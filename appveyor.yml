@@ -1,7 +1,7 @@
 version: 1.0.{build}
 
 init:
-  dir c:\Libraries
+  dir c:\Libraries\boost_1_62_0
 
 build:
   verbosity: minimal
