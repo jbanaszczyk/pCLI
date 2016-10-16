@@ -1,7 +1,7 @@
 version: 1.0.{build}
 
 init:
-  dir c:\
+  dir c:\Libraries
 
 build:
   verbosity: minimal
