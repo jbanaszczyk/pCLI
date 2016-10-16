@@ -1,5 +1,8 @@
 version: 1.0.{build}
 
+init:
+  dir c:\
+
 build:
   verbosity: minimal
   
