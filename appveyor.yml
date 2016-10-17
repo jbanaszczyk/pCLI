@@ -3,6 +3,7 @@ os: Visual Studio 2015
 version: 1.0.{build}
 
 init:
+  time /t
  
 
 build:
