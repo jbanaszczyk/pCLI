@@ -2,5 +2,7 @@
 
 int main()
 {
-    return 0;
+	int *ref = nullptr;
+//	*ref = 0;
+	return 0;
 }
