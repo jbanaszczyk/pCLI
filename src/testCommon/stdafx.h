@@ -1,15 +1,25 @@
-// stdafx.h : include file for standard system include files,
-// or project specific include files that are used frequently, but
-// are changed infrequently
-//
+/*****************************************************************************
+ *                                                                           
+ * Copyright 2013 Jacek.Banaszczyk@gmail.com                                 
+ * part of PortableApps Launcher project                                      
+ * https://github.com/jbanaszczyk/pCli
+ * Release 2.0
+ *                                                                           
+ *****************************************************************************/
 
+#ifndef _9AF6A001_478D_4532_8379_A4AB8D578CF3_INCLUDED
+#define _9AF6A001_478D_4532_8379_A4AB8D578CF3_INCLUDED
+
+#ifdef _MSC_VER
 #pragma once
+#endif
 
-#include "targetver.h"
+/******************************************************************************
+ *
+ * Dont modify this file!
+ * 
+ *****************************************************************************/
 
-#include <stdio.h>
-#include <tchar.h>
+#include"../common/common.h"
 
-
-
-// TODO: reference additional headers your program requires here
+#endif

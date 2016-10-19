@@ -1,8 +1,16 @@
-// stdafx.cpp : source file that includes just the standard includes
-// testCommon.pch will be the pre-compiled header
-// stdafx.obj will contain the pre-compiled type information
+/*******************************************************
+ *                                                     
+ * Copyright 2013 Jacek.Banaszczyk@gmail.com           
+ * part of PortableApps Launcher project                
+ * https://github.com/jbanaszczyk/pCli
+ * Release 2.0
+ *                                                     
+ *******************************************************/
 
 #include "stdafx.h"
 
-// TODO: reference any additional headers you need in STDAFX.H
-// and not in this file
+/******************************************************************************
+ *
+ * Dont modify this file!
+ *
+ *****************************************************************************/
