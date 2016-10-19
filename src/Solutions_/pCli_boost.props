@@ -1,0 +1,31 @@
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup Condition="'$(APPVEYOR)'!='True'" Label="Boost">
+    <BoostDir>$(SolutionDir)..\Libraries\boost\1.62.0</BoostDir>
+    <BoostDirLib>$(BoostDir)\stage\msvc14\$(Platform)</BoostDirLib>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(APPVEYOR)'=='True' And '$(Platform)'=='Win32'" Label="Boost">
+    <BoostDir>C:\Libraries\boost_1_62_0</BoostDir>
+    <BoostDirLib>$(BoostDir)\lib32-msvc-14.0</BoostDirLib>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(APPVEYOR)'=='True' And '$(Platform)'=='x64'" Label="Boost">
+    <BoostDir>C:\Libraries\boost_1_62_0</BoostDir>
+    <BoostDirLib>$(BoostDir)\lib64-msvc-14.0</BoostDirLib>
+  </PropertyGroup>
+
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(BoostDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+
+    <Link>
+      <AdditionalLibraryDirectories>$(BoostDirLib);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+
+  </ItemDefinitionGroup>
+
+
+
+</Project>
+
+

@@ -19,9 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{9297B46F-81E3-48A9-BDBA-8DEA560B1DAE}</ProjectGuid>
+    <ProjectGuid>{7C04B9D5-DA68-4DBA-BFA9-10A1AADEDE72}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>pCliLauncher</RootNamespace>
+    <RootNamespace>testCommon</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -92,7 +92,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="pCliLauncher.cpp" />
+    <ClCompile Include="testCommon.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
