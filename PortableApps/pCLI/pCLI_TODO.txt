@@ -1,0 +1,85 @@
+
+Helpa dokonczyc
+
+Opsac. ze wszystkie sciezki wzgledne sa wzgelem Portableapps\\TccLePortable
+
+Opisaæ, HistoryFile, DirHistoryFile, DirDrivesFile:
+	Jak jest puste, nawet explicite, to jest default. Zeby miec puste, trzeba wstawic "." czyli katalog. Wtedy zapis/odtwarzanie stanu siê wy³¹cza
+
+Opisac
+	; This file 4App.ini can be located either in "Data" or "App\AppInfo" folder
+	Platform = 32, 64
+
+Co jak nie ma ..\Documents
+
+Takie jak 4App.ini - w roznych katalogach profilowych
+
+Sprawdzic, czy dziala translacja komunikatow o b³êdach. Albo j¹ wywaliæ.
+
+zrobic plugina: jesli wywolanie UnixStyle (-opcja), to jedno, a jak windows (/?) to drugie. Na przyklad echo, mkdir itp
+
+A potem cale tcStart.btm zamienic na plugin
+
+Jak byl dysk (przenoœny) a teraz go nie ma, to narzeka przy odtwarzaniu katalogów
+
+Dodac: curl (jako biblioteke?) xmlstarlet ConEmu TreeViz
+
+ConEmu skonfigurowac
+
+Popatrzeæ, jak ogarn¹æ w 4APP.ini linie takie jak:
+	Description		= MSYS [new] [sh|mintty|rxvt] [shellParameters]
+	;   + updated mintty (1.0.1 -> 1.0.3)
+
+Zrobiæ zbiory konfiguracji, i przy sekcjach pozwalac: np [aliases_32;CLANG;MINGW]
+
+Dodac cache'owanie MD5?
+
+Cos mi ustawianie jêzyka nie dziala
+
+Nie dzia³a, jak jest tylko TccLePortable
+
+Niech nie zapisuje stanu dyskow sieciowych.
+
+Jak sie w bdebugger robi Save "Watch list", to on coœ cce od desktopu
+
+Dodac katalog "Desktop" do Z:\PortableApps\TccLePortable\Data\profile\_thisUser_. Bo windowsowe okienko SavaAs ma k³opot
+
+Quoting:
+	http://blogs.msdn.com/b/twistylittlepassagesallalike/archive/2011/04/23/everyone-quotes-arguments-the-wrong-way.aspx
+
+Kompatybilnoœc z wszsytkimi opcjami //option, jakby nie dzia³alo, to robic kopie, ustawic ok, odtworzyc kopie. Tak jak localHistory
+
+Ustawienie Editor nie bardzo dziala
+
+Language: nie forsowac jêzyka, jesli w opcjach pApps jest "nie forsowac"
+
+Zmieniæ TccLEPortable na TccLE
+
+Procedura NiceMessage: dodaæ kolor
+
+Nice message, ShowError: zmienic kolejnosc argumentow, zeby dzialal Message zawierajcy cudzys³owy
+
+Przy *SetDos /x-456 nie zapisuje historii
+
+Dorobic backup wszystkich opcji, które mog¹ przeszkodzic w wykonaniu startupu, potem odtworzyc
+
+Zmienic katalog z TccLePortable na TCC
+
+Zmieniæ porówanie stringów na porówanie @MD5
+
+Dla MSYSa: obs³uga shebanga #!/usr/bin/perl
+	http://whitescreen.nicolaas.net/programming/windows-shebangs
+
+Ikonê zmienic
+
+@unquote => @unquotes
+
+for => Do
+
+Dodaæ ADB: http://blog.utak3r.pl/2015/03/
+
+Dodac flage, ¿e tylko non-commercial
+
+Java: dodac alias do javaws.exe
+
+Dodac do ustawien environment: opcje append i zmienic w gcc, clangu i nasmenv

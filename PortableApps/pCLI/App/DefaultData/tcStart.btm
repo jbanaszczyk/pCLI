@@ -1,0 +1,974 @@
+
+:: skonczyc sprzatanie zmiennych lokalnych
+
+@*Echo off
+
+::--------------------------------------------------------------------------------
+:: Transfer flow to tcStart_first.btm
+:: useful if you wish to setup env. variables for plugins
+
+*If exist %@Quote[%@Path[%_BatchName]\%@Name[%_BatchName]_first.btm] *Call %@Quote[%@Path[%_BatchName]\%@Name[%_BatchName]_first.btm]
+
+::--------------------------------------------------------------------------------
+:: Inheritance
+::     Secondary shell inherits global aliases, history, dirhistory, functions, environment, current directories for particular drives - everything except Plugins
+::     Second instance inherits global aliases, history, dirhistory, functions
+
+::--------------------------------------------------------------------------------
+:: Load plugins - always
+:: Put all plugins into ..\..\App\Plugins
+:: 64-bit plugins should be named *64.dll, 32-bit - something else
+
+*Plugin /U *
+
+*Iff %_x64==1 Then
+	*For %_TCC$dataFile in (%@Quote[%@path[%_cmdspec]..\..\App\Plugins\*64.dll]) Do *Plugin /L %@Quote[%_TCC$dataFile]
+*Else
+	*For /[!*64.dll] %_TCC$dataFile in (%@Quote[%@path[%_cmdspec]..\..\App\Plugins\*.dll]) Do *Plugin /L %@Quote[%_TCC$dataFile]
+*EndIff
+
+::--------------------------------------------------------------------------------
+:: Nothing to do with secondary shells
+
+*If ( defined _BDEBUGGER .and. "%_BDEBUGGER" != "0" ) .OR. %_SHELL != 0 .OR. %_TRANSIENT != 0 *Cancel
+
+::--------------------------------------------------------------------------------
+:: Debug helper
+
+*Iff "%_BDEBUGGER" != "1" Then
+	*Alias Breakpoint=Echo %@If[%_ansi==1,^e^[1;31m,]=== Breakpoint `[%@Formatn[06.2,%@Timer[1,s]]] %_BATCHLINE` @ `%@FileName[%_BATCHNAME] : %$`%@If[%_ansi==1,^e^[0m,]
+*EndIff
+
+::--------------------------------------------------------------------------------
+:: Let's go
+
+*SetDos /X-5
+
+*Timer /1 on > nul:
+
+Breakpoint Start
+
+::--------------------------------------------------------------------------------
+:: _wow64 is not supported in LE, but can be created
+
+*If "%_wow64" != "0" .AND. "%_wow64" != "1" *Set _wow64=%@If[defined ProgramW6432 .AND. "%_x64" == "0",1,0]
+
+::--------------------------------------------------------------------------------
+:: _x3264
+::     equals == 32: execute 32-bit apps only
+::     equals == 64: execute 32-bit or 64-bit apps
+::
+:: _wow64 _x64     Win TCC                                        _x3264
+::      0    0 ==>  32  32 ==>                                         32 (clean Win32, Tcc32, only 32-bit apps)
+::      0    1 ==>  64  64 ==>                                         64 (clean Win64, Tcc64, all apps allowed)
+::      1    0 ==>  64  32 ==> if exist exist App\64\tcc.exe           32 (that means TccLePortable selected Tcc32 due to Force32; only 32-bit apps)
+::      1    0 ==>  64  32 ==> if not exist exist App\64\tcc.exe   look through TcclePortable.ini, if Force32 would be active
+
+*Iff "%_wow64" == "0" Then
+	*Set _x3264=%@If[%_x64==0,32,64]
+*ElseIff exist %@Quote[%@path[%_cmdspec]..\64\%@filename[%_cmdspec]] Then
+	*Set _x3264=32
+*Else
+	*GoSub getPortableIni _TCC$force32 StartUp Force32
+	*GoSub boolean _TCC$force32 0 %_TCC$force32
+	*Set _x3264=%@If[%_TCC$force32==1,32,64]
+*EndIff
+
+::--------------------------------------------------------------------------------
+:: if display summary of installed apps?
+
+*GoSub getPortableIni _TCC$splash StartUp ShowSplash
+*GoSub boolean _TCC$splash 1 %_TCC$splash
+
+::--------------------------------------------------------------------------------
+:: Basic directories:
+:: _TccDir is always defined, contains TccLePortable.exe and subdirs, like Z:\PortableApps\TccLePortable
+:: _PortableDir is not always defined, contains PortableApp and subdirs Z:\PortableApps
+:: Both are: quoted, with trailing backslash
+
+*Set _TccDir=%@path[%_cmdspec]..\..\
+*GoSub Cleanpath _TccDir
+
+*Set _PortableDir=%@path[%_cmdspec]..\..\..\
+*GoSub Cleanpath _PortableDir
+
+*If "%@Name[%_PortableDir]" != "PortableApps" *UnSet _PortableDir
+
+::--------------------------------------------------------------------------------
+:: Startup aliases have to be local
+:: Example: running second concurrent session using different settings
+::  (like 32-bit/64-bit) would destroy settings on another session
+:: So: tcSTART runs with Local Aliases, History, DirHistory and (if aplicable) Funcions
+:: Finaly options are restored at the end
+
+*Set _TCC$Option_LocalAliases=%@option[LocalAliases]
+*Set _TCC$Option_LocalDirHistory=%@option[LocalDirHistory]
+*Set _TCC$Option_LocalHistory=%@option[LocalHistory]
+*If IsInternal Function *Set _TCC$Option_LocalFunctions=%@option[LocalFunctions]
+
+*Alias /L
+*History /L
+*DirHistory /L
+*If IsInternal Function *Function /L
+
+::--------------------------------------------------------------------------------
+:: Build configuration
+
+*Set $TCC$plugins=*
+*Set $TCC$Variables=*
+*UnSet _TCC$Apps
+*UnSet _TCC$PathBefore
+*UnSet _TCC$PathAfter
+
+*GoSub collectConfig
+
+*Do _TCC$dataDir in /T"*" /L %_TCC$Apps
+	If "%_TCC$dataDir" == "" *iterate
+	*GoSub Parse4AppConfig %@Quote[%_TCC$dataDir]
+*EndDo
+
+*Iff defined _PortableDir Then
+	:: Looks the same, but there is different GoSub' label
+	*Do _TCC$dataDir in /a:d %_PortableDir\*
+		*GoSub Parse4PortableConfig %@Quote[%_TCC$dataDir]
+	*EndDo
+*EndIff
+
+*Set PATH=%[_TCC$PathBefore]%[_TCC$PathAfter]%PATH
+
+::--------------------------------------------------------------------------------
+:: Workaround for bug: http://jpsoft.com/forums/threads/lost-history.5878/
+::   If History / DirHistory is local, it is handled by TCC.
+::   If History / DirHistory is global, it is handled here
+::   $TCC$HistFile and $TCC$DirHistFile are already quoted
+
+*If defined $TCC$HistFile    *If IsFile %[$TCC$HistFile]    *If "%@ExecStr[*History]" == ""    *History    /R %[$TCC$HistFile]
+*If defined $TCC$DirHistFile *If IsFile %[$TCC$DirHistFile] *If "%@ExecStr[*DirHistory]" == "" *DirHistory /R %[$TCC$DirHistFile]
+
+::--------------------------------------------------------------------------------
+:: restore last CWDs for all drives
+:: last CWDs for all drives are stored by tcExit.btm
+::   %[$TCC$DirDrivesFile] is quoted
+
+*Iff defined $TCC$DirDrivesFile then
+	*Iff IsFile %[$TCC$DirDrivesFile] Then
+		*Do _TCC$dataLine in @%[$TCC$DirDrivesFile]
+			*If %@Len[%_TCC$dataLine] le 2 *Iterate
+
+	        ::------------------------------------------------------------------------
+	        :: if the directory was removed between sessions, find the longest, existing parent dir
+			*Do while not isDir %_TCC$dataLine
+				*If "%_TCC$dataLine" == "%@RTrim[\/,%@Path[%_TCC$dataLine]]" *Leave
+				*Set _TCC$dataLine=%@RTrim[\/,%@Path[%_TCC$dataLine]]
+				*If %@Len[%_TCC$dataLine] le 2 *Leave
+			*EndDo
+			*If %@Len[%_TCC$dataLine] le 2 *Iterate
+			*CDD /x %_TCC$dataLine >& NUL:
+			if %? != 0 *Leave
+		*EndDo
+	*EndIff
+EndIff
+
+::--------------------------------------------------------------------------------
+:: Restore Global/Local* options
+
+*If "%_TCC$Option_LocalAliases" == "No" *Alias /G
+*If "%_TCC$Option_LocalDirHistory" == "No" *DirHistory /G
+*If "%_TCC$Option_LocalHistory" == "No" *History /G
+*If IsInternal Function .AND. "%_TCC$Option_LocalFunctions" == "No" *Function /G
+
+::--------------------------------------------------------------------------------
+:: Clean environment
+
+::   clean _TCC$etc* variables
+::   _TCC$etc contains list of variables (suffixes only) to be cleared
+
+*Iff defined _TCC$etc Then
+	*Do _TCC$this in /L %_TCC$etc
+		*UnSet _TCC$etc$%_TCC$this
+	*EndDo
+*EndIff
+
+::   clean _TCC$ pseudo namespace
+
+*UnSet _TCC$action _TCC$appINI _TCC$Apps _TCC$appVer _TCC$cmd _TCC$data _TCC$dataDir _TCC$dataFile _TCC$dataLine
+*UnSet _TCC$description _TCC$dirName _TCC$enabled _TCC$etc _TCC$etc$fstab _TCC$ext _TCC$extList _TCC$file _TCC$fileName
+*UnSet _TCC$force32 _TCC$fullName _TCC$handle _TCC$ignore _TCC$index _TCC$pos _TCC$lineNumber _TCC$msys _TCC$msysFile
+*UnSet _TCC$nPath _TCC$oldPath _TCC$onPath _TCC$Option_LocalAliases _TCC$Option_LocalDirHistory
+*UnSet _TCC$Option_LocalFunctions _TCC$Option_LocalHistory _TCC$orderDefault _TCC$pacINI _TCC$PathAfter _TCC$PathBefore
+*UnSet _TCC$platform _TCC$retVal _TCC$splash _TCC$this _TCC$value _TCC$variable _TCC$which _TCC$retVal _TCC$aDir
+
+::--------------------------------------------------------------------------------
+::   clean published, but invalid _vars
+
+*UnSet  _thisApp _thisAppDir _thisAppId _thisBinDir _thisDataDir _thisIniDir _thisName _this3264
+
+BreakPoint Finish
+
+*If "%_BDEBUGGER" != "1" .AND. IsAlias Breakpoint *UnAlias Breakpoint
+
+::--------------------------------------------------------------------------------
+:: Transfer flow to tcStart_next.btm
+
+*If exist %@Quote[%@Path[%_BatchName]\%@Name[%_BatchName]_next.btm] *Call %@Quote[%@Path[%_BatchName]\%@Name[%_BatchName]_next.btm]
+
+::--------------------------------------------------------------------------------
+:: Finish!
+
+*SetDos /X+5
+
+*Timer /1 off > nul:
+
+Title  %_CMDPROC %_version [%_x3264]
+
+*Cancel
+
+::=============================================================================================================================================================================================
+
+::===============================================================
+::===============================================================
+::
+:: collect configuration - find apps, sort by Order
+
+:collectConfig
+
+	*For /L _tcc$this in (1,1,99) *UnSet _TCC$Apps$%_tcc$this
+
+	*Set _TCC$orderDefault=49
+	*Iff IsDir %_TccDir\CommonFiles Then
+		*Do _TCC$dataDir in /a:d %_TccDir\CommonFiles\*
+			*GoSub getOrder %@Quote[%_TCC$dataDir]
+		*EndDo
+	*EndIff
+
+	*Set _TCC$orderDefault=50
+	*Iff defined _PortableDir .AND. IsDir %_PortableDir\CommonFiles Then
+		*Do _TCC$dataDir in /a:d %_PortableDir\CommonFiles\*
+			*GoSub getOrder %@Quote[%_TCC$dataDir]
+		*EndDo
+	*EndIff
+
+	*Set _TCC$orderDefault=51
+	*Iff defined _PortableDir Then
+		*Do _TCC$dataDir in /a:d %_PortableDir\*
+			*GoSub getOrder %@Quote[%_TCC$dataDir]
+		*EndDo
+	*EndIff
+
+:: variables _TCC$Apps$1 .. _TCC$Apps$99 contain list of apps with particular order, separated by asterisk
+::   merge them, then iterate
+
+	*Do _tcc$this = 1 to 99
+		*If not defined _TCC$Apps$%_tcc$this *Iterate
+		*Set _TCC$Apps=%_TCC$Apps*%[_TCC$Apps$%_tcc$this]
+		*UnSet _TCC$Apps$%_tcc$this
+	*EndDo
+
+	*Set _TCC$Apps=%@Replace[**,*,%_TCC$Apps]
+
+	*Return
+
+::===============================================================
+::===============================================================
+::
+:: getOrder
+
+:getOrder [_TCC$dataDir]
+
+	*Set _thisAppDir=%_TCC$dataDir
+	*GoSub CleanPath _thisAppDir
+
+	:: Look for 4App.ini
+
+	*GoSub chooseINI _TCC$appINI %@Quote[%_thisAppDir\Data\4App.ini] %@Quote[%_thisAppDir\App\AppInfo\4App.ini]
+	*If %_? == 0 *Return
+
+	*Set _TCC$dirName=%@FileName[%_thisAppDir]
+
+	*GoSub getPortableIni _TCC$enabled Apps %_TCC$dirName
+
+	*Iff not defined _TCC$enabled Then
+		:: Register the app for future use
+		*Set _TCC$value=%@IniWrite[%@path[%_cmdspec]..\..\TccLePortable.ini,Apps,%_TCC$dirName,1]
+		*Set _TCC$enabled=1
+	*EndIff
+
+	*If %_TCC$enabled == 0 *Return
+	*If %_TCC$enabled != 1 .AND. %_TCC$enabled != %_x3264 *Return
+
+	*Set _TCC$value=%@IniRead[%_TCC$appINI,Details,Order]
+	*If not defined _TCC$value *Set _TCC$value=%_TCC$orderDefault
+	*If not defined _TCC$value *Set _TCC$value=50
+
+	*Set _TCC$Apps$%_TCC$value=%[_TCC$Apps$%_TCC$value]*%_TCC$dataDir
+
+	*Return
+
+::===============================================================
+::===============================================================
+::
+:: Parse files directories of PortableApps that are not prepared for the shell
+
+:Parse4PortableConfig [_TCC$dataDir]
+
+	::--------------------------------------------------------------------------------
+	::   clean _thisVars
+
+	*UnSet _thisAppDir _thisIniDir _thisApp _thisName _thisAppId
+
+	*Set _thisAppDir=%_TCC$dataDir
+	*GoSub CleanPath _thisAppDir
+
+	:: Look for 4App.ini
+
+	*If not defined _thisAppDir *Return
+	*If not isDir %_thisAppDir  *Return
+
+	*Iff exist %_thisAppDir\Data\AppInfo\4App.ini Then
+		*Return
+	*ElseIff exist %_thisAppDir\App\AppInfo\4App.ini Then
+		*Return
+	*EndIff
+
+	*Set _TCC$dirName=%@FileName[%_thisAppDir]
+
+	*If "%_TCC$dirName" == "PortableApps.com" *Return
+	*If "%_TCC$dirName" == "CommonFiles"      *Return
+
+	*Do _TCC$fullName in /a:-d %_thisAppDir\*.exe
+		*Set _TCC$fileName=%@FileName[%_TCC$fullName]
+		*If "%@IniRead[%_PortableDir\PortableApps.com\Data\PortableAppsMenu.ini,AppsHidden,%_TCC$dirName\%_TCC$fileName]" != "" *Iterate
+
+		*Set _thisName=%@IniRead[%_PortableDir\PortableApps.com\Data\PortableAppsMenu.ini,AppsRenamed,%_TCC$dirName\%_TCC$fileName]
+		*If not defined _thisName *Set _thisName=%@Name[%_TCC$fileName]
+
+		*If "%@IniRead[%_PortableDir\PortableApps.com\Data\PortableAppsMenu.ini,DisplayOptions,HidePortableInAppNames]" == "True" *Set _thisName=%@Replace[Portable,,%_thisName]
+		*Set _thisName=%@Replace[ ,_,%_thisName]
+
+		*GoSub which %_thisName
+		*If %_? == 0 *Iterate
+		*Alias %_thisName=%@Quote[%_TCC$fullName]
+
+		::================================================
+		:: Add me to Apps list
+		*If defined _TccApps *Set _TccApps=%_TccApps;
+		*Set _TccApps=%[_TccApps]%_thisName
+
+	*EndDo
+
+	*Return
+
+::===============================================================
+::===============================================================
+::
+:: Parse TCC/LE compatible directories
+::   It means, that there exists either Data\4App.ini App\AppInfo\4App.ini
+
+:Parse4AppConfig [_thisAppDir]
+
+	::--------------------------------------------------------------------------------
+	::   clean _thisVars
+
+	*UnSet _thisIniDir _thisApp _thisName _thisAppId _this3264 _thisBinDir _thisDataDir
+
+	*GoSub chooseINI _TCC$appINI %@Quote[%_thisAppDir\Data\4App.ini] %@Quote[%_thisAppDir\App\AppInfo\4App.ini]
+	*If %_? == 0 *Return
+	*GoSub CleanPath _TCC$appINI
+
+	*GoSub chooseINI _TCC$pacINI %@Quote[%_thisAppDir\App\AppInfo\appinfo.ini] %@Quote[%_thisAppDir\App\AppInfo\plugininstaller.ini]
+	*If %_? == 0 *Return
+	*GoSub CleanPath _TCC$pacINI
+
+	::================================================
+	:: Reading application name and description
+	:: Appname: is available as %_thisName  and comes from App\AppInfo\appinfo.ini (or App\AppInfo\plugininstaller.ini)
+	:: AppID:   is available as %_thisAppId and comes from App\AppInfo\appinfo.ini (or App\AppInfo\plugininstaller.ini)
+	:: AppDescription: comes from Data\4Tcc\4App.ini or App\4Tcc\4App.ini, or from App\AppInfo\appinfo.ini (or App\AppInfo\plugininstaller.ini)
+
+	*Set _thisApp=%@FileName[%_thisAppDir]
+
+	*Set _thisName=%@IniRead[%_TCC$pacINI,Details,Name]
+	*If not defined _thisName *Set _thisName=%_thisApp
+
+	*Set _thisAppId=%@IniRead[%_TCC$pacINI,Details,AppID]
+	*If not defined _thisAppId *Set _thisAppId=%_thisApp
+
+	:: Unified support for Java and Java64 (jPortable)
+	*If "%@Right[2,%_thisAppId]" == "32" .OR. "%@Right[2,%_thisAppId]" == "64" *Set _thisAppId=%@Left[-2,%_thisAppId]
+
+	::================================================
+	:: _thisBinDir - try to guess App\32 or App\64
+
+	*Set _thisBinDir=%_thisAppDir\App
+	*Set _this3264=32
+
+	*Iff exist %_thisBinDir\32 .OR. exist %_thisBinDir\64 Then
+		*Iff exist %_thisBinDir\%_x3264 Then
+			*Set _thisBinDir=%_thisBinDir\%_x3264
+			*Set _this3264=%_x3264
+		*ElseIff exist %_thisBinDir\32 Then
+			:: App\32 on 64-bit platform
+			*Set _thisBinDir=%_thisBinDir\32
+			*Set _this3264=32
+		*Else
+			:: App\64 on 32-bit platform
+			*Return
+		*EndIff
+	*EndIff
+
+	*Set _thisBinDir=%@Quote[%@Full[%_thisBinDir]]
+
+	::================================================
+	:: Platform flag:
+	::   32 - TCC/LE 32-bit only
+	::   64 - TCC/LE 64-bit only
+
+	*Set _TCC$platform=%@IniRead[%_TCC$appINI,Details,Platform]
+	*If defined _TCC$platform .AND. "%_TCC$platform" != "%_this3264" *Return
+
+	::================================================
+	:: Don't load multiple CommonFiles with the same AppID (for example: use only one Java)
+	:: $TCC$plugins contains a list of IDs, sparated with "\", with leading and trailing "\"
+
+	*If %@Index[%[$TCC$plugins],*%_thisAppId*] != -1 *Return
+	*Set $TCC$plugins=%[$TCC$plugins]%[_thisAppId]*
+
+	*Iff %_TCC$splash == 1 Then
+		*Set _TCC$appVer=%@IniRead[%_TCC$pacINI,Version,DisplayVersion]
+		*GoSub showNiceMessage "%_thisName %_TCC$appVer" 0 _
+
+		*Set _TCC$description=%@IniRead[%_TCC$appINI,Details,Description]
+		*If not defined _TCC$description *Set _TCC$description=%@IniRead[%_TCC$pacINI,Details,Description]
+		*If defined _TCC$description *GoSub showNiceMessage "%_TCC$description" 2
+	*EndIff
+
+	:: Unquote, remove quirks, remove trailing backslash, quote if needed
+
+	*Set _thisIniDir=%@Path[%_TCC$appINI]
+	*GoSub CleanPath _thisIniDir
+
+	*Set _thisDataDir=%_thisAppDir\Data
+
+	::================================================
+	:: There are some legal variables, which can be useful inside 4App.ini
+	:: _thisAppDir  - [quoted] base directory of the plugin or app
+	::                Something like z:\PortableApps\myAppPortable or z:\PortableApps\CommonFiles\Java
+	:: _thisBinDir  - [quoted] one of App or App\32 or App\64 subdirs %_thisAppDir
+	:: _thisDataDir - _thisAppDir\Data
+	:: _thisIniDir  - [quoted] directory comnatining this .INI. May be %_thisAppDir\App\4TCC or %_thisAppDir\Data\4TCC
+	:: _thisApp     - last part od %_thisAppDir - something like TccLePortable or Java
+	:: _thisName    - retrived from appinfo.ini or plugininstaller.ini
+	:: _thisAppId   - retrived from appinfo.ini or plugininstaller.ini
+	:: _TccDir      - [quoted] points to the root of TccLePortable (example above: z:\PortableApps\TccLePortable )
+	:: _PortableDir - [quoted] points to the root of PortableApps (example above: z:\PortableApps )
+	::                _PortableDir is not defined if there is no PortableApps framework
+	:: _this3264    - equals to 32 xor 64
+	::
+	:: Show them if required
+
+	*GoSub boolean _TCC$this 0 %@IniRead[%_TCC$appINI,Details,Debug]
+	*Iff %_? == 1 Then
+		*GoSub showNiceMessage "Variables: %_thisName" 15 -
+		*Do _TCC$this in /L _thisAppDir _this3264 _thisBinDir _thisIniDir _thisDataDir _thisApp _thisName _thisAppId _TccDir _PortableDir
+			*Echo  %@Format[-15,%_TCC$this]= %[%_TCC$this]
+		*EndDo
+	*EndIff
+
+	*Set _TCC$handle=%@FileOpen[%_TCC$appINI,r,t]
+	*If %_TCC$handle == -1 *Return
+
+	::================================================
+	:: Read INI file line by line
+	:: Set _TCC$action according to sections found
+	:: parse lines with values
+	:: perform _TCC$action for each line found
+
+	*Set _TCC$action=Notes
+	*Set _TCC$lineNumber=0
+
+	*Do ForEver
+		*Set _TCC$data=%@Trim[%@FileRead[%_TCC$handle]]
+		*Set _TCC$lineNumber=%@Inc[%_TCC$lineNumber]
+
+		::================================================
+		:: @FileRead loop control
+		:: skip empty lines and comments (the first char is semicolon or colon)
+
+		*If not defined _TCC$data *Iterate
+		*If "%_TCC$data" == "**EOF**" *Leave
+		*If "%@Left[1,%_TCC$data]" == ";" *Iterate
+		*If "%@Left[1,%_TCC$data]" == ":" *Iterate
+
+		*Iff "%@Left[1,%_TCC$data]" == "[" .AND. "%@Right[1,%_TCC$data]" == "]" Then
+
+			:: [Section] line found: Remove side brackets, set _TCC$action, iterate
+
+			*Set _TCC$action=%@Trim[%@Right[-1,%@Left[-1,%_TCC$data]]]
+
+			:: if [Section_32] or [Section_64] ?
+			*Set _TCC$value=%@Right[3,%_TCC$action]
+			*Iff "%_TCC$value" == "_32" .OR. "%_TCC$value" == "_64" Then
+				*Set _TCC$action=%@Left[-3,%_TCC$action]
+				*If "%_TCC$value" != "_%_this3264" *Set _TCC$action=Notes
+			*EndIff
+
+			*Iterate
+		*EndIff
+
+		::================================================
+		:: Skip potentially dangerous code during _TCC$action=Execute
+
+		*Iff "%_TCC$action" != "Execute" Then
+
+			::================================================
+			:: may be something like _TCC$variable = _TCC$value ? Let's parse
+			:: There is a problem, if _TCC$data contains commas or equal signs
+			:: %@Index used quoted _TCC$data, then I'm splitting unquoted _TCC$data
+
+			*Set _TCC$pos=%@Index["%_TCC$data",=]
+			*Iff %_TCC$pos == -1 then
+				*Set _TCC$variable=%_TCC$data
+				*UnSet _TCC$value
+			*Else
+				*Set _TCC$variable=%@Trim[%@Left[%@Dec[%_TCC$pos],%_TCC$data]]
+				*Set _TCC$value=%@Trim[%@InStr[%_TCC$pos,,%_TCC$data]]
+			*EndIff
+		*EndIff
+
+		*Switch %_TCC$action
+			case Aliases
+				::--------------------
+				:: Define alias if command not defined yet
+				*Iff defined _TCC$variable Then
+					*Iff %@Left[1,%_TCC$variable] == * Then
+						*Set _TCC$value=%@Quote[%_TCC$value]
+						*Iff exist %_TCC$value then
+							*Alias /O /R %_TCC$value
+						*Else
+							*GoSub :showError "Read aliases: File does not exist %_TCC$value"
+						*EndIff
+					*Else
+						*GoSub which %_TCC$variable
+						*If %_? != 0 *Alias %_TCC$variable=%_TCC$value
+					*EndIff
+				*EndIff
+
+			case ForcedAliases
+				::--------------------
+				:: Define alias unconditionally
+				*Iff defined _TCC$variable Then
+					*Iff %@Left[1,%_TCC$variable] == * Then
+						*Set _TCC$value=%@Quote[%_TCC$value]
+						*Iff exist %_TCC$value then
+							*Alias /R %_TCC$value
+						*Else
+							*GoSub :showError "Read forced aliases: File does not exist %_TCC$value"
+						*EndIff
+					*Else
+						*Alias %_TCC$variable=%_TCC$value
+					*EndIff
+				*EndIff
+
+			case Env
+				::--------------------
+				:: Set environment variables
+				*Iff defined _TCC$variable Then
+					*Iff %@Left[1,%_TCC$variable] == * Then
+						*Set _TCC$value=%@Quote[%_TCC$value]
+						*Iff exist %_TCC$value then
+							*Set /O /R %_TCC$value
+						*Else
+							*GoSub :showError "Read environment: File does not exist %_TCC$value"
+						*EndIff
+					*Else
+						*Iff not defined %[_TCC$variable] Then
+							*Set %[_TCC$variable]=%_TCC$value
+							*If defined %[_TCC$variable] .AND. %@Index[%[$TCC$Variables],*%[_TCC$variable]*] == -1 *Set $TCC$Variables=%[$TCC$Variables]%[_TCC$variable]*
+						*EndIff
+					*EndIff
+				*EndIff
+
+			case ForcedEnv
+				::--------------------
+				:: Set environment variables
+				*Iff defined _TCC$variable Then
+					*Iff %@Left[1,%_TCC$variable] == * Then
+						*Set _TCC$value=%@Quote[%_TCC$value]
+						*Iff exist %_TCC$value then
+							*Set /R %_TCC$value
+						*Else
+							*GoSub :showError "Read environment: File does not exist %_TCC$value"
+						*EndIff
+					*Else
+						*Set %[_TCC$variable]=%_TCC$value
+						*If defined %[_TCC$variable] .AND. %@Index[%[$TCC$Variables],*%[_TCC$variable]*] == -1 *Set $TCC$Variables=%[$TCC$Variables]%[_TCC$variable]*
+					*EndIff
+				*EndIff
+
+			case Execute
+				::--------------------
+				:: Directly Execute; use CALL to execute a batch
+				%_TCC$data
+
+			case Path
+				::--------------------
+				:: Manipulate %PATH
+				switch %_TCC$variable
+					case Insert
+						::--------------------
+						:: Insert _TCC$value before the PATH
+						*Iff IsFile %_TCC$value\* Then
+							*Set _TCC$PathBefore=%[_TCC$PathBefore]%[_TCC$value];
+						*EndIff
+
+					case Append
+						::--------------------
+						:: Append  _TCC$value to the PATH
+						*Iff IsFile %_TCC$value\* Then
+							*Set _TCC$PathAfter=%[_TCC$PathAfter]%[_TCC$value];
+						*EndIff
+
+					case Alias
+						::--------------------
+						:: The most powerfull version:
+						:: if there is conflict between exe file name and internal command (for example touch / touch.exe) - alias is created,
+						:: if there is conflict between exe file name and \windows\*\* (for example find.exe): alias is created, windows command is aliased with "w" prefix
+						::   in the example: alias find points to particular find.exe, alias wfind point to C:\Windows\system32\find.exe
+						:: Directory is not added to the PATH, do it again using Append or Insert
+
+						:: procedure makes extensive usage of "WHICH" command, it takes a lot of time. Limiting PATH to win dirs only improves the porcess
+						*Set _TCC$oldPath=%PATH
+						*GoSub shortenPath
+						*Do _TCC$file in %_TCC$value\*.exe
+							*Set _TCC$cmd=%@Name[%_TCC$file]
+
+							:: No way to create alias name containing space
+							*If %@index[%_TCC$cmd, ] != -1 *Iterate
+
+							:: Already defined alias
+							*If isAlias %_TCC$cmd *Iterate
+
+							:: Internals, plugins
+							*Iff isInternal %_TCC$cmd .OR. isPlugin %_TCC$cmd Then
+								:: Some very basic internal command shouldn't be aliased; %@index is very slow
+								*If %@Index[*dir*echo*,*%_TCC$cmd*] != -1 *Iterate
+								*Alias %_TCC$cmd=%@Quote[%_TCC$file]
+								*Iterate
+							*EndIff
+
+							:: @ExecStr is very time consuming; so lets test WHICH command points, that command can be executed at all, and later let's ask for details
+							*Which %_TCC$cmd >& nul:
+
+							:: not executable
+							*If %_? != 0 *Iterate
+
+							*Set _TCC$which=%@execstr[*Which %_TCC$cmd]
+
+							*Alias %_TCC$cmd=%@Quote[%_TCC$file]
+							*Alias w%_TCC$cmd=%@Quote[%@Right[-%@index[%_TCC$which,%windir],%_TCC$which]]
+
+						*EndDo
+
+						*Set PATH=%_TCC$oldPath
+
+					case Delete
+						::--------------------
+						:: Insert _TCC$value before the PATH
+						*GoSub delFromPath %_TCC$value
+
+				DEFAULT
+					*GoSub :showError "Unknown PATH manipulation: %_TCC$variable"
+
+				*EndSwitch
+
+			case fstab
+				::--------------------
+				:: add entry to MSYS /etc/fstab
+
+				*Iff not defined MSYS_VERSION Then
+					*Iff defined MSYS_HOME Then
+						*Iff exist %MSYS_HOME\msys-1.0.dll .OR. exist %MSYS_HOME\bin\msys-1.0.dll Then
+							*Set MSYS_VERSION=1
+						*ElseIff exist %MSYS_HOME\msys-2.0.dll .OR. exist %MSYS_HOME\usr\bin\msys-2.0.dll Then
+							*Set MSYS_VERSION=2
+						*Else
+							*Unset MSYS_HOME
+						*EndIff
+					*EndIff
+				*EndIff
+
+				*Iff defined MSYS_HOME .AND. IsDir %@Quote[%MSYS_HOME\etc] Then
+
+					*Set _TCC$msysFile=%@Quote[%MSYS_HOME\etc\fstab]
+
+					*Iff not defined _TCC$etc$fstab Then
+						*SetLocal
+						*SetDos /X+5
+						(	*Echo # Any changes will be lost. This file is created automatically by
+							*Echo #   %@Quote[%_BATCHNAME]
+							*Echo # Entries are generated by [fstab] parts of 4App.ini files
+							*Echo # File format:
+							*Echo #     http://cygwin.com/cygwin-ug-net/using.html#mount-table
+							*Echo.
+							*If %MSYS_VERSION==2 *Echo none^t/^tcygdrive binary,posix=0,noacl,user 0 0
+						) > %_TCC$msysFile
+						*EndLocal
+
+						*Set _TCC$etc$fstab=1
+						*Set _TCC$etc=%_TCC$etc fstab
+					*EndIff
+
+					*Set _TCC$aDir=%@Word[" ^t",0,%_TCC$value]
+					*Iff IsDir %_TCC$aDir then
+						*Set _TCC$value=%@Word[" ^t",1-4,%_TCC$value]
+
+						*Set _TCC$aDir=%@Replace[\,/,%_TCC$aDir]
+
+						:: in case there is a space: MSYS - use short path, MSYS2 - encode space with \040
+						*Iff %@index[%_TCC$aDir, ] != -1 Then
+							*Iff %MSYS_VERSION==2 Then
+								*Set _TCC$aDir=%@Replace[ ,\040,%_TCC$aDir]
+							*Else
+								*Set _TCC$aDir=%@SFN[%_TCC$aDir]
+							*EndIff
+						*EndIff
+
+						*Set _TCC$aDir=%@UnQuote[%@Full[%_TCC$aDir]]
+						*Set _TCC$variable=%@UnQuote[%_TCC$variable]
+						*If MSYS_VERSION != 2 *UnSet _TCC$value
+
+						*Echo %@Format[-63,%_TCC$aDir]^t%_TCC$variable %_TCC$value >> %_TCC$msysFile
+						*Set _TCC$variable=%@Quote[%MSYS_HOME\%@Replace[/,\,%_TCC$variable]\..]
+						*If not IsDir %_TCC$variable *Md /NS %_TCC$variable
+
+					*EndIff
+
+
+				*EndIff
+
+			case Details
+				::--------------------
+				:: [Details] is a regular part of 4App.ini
+
+			case Notes
+				::--------------------
+				:: do nothing, but skip DEFAULT
+
+			DEFAULT
+				*GoSub :showError "Unknown action: %_TCC$action"
+
+		*EndSwitch
+
+	*EndDo
+
+	*Set _TCC$handle=%@FileClose[%_TCC$handle]
+
+	*Return
+
+::===============================================================
+:: Check if _command can be executed
+:: 	_? = 2 "Unknown command"
+:: 	_? = 0 "Can be executed"
+
+:which [_command]
+
+	::------------------------------------------
+	:: Which returns exactly what we need
+
+	*Which %_command >& nul:
+	*Set _TCC$retVal=%_?
+	*Return %_TCC$retVal
+
+::===============================================================
+:: aliasExe below makes extensive usage of "which" command, it takes a lot of time. Limiting PATH to win dirs only improves the porcess
+
+:shortenPath
+	*UnSet _TCC_$partial
+
+	*Do _TCC_$onPath in /T";" /L %PATH
+		*If %@Index[%_TCC_$onPath\,%windir\] == 0 *Set _TCC_$partial=%[_TCC_$partial]%[_TCC_$onPath];
+	*EndDo
+
+	*Set PATH=%_TCC_$partial
+
+	*Unset _TCC_$onPath _TCC_$partial
+	*Return
+
+::===============================================================
+:: Rewiev all parts of PATH.
+::	if _fileName can be found on the path - corresponding PATH' part is removed
+
+:delFromPath [_fileName]
+
+	*UnSet _TCC_$partial
+
+	*UnSet _TCC_$extList
+	*Iff "%@Ext[%_fileName]" == "" Then
+		*Set _TCC_$extList=%PATHEXT
+		*If not defined _TCC_$extList *Set _TCC_$extList=.exe;.com;.lnk;.btm;.bat;.cmd
+	*EndIff
+
+	*Do _TCC_$iPath in /T";" /L %PATH
+
+		*Set _TCC_$ignore=0
+		*Set _TCC_$onPath=%_TCC_$iPath
+		*GoSub CleanPath _TCC_$onPath
+
+		:: Don't touch windows directories
+		*Iff %@Index[%_TCC_$onPath\,%windir\] != 0 Then
+
+			*Iff not defined _TCC_$extList Then
+				*If IsFile %@Quote[%_TCC_$onPath\%[_fileName]] *Set _TCC_$ignore=1
+			Else
+				:: iterate through all executable extensions
+				*Do _TCC_$ext in /T";" /L %_TCC_$extList
+					*Iff IsFile %@Quote[%_TCC_$onPath\%[_fileName]%[_TCC_$ext]] Then
+						*Set _TCC_$ignore=1
+						*Leave
+					*EndIff
+				*EndDo
+			*EndIff
+		*EndIff
+
+		*Iff %_TCC_$ignore == 0 Then
+			:: Reconstruct the path
+			*Set _TCC_$partial=%[_TCC_$partial]%@UnQuote[%_TCC_$onPath];
+		*EndIff
+	*EndDo
+
+	:: remove trailing semicolon
+	*Set PATH=%@Left[-1,%_TCC_$partial]
+
+	*Unset _TCC_$ext _TCC_$extList _TCC_$ignore _TCC_$iPath _TCC_$onPath _TCC_$partial
+	*Return
+
+::===============================================================
+:: Show error message
+
+:showError [_errmessage]
+
+	*Echo *[ ERROR ]***************
+	:: unquote
+	*Echo ERROR: %@Left[-1,%@Right[-1,%_errmessage]]
+	*Echo FILE : %_TCC$appINI
+	*Echo LINE : %_TCC$lineNumber
+	*Echo *************************
+	*Return 2
+
+::===============================================================
+:: Select one of two files
+
+:chooseINI [_varName _file1 _file2]
+
+	*Iff exist %_file1 Then
+		*Set %_varName=%_file1
+		*Return 1
+	*EndIff
+
+	*Iff exist %_file2 Then
+		*Set %_varName=%_file2
+		*Return 2
+	*EndIff
+
+	*UnSet %_varName
+	*Return 0
+
+::===============================================================
+:: getPortableIni - get value from TccLePortable.ini, aware on profile settings and specific machine/user INI files
+:: Paradigm:
+::   getPortableIni is valid only in tcStart - probably just after start it was unchanged
+::   getPortableIni is not valid only in tcExit - it is possible, that it was changed. So any values related to tcExit should be passed via environment variables
+
+:getPortableIni [_varName _section _name]
+
+	*UnSet %_varName
+
+	*Set _TCC_$profile=%@Quote[%@path[%_cmdspec]..\..]
+
+	*Set _TCC_$value=%@IniRead[%_TCC_$profile\TccLePortable.ini,%_section,%_name]
+
+	*Set _TCC_$iniValue=%@IniRead[%_TCC_$profile\TccLePortable.ini,TccLePortable,ProfileDirectory]
+	*If not defined _TCC_$iniValue *Set _TCC_$iniValue=profile
+	*Set _TCC_$profile=%_TCC_$profile\Data\%_TCC_$iniValue
+	*GoSub CleanPath _TCC_$profile
+
+	*Do _TCC_$subProfile in /L %USERDOMAIN %USERNAME %COMPUTERNAME
+		*Set _TCC_$profile=%@Quote[%_TCC_$profile\%_TCC_$subProfile]
+		*If not isDir %_TCC_$profile *Leave
+
+		*Set _TCC_$iniValue=%@IniRead[%_TCC_$profile\TccLePortable.ini,%_section,%_name]
+		*If defined _TCC_$iniValue *Set _TCC_$value=%_TCC_$iniValue
+	*EndDo
+
+	*Set %_varName=%_TCC_$value
+
+	*UnSet _TCC_$iniValue _TCC_$profile _TCC_$subProfile _TCC_$value
+	*Return
+
+::===============================================================
+:: returns value to 0 or 1,
+
+:boolean [_varName _default _value]
+
+	*Iff "%_value" == "true" .OR. "%_value" == "1" .OR. "%_value" == "yes" Then
+		*Set %_varName=1
+		*Return 1
+	*EndIff
+
+	*Iff "%_value" == "false" .OR. "%_value" == "0" .OR. "%_value" == "no" Then
+		*Set %_varName=0
+		*Return 0
+	*EndIff
+
+	*Set %_varName=%_default
+	*Return %_default
+
+::===============================================================
+:: clean and quote absolute path
+:: Returns clean path, without trailing backslash, with all ".." resolved
+::   procedure is a bit complicated due to new behavior of @Full[] introduced with TCMD17
+:: @Quote   - Quotes
+:: \        - Adds extra backslash
+:: @Full    - Removes extra trailing backslashes, clears quirks, resolves \..\
+:: @UnQuote - unquotes for compatibility with TCMDv17 (changed @Full[] behaviour)
+:: @Left    - Removes trailing backslash
+:: @Quote   - Quotes again
+
+:CleanPath [_varName]
+
+	*Set %_varName=%@UnQuote[%@Full[%@Quote[%[%_varName]]]]
+
+	*If "%@Right[1,%[%_varName]]" == "\" *Set %_varName=%@Left[-1,%[%_varName]]
+
+	:: Make absolute: X: into X:\
+	*If "%@InStr[1,,%[%_varName]]" == ":" *Set %_varName=%[%_varName]\
+
+	*Set %_varName=%@Quote[%[%_varName]]
+	*Return
+
+::===============================================================
+:: show nice title
+
+:showNiceMessage [_message _rightMargin _lineChar]
+	*SetLocal
+
+	*Set _TCC_$len=%@Eval[%_COLUMNS-1-%_rightMargin]
+	*Set _TCC_$msg=%@UnQuote[%_message]
+
+	*Iff "%_lineChar" != "" Then
+		*Set _TCC_$msg=%@Left[%@Eval[%_TCC_$len-8],%_TCC_$msg]
+		*Set _TCC_$len=%@Eval[%_TCC_$len-%@Len[%_TCC_$msg]-7]
+		*Echo %_lineChar%%_lineChar%[ %@If[%_ansi==1,^e^[1;33m,]%[_TCC_$msg] %@If[%_ansi==1,^e^[0m,]]%@Repeat[%_lineChar,%_TCC_$len]
+	*Else
+		*Set _TCC_$len=%@Eval[%_TCC_$len-1]
+		*Set _TCC_$msg=%@UnQuote[%_message]
+		*If %@Len[%_TCC_$msg] GT %_TCC_$len *Set _TCC_$msg=%@Left[%@Eval[%_TCC_$len-3],%_TCC_$msg]...
+		*Echo  %_TCC_$msg
+	*EndIff
+
+	*EndLocal
+	*Return
+
+::===============================================================
+::===============================================================
+::===============================================================
