@@ -21,6 +21,10 @@
 /PortableApps/pCLI/pCLI.exe
 /PortableApps/pCLI/pCLI.ini
 
+# Build results *.exe
+pCli.exe
+testCommon.exe
+
 # User-specific files
 *.suo
 *.user

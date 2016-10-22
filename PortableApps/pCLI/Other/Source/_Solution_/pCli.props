@@ -17,14 +17,11 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
-
     <ResourceCompile>
       <PreprocessorDefinitions>_UNICODE;UNICODE;VER_TARGETNAME_STR=$(TargetFileName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
-
-
     <PostBuildEvent>
-      <Command>xcopy /YF "$(TargetPath)" "$(SolutionDir)Deliverable\$(PlatformName)\$(Configuration)\"</Command>
+      <Command>"$(ProjectDir)PostBuild.cmd" "$(TargetPath)" "$(ProjectDir)" $(Platform) $(Configuration)</Command>
     </PostBuildEvent>
     <BuildLog>
       <Path>$(SolutionDir)ipch\$(ProjectName).log</Path>
@@ -36,3 +33,5 @@
     </ClCompile>
   </ItemGroup>
 </Project>
+
+

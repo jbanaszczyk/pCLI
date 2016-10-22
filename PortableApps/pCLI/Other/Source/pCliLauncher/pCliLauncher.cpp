@@ -234,7 +234,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[]) {
 #ifdef _DEBUG
 #ifdef _MSC_VER
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	          _CrtSetBreakAlloc(926);
+//	          _CrtSetBreakAlloc(926);
 #endif
 #endif
 
