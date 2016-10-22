@@ -6,15 +6,9 @@ os: Visual Studio 2015
 
 build:
   verbosity: minimal
-  #parallel: true
-
-before_test:
-  - echo Before %_cwd
+  parallel: true
 
 # to run your custom scripts instead of automatic tests
 test_script:
-  - echo This is my custom test script
+  - dir
 
-# scripts to run after tests
-after_test:
-  - echo After %_cwd
