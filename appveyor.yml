@@ -13,7 +13,7 @@ platform:
 # build configuration, i.e. Debug, Release, etc.
 configuration:
   #- Debug
-  #- Release
+  Release
 
 build:
   verbosity: minimal
