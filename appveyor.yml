@@ -12,5 +12,5 @@ build:
   verbosity: minimal
   parallel: true
 
-test_script:  
-  - PortableApps\pCLI\Other\Source\_Solution_\Deliverable\Win32\Debug\testCommon.exe
+test_script:
+  - PortableApps\pCLI\Other\testCommon.exe
