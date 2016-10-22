@@ -1,13 +1,11 @@
-/*****************************************************************************
- *                                                                           
- * Copyright 2013 Jacek.Banaszczyk@gmail.com                                 
- * part of PortableApps Launcher project                                      
- * http://sourceforge.net/projects/tccleportable/                            
- * Release 1.0.0                                                             
- *                                                                           
+/******************************************************************************
+ *
+ * Copyright 2013 Jacek.Banaszczyk@gmail.com
+ * Part of pCli project: https://github.com/jbanaszczyk/pCli
+ *
  *****************************************************************************/
 
-#include "LauncherVersion.h" 
+#include "LauncherVersion.h"
 
 #ifdef _UNICODE
 	#define _T_(x)      L ## x

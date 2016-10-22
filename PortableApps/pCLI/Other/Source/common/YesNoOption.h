@@ -1,9 +1,7 @@
-/*****************************************************************************
+/******************************************************************************
  *
  * Copyright 2013 Jacek.Banaszczyk@gmail.com
- * part of PortableApps Launcher project
- * http://sourceforge.net/projects/tccleportable/
- * Release 1.0.0
+ * Part of pCli project: https://github.com/jbanaszczyk/pCli
  *
  *****************************************************************************/
 
@@ -17,8 +15,8 @@
 /******************************************************************************
 *
 * class pApps::YesNoOption converts strings to boolan
-* 
-* Supported strings: "Yes", "No", "true", "false", "1", "0" 
+*
+* Supported strings: "Yes", "No", "true", "false", "1", "0"
 *
 * addString(tstring, bool)
 *   adds/modifies more string/bool conversions
@@ -43,7 +41,7 @@ namespace pApps {
 			}
 		};
 		std::map< std::tstring, bool, fuLess<std::tstring>> _values;
-	
+
 		bool getOption(const std::tstring& key, const bool defValue) const {
 			auto itValues = _values.find(key);
 			if (_values.end() == itValues)

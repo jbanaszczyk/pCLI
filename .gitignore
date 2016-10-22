@@ -21,8 +21,6 @@
 /PortableApps/pCLI/pCLI.exe
 /PortableApps/pCLI/pCLI.ini
 
-
-
 # User-specific files
 *.suo
 *.user

@@ -1,11 +1,9 @@
-/*******************************************************
+/******************************************************************************
  *
  * Copyright 2013 Jacek.Banaszczyk@gmail.com
- * part of PortableApps Launcher project
- * https://github.com/jbanaszczyk/pCli
- * Release 2.0
+ * Part of pCli project: https://github.com/jbanaszczyk/pCli
  *
- *******************************************************/
+ *****************************************************************************/
 
 #include "stdafx.h"
 

@@ -1,9 +1,7 @@
-/*****************************************************************************
+/******************************************************************************
  *
  * Copyright 2013 Jacek.Banaszczyk@gmail.com
- * part of PortableApps Launcher project
- * http://sourceforge.net/projects/tccleportable/
- * Release 1.0.0
+ * Part of pCli project: https://github.com/jbanaszczyk/pCli
  *
  *****************************************************************************/
 
@@ -22,7 +20,7 @@
  *   in a common way
  *
  * singleton should be manipulated using pApps::CtrlHandler::getInstance().
- * 
+ *
  * There is defined static object of class currentCtrlHandler - it initializes CtrlHandler
  *
  * Methods:

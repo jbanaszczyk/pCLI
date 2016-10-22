@@ -1,9 +1,7 @@
-/*****************************************************************************
+/******************************************************************************
  *
  * Copyright 2013 Jacek.Banaszczyk@gmail.com
- * part of PortableApps Launcher project
- * http://sourceforge.net/projects/tccleportable/
- * Release 1.0.0
+ * Part of pCli project: https://github.com/jbanaszczyk/pCli
  *
  *****************************************************************************/
 
