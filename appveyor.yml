@@ -4,6 +4,12 @@ version: "{build}"
 # Operating system (build VM template)
 os: Visual Studio 2015
 
+platform:
+  - Win32
+
+configuration:
+  - Debug
+
 build:
   verbosity: minimal
   parallel: true
@@ -13,5 +19,3 @@ test_script:
   #- dir PortableApps\pCLI\Other\Source\_Solution_\Deliverable\x64\Debug\
   #- dir PortableApps\pCLI\Other\Source\_Solution_\Deliverable\x64\Debug\testCommon.exe
   - PortableApps\pCLI\Other\Source\_Solution_\Deliverable\x64\Debug\testCommon.exe
-
-
