@@ -10,6 +10,8 @@ build:
 
 # to run your custom scripts instead of automatic tests
 test_script:
-  - dir
-  - PortableApps\pCLI\Other\Source\_Solution_\Deliverable\Win32\Debug\testCommon.exe
+  #- dir PortableApps\pCLI\Other\Source\_Solution_\Deliverable\x64\Debug\
+  #- dir PortableApps\pCLI\Other\Source\_Solution_\Deliverable\x64\Debug\testCommon.exe
+  - PortableApps\pCLI\Other\Source\_Solution_\Deliverable\x64\Debug\testCommon.exe
+
 
