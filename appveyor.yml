@@ -11,4 +11,5 @@ build:
 # to run your custom scripts instead of automatic tests
 test_script:
   - dir
+  - PortableApps\pCLI\Other\Source\_Solution_\Deliverable\Win32\Debug\testCommon.exe
 
