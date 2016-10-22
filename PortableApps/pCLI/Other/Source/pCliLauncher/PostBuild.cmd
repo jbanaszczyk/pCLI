@@ -5,14 +5,24 @@ if [%2] EQU [] goto :Usage
 if [%3] EQU [Win32] goto :Win32
 
 :x64
-xcopy /YF %1 %2..\..\
+
+echo %1 =^> %2..\..\
+copy %1 %2..\..\ >nul
 goto :Finish
 
 :Win32
-xcopy /YF %1 %2..\..\
-xcopy /YF %1 %2..\..\..\
-xcopy /YF %1 %2..\..\..\..\
-if exist %2..\..\..\..\..\Start.exe xcopy /YF %1 %2..\..\..\..\..\
+echo %1 =^> %2..\..\
+copy %1 %2..\..\ >nul
+
+echo %1 =^> %2..\..\..\
+copy %1 %2..\..\..\ >nul
+
+echo %1 =^> %2..\..\..\..\
+copy %1 %2..\..\..\..\ >nul
+
+
+if exist %2..\..\..\..\..\Start.exe echo %1 =^> %2..\..\..\..\..\
+if exist %2..\..\..\..\..\Start.exe copy %1 %2..\..\..\..\..\ >nul
 
 goto :Finish
 

@@ -2,7 +2,8 @@
 
 if [%2] EQU [] goto :Usage
 
-xcopy /YF %1 %2..\..\
+echo %1 =^> %2..\..\
+copy %1 %2..\..\ >nul
 goto :Finish
 
 :Usage

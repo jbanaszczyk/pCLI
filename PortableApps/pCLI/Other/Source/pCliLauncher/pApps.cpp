@@ -573,6 +573,10 @@ namespace pApps {
 				pWait = tpWait::pWait_NoWait;
 			}
 		}
+
+// pWait jest nie ustawione ok????
+pWait = tpWait::pWait_Wait;
+
 		//-------------------------------------------- lpApplicationName
 		//-------------------------------------------- lpCommandLine
 

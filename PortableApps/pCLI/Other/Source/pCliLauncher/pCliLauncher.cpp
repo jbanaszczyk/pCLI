@@ -213,7 +213,7 @@ void parseCmdLine(const std::tstring& cmdLine, boost::optional<std::tstring>& co
 };
 
 /******************************************************************************
-*	Merge to STL containers
+*	Merge two STL containers
 *	used to merge vectors
 *****************************************************************************/
 template <typename T>
