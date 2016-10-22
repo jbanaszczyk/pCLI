@@ -5,12 +5,7 @@
  *
  *****************************************************************************/
 
-#ifndef _ADA9F1AC_71AC_4B94_8384_F6C61C6D74E4_INCLUDED
-#define _ADA9F1AC_71AC_4B94_8384_F6C61C6D74E4_INCLUDED
-
-#ifdef _MSC_VER
 #pragma once
-#endif
 
 #include "../common/common.h"
 #include "LauncherVersion.h"
@@ -45,5 +40,3 @@ namespace pApps {
 	std::string tstring2string ( const std::tstring sou );
 
 }
-
-#endif  // _ADA9F1AC_71AC_4B94_8384_F6C61C6D74E4_INCLUDED

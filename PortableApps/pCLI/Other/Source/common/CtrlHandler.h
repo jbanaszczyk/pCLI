@@ -5,12 +5,7 @@
  *
  *****************************************************************************/
 
-#ifndef _8ECE158B_EBCD_484E_9712_3988D0C2C5DE_INCLUDED
-#define _8ECE158B_EBCD_484E_9712_3988D0C2C5DE_INCLUDED
-
-#ifdef _MSC_VER
 #pragma once
-#endif
 
 /******************************************************************************
  *
@@ -82,4 +77,3 @@ namespace pApps
 	};
 }
 
-#endif  // _8ECE158B_EBCD_484E_9712_3988D0C2C5DE_INCLUDED

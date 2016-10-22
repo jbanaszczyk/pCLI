@@ -5,12 +5,7 @@
  *
  *****************************************************************************/
 
-#ifndef _B2C0002B_EEA7_4BD5_BC8F_67A4C303052E_INCLUDED
-#define _B2C0002B_EEA7_4BD5_BC8F_67A4C303052E_INCLUDED
-
-#ifdef _MSC_VER
-	#pragma once
-#endif
+#pragma once
 
 /******************************************************************************
  *
@@ -138,4 +133,3 @@ namespace pApps {
 		void setValue(const std::tstring section, const std::tstring name, const std::tstring value, const bool isDefault = false);
 	};
 }
-#endif  // _B2C0002B_EEA7_4BD5_BC8F_67A4C303052E_INCLUDED

@@ -5,12 +5,7 @@
  *
  *****************************************************************************/
 
-#ifndef _C975DB66_8F15_4C20_8875_D254869E715B_INCLUDED
-#define _C975DB66_8F15_4C20_8875_D254869E715B_INCLUDED
-
-#ifdef _MSC_VER
 #pragma once
-#endif
 
 /******************************************************************************
  *
@@ -168,5 +163,3 @@ namespace pApps {
 
 	extern SysPidInfo _sysPidInfo;
 }
-
-#endif  // _C975DB66_8F15_4C20_8875_D254869E715B_INCLUDED

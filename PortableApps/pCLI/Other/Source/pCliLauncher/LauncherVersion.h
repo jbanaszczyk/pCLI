@@ -5,12 +5,7 @@
  *
  *****************************************************************************/
 
-#ifndef _E334A8BE_A9B3_4D8F_8990_D1DDC7F93AA5_INCLUDED
-#define _E334A8BE_A9B3_4D8F_8990_D1DDC7F93AA5_INCLUDED
-
-#ifdef _MSC_VER
 #pragma once
-#endif
 
 /*****************************************************************************
  *
@@ -47,6 +42,4 @@
 	#define VER_FILENAME_STR            VER_PRODUCTNAME_STR _T_(".exe")
 #else
 	#define VER_FILENAME_STR            STRINGIZATOR(VER_TARGETNAME_STR)
-#endif
-
 #endif

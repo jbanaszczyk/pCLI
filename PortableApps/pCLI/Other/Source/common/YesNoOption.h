@@ -5,12 +5,7 @@
  *
  *****************************************************************************/
 
-#ifndef _FD07B0C1_AC69_4C9C_AE11_F56D9CC86B31_INCLUDED
-#define _FD07B0C1_AC69_4C9C_AE11_F56D9CC86B31_INCLUDED
-
-#ifdef _MSC_VER
 #pragma once
-#endif
 
 /******************************************************************************
 *
@@ -77,5 +72,3 @@ namespace pApps {
 
 	};
 }
-
-#endif  // _FD07B0C1_AC69_4C9C_AE11_F56D9CC86B31_INCLUDED

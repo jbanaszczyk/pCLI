@@ -5,12 +5,7 @@
  *
  *****************************************************************************/
 
-#ifndef _DC91CD87_58C9_4212_A148_C3E6F28EBF48_INCLUDED
-#define _DC91CD87_58C9_4212_A148_C3E6F28EBF48_INCLUDED
-
-#ifdef _MSC_VER
-	#pragma once
-#endif
+#pragma once
 
 /******************************************************************************
  *
@@ -61,5 +56,3 @@ namespace pApps {
 		void dump(std::unique_ptr<TCHAR[]>& result) const;
 	};
 }
-
-#endif  // _DC91CD87_58C9_4212_A148_C3E6F28EBF48_INCLUDED
