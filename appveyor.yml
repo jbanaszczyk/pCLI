@@ -4,20 +4,9 @@ version: "{build}"
 # Operating system (build VM template)
 os: Visual Studio 2015
 
-# build platform, i.e. Win32 (instead of x86), x64, Any CPU. This setting is optional.
-platform:
-  #- Win32
-  x64  Disable build for x64 machine until x64 version of dart-prerequisites is ready
-
-
-# build configuration, i.e. Debug, Release, etc.
-configuration:
-  #- Debug
-  Release
-
 build:
   verbosity: minimal
-  parallel: true
+  #parallel: true
 
 before_test:
   - echo Before %_cwd
