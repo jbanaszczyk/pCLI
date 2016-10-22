@@ -1,7 +1,5 @@
-# Specify version format
 version: "{build}"
 
-# Operating system (build VM template)
 os: Visual Studio 2015
 
 platform:
@@ -14,8 +12,5 @@ build:
   verbosity: minimal
   parallel: true
 
-# to run your custom scripts instead of automatic tests
-test_script:
-  #- dir PortableApps\pCLI\Other\Source\_Solution_\Deliverable\x64\Debug\
-  #- dir PortableApps\pCLI\Other\Source\_Solution_\Deliverable\x64\Debug\testCommon.exe
-  - PortableApps\pCLI\Other\Source\_Solution_\Deliverable\x64\Debug\testCommon.exe
+test_script:  
+  - PortableApps\pCLI\Other\Source\_Solution_\Deliverable\Win32\Debug\testCommon.exe
