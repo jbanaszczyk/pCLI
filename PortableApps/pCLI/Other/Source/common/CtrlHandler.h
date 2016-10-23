@@ -7,99 +7,111 @@
 
 #pragma once
 
-/******************************************************************************
-*
-* Procere used by SetConsoleCtrlHandler( myCtrlHandler, ... has to be static,
-* so there is a lot of static things
-*
-* singleton pApps::CtrlHandler allows handling:
-*   SetConsoleCtrlHandler
-*   in a common way
-*
-* singleton should be manipulated using pApps::CtrlHandler::getInstance().
-*
-* There is defined static object of class currentCtrlHandler - it initializes CtrlHandler
-*
-* Methods:
-*
-* clear
-*   dactivates all handlers, clears all data
-*
-* addEvent
-*   adds console event to be handled (disabled) by handler procedure
-*   use any of CTRL_C_EVENT, CTRL_BREAK_EVENT, and so on
-*   or pApps::CtrlHandler::CTRL_ALL_EVENTS to deactivate all
-*
-* activate
-*   activates SetConsoleCtrlHandler
-*
-* setDebugBeep
-*   to help debugging
-*
-*****************************************************************************/
-#include "./common.h"
-
+#include "common.h"
 #include <windows.h>
-#include <tchar.h>
-#include <set>
 
 namespace pApps {
-	class CtrlHandler : private boost::noncopyable {
-	private:
-		CtrlHandler() {
-			clear();
-		}
 
-		~CtrlHandler() {
-			clear();
-		}
+	class CtrlHandlerManager {
 
-	public:
-		static CtrlHandler& getInstance() {
-			static CtrlHandler _instance;
-			return _instance;
-		}
+			//************************************
+			// Variable:  bool CtrlHandlerManager::DebugBeep_
+			// Brief:     Has to be static, because is referenced by static method.
+			//            If true pressing CtrlC should beep
+			//************************************
+			static bool DebugBeep_;
 
-		static const DWORD CTRL_ALL_EVENTS = -1;
+			//************************************
+			// Field: Variable:  BOOL CtrlHandlerManager::Active_
+			// Brief: Mirror of CtrlHandlerManager state
+			//************************************
+			BOOL Active_;
 
-		void clear() {
-			if ( ctrlHandlerActive_ ) {
-				SetConsoleCtrlHandler( myCtrlHandler, FALSE );
-				ctrlHandlerActive_ = FALSE;
+			//************************************
+			// Method:    vSetConsoleCtrlHandler
+			// FullName:  pApps::CtrlHandlerManager::vSetConsoleCtrlHandler
+			// Access:    virtual private
+			// Returns:   BOOL WINAPI
+			// Qualifier:
+			// Parameter: _In_opt_ PHANDLER_ROUTINE HandlerRoutine
+			// Parameter: _In_ BOOL Add
+			// Brief:     mockable, falls to SetConsoleCtrlHandler
+			//************************************
+			virtual BOOL WINAPI vSetConsoleCtrlHandler ( _In_opt_ PHANDLER_ROUTINE HandlerRoutine, _In_ BOOL Add ) {
+				return SetConsoleCtrlHandler ( HandlerRoutine, Add );
 			}
-			ctrlEvents_.clear();
-			debugBeep_ = false;
-			consoleWindow_ = GetConsoleWindow();
-		}
 
-		void activate() {
-			if ( !ctrlHandlerActive_ && ctrlEvents_.size() ) {
-				ctrlHandlerActive_ = SetConsoleCtrlHandler( myCtrlHandler, TRUE );
-			}
-		}
-
-		void setDebugBeep( const bool value = true ) {
-			debugBeep_ = value;
-		}
-
-		void addEvent( const DWORD ctrlType ) {
-			ctrlEvents_.insert( ctrlType );
-		}
-
-	private:
-		static std::set<DWORD> ctrlEvents_;
-		static HWND consoleWindow_;
-		static BOOL ctrlHandlerActive_;
-		static bool debugBeep_;
-
-		static BOOL WINAPI myCtrlHandler( _In_ DWORD ctrlType ) {
-			if ( ctrlEvents_.end() != ctrlEvents_.find( ctrlType ) || ctrlEvents_.end() != ctrlEvents_.find( CTRL_ALL_EVENTS ) ) {
-				if ( debugBeep_ ) {
-					Beep( 750, 300 );
+			//************************************
+			// Method:    myCtrlHandler
+			// FullName:  pApps::CtrlHandlerManager::myCtrlHandler
+			// Access:    private static
+			// Returns:   BOOL WINAPI
+			// Qualifier:
+			// Parameter: _In_ DWORD ctrlType
+			// Brief:     Handler used by OS
+			//************************************
+			static BOOL WINAPI myCtrlHandler ( _In_ DWORD ctrlType ) {
+				if ( DebugBeep_ ) {
+					Beep ( 750, 300 );
 				}
 				return TRUE;
 			}
-			return ( FALSE );
-		}
+
+		public:
+			//************************************
+			// Method:    CtrlHandlerManager
+			// FullName:  pApps::CtrlHandlerManager::CtrlHandlerManager
+			// Access:    public
+			// Returns:
+			// Qualifier: : Active_( FALSE )
+			// Brief:     ctor - activate Ctrl handler
+			//************************************
+			CtrlHandlerManager() : Active_ ( FALSE ) {
+				DebugBeep_ = false,
+				activate ( TRUE );
+			}
+
+			//************************************
+			// Method:    ~CtrlHandlerManager
+			// FullName:  pApps::CtrlHandlerManager::~CtrlHandlerManager
+			// Access:    public
+			// Returns:
+			// Qualifier:
+			// Brief:     dtor - deactivate Ctrl handler
+			//************************************
+			virtual ~CtrlHandlerManager() {
+				DebugBeep_ = false;
+				activate ( FALSE );
+			}
+
+			//************************************
+			// Method:    setDebugBeep
+			// FullName:  pApps::CtrlHandlerManager::setDebugBeep
+			// Access:    private static
+			// Returns:   void
+			// Qualifier:
+			// Parameter: _In_ bool value
+			// Brief:     activate/deactivate Ctrl beep
+			//************************************
+			static void setDebugBeep ( _In_ bool value = true ) {
+				DebugBeep_ = value;
+			}
+
+			//************************************
+			// Method:    activate
+			// FullName:  pApps::CtrlHandlerManager::activate
+			// Access:    private
+			// Returns:   void
+			// Qualifier:
+			// Parameter: _In_ BOOL newState
+			// Brief:     activate/deactivate Ctrl handler
+			//************************************
+			void activate ( _In_ BOOL newState ) {
+				if ( Active_ != newState ) {
+					if ( vSetConsoleCtrlHandler ( myCtrlHandler, newState ) ) {
+						Active_ = newState;
+					}
+				}
+			}
 	};
 }

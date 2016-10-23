@@ -97,6 +97,16 @@
     <Text Include="ReadMe.md" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\common\common.h" />
+    <ClInclude Include="..\common\CtrlHandler.h" />
+    <ClInclude Include="..\common\Environment.h" />
+    <ClInclude Include="..\common\IniFile.h" />
+    <ClInclude Include="..\common\stdafx.h" />
+    <ClInclude Include="..\common\SysPidInfo.h" />
+    <ClInclude Include="..\common\YesNoOption.h" />
+    <ClInclude Include="LauncherVersion.h" />
+    <ClInclude Include="pApps.h" />
+    <ClInclude Include="papps2.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>

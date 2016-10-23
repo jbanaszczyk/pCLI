@@ -10,42 +10,50 @@
 
 #include "../common/CtrlHandler.cpp"
 
-#include  <boost/serialization/singleton.hpp>
+static volatile int ctrlCCounter = 0;
 
-struct A {
-	std::string name_;
-	int age_;
+static BOOL WINAPI mockCtrlHandler ( _In_ DWORD ctrlType ) {
+	++ctrlCCounter;
+	return TRUE;
+}
+
+class mockCtrlHandlerManager : public pApps::CtrlHandlerManager {
+	public:
+		BOOL WINAPI vSetConsoleCtrlHandler ( _In_opt_ PHANDLER_ROUTINE HandlerRoutine, _In_ BOOL Add ) override {
+			if ( Add < 2 ) {
+				return SetConsoleCtrlHandler ( HandlerRoutine, Add );
+			}
+
+			Add -= 2;
+			ctrlCCounter = 0;
+			return SetConsoleCtrlHandler ( mockCtrlHandler, Add );
+		}
 };
 
-struct MyClass : public boost::serialization::singleton<MyClass>, public A {
-};
+BOOST_AUTO_TEST_CASE ( CtrlHandler, *boost::unit_test::disabled() ) {
 
-BOOST_AUTO_TEST_CASE( CtrlHandler ) {
+	// A bit difficult
+	// shut down installed CtrlHandler
+	pApps::CtrlHandler_.activate ( false );
 
-	pApps::CtrlHandler::getInstance().setDebugBeep( true );
+	// mocked ctor invokes activate again
+	mockCtrlHandlerManager mockCtrlHandler_;
+	// so deactivate again
+	mockCtrlHandler_.activate ( FALSE );
 
-	MyClass::get_mutable_instance().name_ = "Robin";
-	MyClass::get_mutable_instance().age_ = 21;
+	// install mockCtrlHandler as CtrlHandler
+	mockCtrlHandler_.activate ( TRUE + 2 );
 
-	std::cin.get();
+	BOOST_CHECK ( ctrlCCounter == 0 );
+	GenerateConsoleCtrlEvent ( 0, 0 ); // generate CtrlC
+	Sleep ( 1 );                       // yield to allow processing
+	BOOST_CHECK ( ctrlCCounter == 1 );
+	GenerateConsoleCtrlEvent ( 1, 0 ); // generate CtrlBreak
+	Sleep ( 1 );                      // yield to allow processing
+	BOOST_CHECK ( ctrlCCounter == 2 );
 
-	/*
-	// seven ways to detect and report the same error:
-	BOOST_CHECK( add( 2, 2 ) == 4 );        // #1 continues on error
-
-	BOOST_REQUIRE( add( 2, 2 ) == 4 );      // #2 throws on error
-
-	if ( add( 2, 2 ) != 4 )
-	    BOOST_ERROR( "Ouch..." );            // #3 continues on error
-
-	if ( add( 2, 2 ) != 4 )
-	    BOOST_FAIL( "Ouch..." );             // #4 throws on error
-
-	if ( add( 2, 2 ) != 4 ) throw "Ouch..."; // #5 throws on error
-
-	BOOST_CHECK_MESSAGE( add( 2, 2 ) == 4,  // #6 continues on error
-	    "add(..) result: " << add( 2, 2 ) );
-
-	BOOST_CHECK_EQUAL( add( 2, 2 ), 4 );      // #7 continues on error
-	*/
+	// deactivate mock
+	mockCtrlHandler_.activate ( FALSE );
+	// reactivate CtrlHandler
+	pApps::CtrlHandler_.activate ( true );
 }

@@ -6,21 +6,19 @@
 *****************************************************************************/
 
 #include "stdafx.h"
-#include "./CtrlHandler.h"
+#include "CtrlHandler.h"
 
 namespace pApps {
-	std::set<DWORD> CtrlHandler::ctrlEvents_;
-	bool CtrlHandler::debugBeep_ = false;
-	HWND CtrlHandler::consoleWindow_ = nullptr;
-	BOOL CtrlHandler::ctrlHandlerActive_ = FALSE;
 
-	void initCtrlHandler() {
-		/*******************************************************
-		*   Disable Ctrl-C
-		*******************************************************/
-		pApps::CtrlHandler::getInstance().addEvent( pApps::CtrlHandler::CTRL_ALL_EVENTS );
-		pApps::CtrlHandler::getInstance().activate();
-	};
+	//************************************
+	// Variable:  bool CtrlHandlerManager::DebugBeep_
+	// Brief:     Has to be static, because is referenced by static method
+	//************************************
+	bool CtrlHandlerManager::DebugBeep_ = false;
 
-	static int _initCtrlHandler = ( initCtrlHandler(), 0 );
+	//************************************
+	// Variable:  CtrlHandlerManager::DebugBeep_
+	// Brief:     Has to be static, because is referenced by static method
+	//************************************
+	CtrlHandlerManager CtrlHandler_;
 }
