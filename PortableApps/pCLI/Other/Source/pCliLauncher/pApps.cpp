@@ -646,3 +646,4 @@ pWait = tpWait::pWait_Wait;
 		return boost::none;
 	}
 }
+
