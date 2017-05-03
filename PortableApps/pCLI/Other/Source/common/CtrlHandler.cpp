@@ -14,11 +14,11 @@ namespace pApps {
 	// Variable:  bool CtrlHandlerManager::DebugBeep_
 	// Brief:     Has to be static, because is referenced by static method
 	//************************************
-	bool CtrlHandlerManager::DebugBeep_ = false;
+	bool CtrlHandlerManager::DebugBeep = false;
 
 	//************************************
 	// Variable:  CtrlHandlerManager::DebugBeep_
 	// Brief:     Has to be static, because is referenced by static method
 	//************************************
-	CtrlHandlerManager CtrlHandler_;
+	CtrlHandlerManager CtrlCHandler;
 }
