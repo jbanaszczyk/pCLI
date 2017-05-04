@@ -22,9 +22,6 @@
 *****************************************************************************/
 #include "./common.h"
 
-#include <tchar.h>
-#include <map>
-
 namespace pApps {
 
 	class YesNoOption {

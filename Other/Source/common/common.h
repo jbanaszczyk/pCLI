@@ -28,9 +28,9 @@
 #error "OS IS NOT SUPPORTED"
 #endif
 
-#define WINVER         0x0601  // _WIN32_WINNT_WINXP
-#define _WIN32_WINDOWS 0x0601  // _WIN32_WINNT_WINXP
-#define _WIN32_WINNT   0x0601  // _WIN32_WINNT_WINXP
+#define WINVER         0x0601  // _WIN32_WINNT_WIN7 
+#define _WIN32_WINDOWS 0x0601  // _WIN32_WINNT_WIN7 
+#define _WIN32_WINNT   0x0601  // _WIN32_WINNT_WIN7 
 #include <SDKDDKVer.h>
 
 #define SECURITY_WIN32
@@ -44,20 +44,8 @@
 	#include <crtdbg.h>
 #endif
 
-/*
-#ifndef _DEBUG
-	#pragma comment(lib,"libboost_system-vc120-mt-s-1_56.lib")
-#else
-	#pragma comment(lib,"libboost_system-vc120-mt-sgd-1_56.lib")
-#endif
-*/
-#pragma comment(lib,"Psapi.lib")
-#pragma comment(lib,"Shell32.lib")
-#pragma comment(lib,"Secur32.lib")
-#pragma comment(lib,"User32.lib")
-#pragma comment(lib, "mpr.lib")
-
-
+#pragma comment(lib,"Secur32.lib")	// GetUserNameExW
+#pragma comment(lib,"mpr.lib")	    // WNetGetUniversalNameW
 
 /** Mandatory #include *****************************************************************/
 

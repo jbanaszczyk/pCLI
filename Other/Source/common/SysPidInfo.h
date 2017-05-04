@@ -66,17 +66,6 @@
  *****************************************************************************/
 #include "./common.h"
 
-#include <windows.h>
-#include <tchar.h>
-#include <tlhelp32.h>
-#include <psapi.h>
-#include <Winternl.h>
-#include <Shellapi.h>
-
-#include <boost/optional.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/filesystem.hpp>
-
 namespace pApps {
 
 	class SysPidInfo {

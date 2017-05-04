@@ -26,11 +26,6 @@
 
 #include "./common.h"
 
-#include <tchar.h>
-#include <map>
-
-#include <boost/algorithm/string.hpp>
-
 namespace pApps {
 	class Environment {
 		private:

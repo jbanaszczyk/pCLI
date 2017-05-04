@@ -57,15 +57,6 @@
 
 #include "./common.h"
 
-#include <tchar.h>
-#include <set>
-#include <map>
-#include <windows.h>
-
-#include <boost/optional.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/filesystem.hpp>
-
 namespace pApps {
 	class iniFile {
 	  public:
