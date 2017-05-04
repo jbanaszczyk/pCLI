@@ -14,6 +14,11 @@ namespace pApps {
 
 	class CtrlHandlerManager {
 
+		CtrlHandlerManager(const CtrlHandlerManager&) = delete;
+		CtrlHandlerManager(const CtrlHandlerManager&&) = delete;
+		CtrlHandlerManager& CtrlHandlerManager:: operator= (const CtrlHandlerManager&) = delete;
+		CtrlHandlerManager&& CtrlHandlerManager:: operator= (const CtrlHandlerManager&&) = delete;
+
 		//************************************
 		// Variable:  bool CtrlHandlerManager::DebugBeep
 		// Brief:     Has to be static, because is referenced by static method.

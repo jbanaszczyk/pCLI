@@ -74,6 +74,7 @@
     <Import Project="$(SolutionDir)\$(SolutionName)_boost.props" />
     <Import Project="$(SolutionDir)\$(SolutionName)_$(Platform).props" />
     <Import Project="$(SolutionDir)\$(SolutionName)_$(Configuration).props" />
+    <Import Project="$(SolutionDir)\_$(TargetName).props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -95,6 +96,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="testCtrlHandler.cpp" />
+    <ClCompile Include="testEnvironment.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

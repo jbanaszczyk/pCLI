@@ -486,9 +486,9 @@ namespace pApps {
 		std::cerr.imbue(std::locale());
 		std::cin.imbue(std::locale());
 #ifdef _UNICODE
-		_setmode(_fileno(stdout), _O_WTEXT);
-		_setmode(_fileno(stdin), _O_WTEXT);
-		_setmode(_fileno(stderr), _O_WTEXT);
+		(void) _setmode(_fileno(stdout), _O_WTEXT);
+		(void) _setmode(_fileno(stdin), _O_WTEXT);
+		(void) _setmode(_fileno(stderr), _O_WTEXT);
 #endif
 	}
 	/******************************************************************************

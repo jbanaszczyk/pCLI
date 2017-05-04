@@ -1,5 +1,15 @@
 
-:: skonczyc sprzatanie zmiennych lokalnych
+:: TODO skonczyc sprzatanie zmiennych lokalnych
+
+:: TODO Zamienic @UnQote na @UnQoteS - tam gdzie ma sens
+
+:: TODO EndLocal pozwala na eksport zmiennych. Wykorzystaæ. Gdzieœ sie z tym wozi³em
+
+:: TODO poszukac relacje, czy sa w nich nawiasy. Nie powinny byc
+
+:: TODo Test na liczbê: @Digits
+
+:: @RTrim ma b³¹d z cudzys³owem. LTrim pewnie te¿
 
 @*Echo off
 
@@ -36,7 +46,15 @@
 :: Debug helper
 
 *Iff "%_BDEBUGGER" != "1" Then
-	*Alias Breakpoint=Echo %@If[%_ansi==1,^e^[1;31m,]=== Breakpoint `[%@Formatn[06.2,%@Timer[1,s]]] %_BATCHLINE` @ `%@FileName[%_BATCHNAME] : %$`%@If[%_ansi==1,^e^[0m,]
+	*Alias Breakpoint=*Echo %@If[%_ansi==1,^e^[1;31m,]=== CheckPoint `[%@Formatn[06.2,%@Timer[1,s]]] %_BATCHLINE` @ `%@FileName[%_BATCHNAME] : %$`%@If[%_ansi==1,^e^[0m,]
+*EndIff
+
+::--------------------------------------------------------------------------------
+:: Commnet introduced in v17
+
+*Iff not IsInternal comment Then
+	*Alias EndComment=
+	*Alias Comment=`*@Echo << EndComment > nul`
 *EndIff
 
 ::--------------------------------------------------------------------------------
@@ -189,7 +207,7 @@ EndIff
 	*EndDo
 *EndIff
 
-::   clean _TCC$ pseudo namespace
+:: TODO clean _TCC$ pseudo namespace
 
 *UnSet _TCC$action _TCC$appINI _TCC$Apps _TCC$appVer _TCC$cmd _TCC$data _TCC$dataDir _TCC$dataFile _TCC$dataLine
 *UnSet _TCC$description _TCC$dirName _TCC$enabled _TCC$etc _TCC$etc$fstab _TCC$ext _TCC$extList _TCC$file _TCC$fileName
@@ -219,7 +237,7 @@ BreakPoint Finish
 
 *Timer /1 off > nul:
 
-Title  %_CMDPROC %_version [%_x3264]
+*Title  %_CMDPROC %_version [%_x3264]
 
 *Cancel
 
@@ -232,7 +250,7 @@ Title  %_CMDPROC %_version [%_x3264]
 
 :collectConfig
 
-	*For /L _tcc$this in (1,1,99) *UnSet _TCC$Apps$%_tcc$this
+	*For /L _tcc$this in (1,1,99) Do *UnSet _TCC$Apps$%_tcc$this
 
 	*Set _TCC$orderDefault=49
 	*Iff IsDir %_TccDir\CommonFiles Then
@@ -935,6 +953,8 @@ Title  %_CMDPROC %_version [%_x3264]
 :: @Quote   - Quotes again
 
 :CleanPath [_varName]
+    *If "%_varName" == "" *Return
+    *If "%[%_varName]" == "" *Return
 
 	*Set %_varName=%@UnQuote[%@Full[%@Quote[%[%_varName]]]]
 

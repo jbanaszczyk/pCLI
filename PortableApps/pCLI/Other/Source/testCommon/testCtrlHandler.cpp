@@ -40,31 +40,57 @@ public:
 	}
 };
 
+BOOST_AUTO_TEST_SUITE( CtrlHandler )
+
 //BOOST_AUTO_TEST_CASE ( CtrlHandler, *boost::unit_test::disabled() ) {
 BOOST_AUTO_TEST_CASE(CtrlHandler) {
 
 	// A bit difficult
 	// shut down installed CtrlHandler
-	pApps::CtrlCHandler.activate(false);
+	pApps::CtrlCHandler.activate ( false );
 
 	// mocked ctor invokes activate again
 	mockCtrlHandlerManager mockCtrlHandler_;
 	// so deactivate again
-	mockCtrlHandler_.activate(FALSE);
+	mockCtrlHandler_.activate ( FALSE );
 
 	// install mockCtrlHandler as CtrlHandler
-	mockCtrlHandler_.activate(TRUE + 2);
+	mockCtrlHandler_.activate ( TRUE + 2 );
 
-	BOOST_CHECK(ctrlCCounter == 0);
-	GenerateConsoleCtrlEvent(0, 0); // generate CtrlC
-	Sleep(1);                       // yield to allow processing
-	BOOST_CHECK(ctrlCCounter == 1);
-	GenerateConsoleCtrlEvent(1, 0); // generate CtrlBreak
-	Sleep(1);                       // yield to allow processing
-	BOOST_CHECK(ctrlCCounter == 2);
+	BOOST_CHECK ( ctrlCCounter == 0 );
+	GenerateConsoleCtrlEvent ( 0, 0 ); // generate CtrlC
+	Sleep ( 1 );                       // yield to allow processing
+	BOOST_CHECK ( ctrlCCounter == 1 );
 
 	// deactivate mock
-	mockCtrlHandler_.activate(FALSE);
+	mockCtrlHandler_.activate ( FALSE );
 	// reactivate CtrlHandler
-	pApps::CtrlCHandler.activate(true);
+	pApps::CtrlCHandler.activate ( true );
 }
+
+BOOST_AUTO_TEST_CASE( CtrlBreakHandler, *boost::unit_test::disabled() ) {
+
+	// A bit difficult
+	// shut down installed CtrlHandler
+	pApps::CtrlCHandler.activate( false );
+
+	// mocked ctor invokes activate again
+	mockCtrlHandlerManager mockCtrlHandler_;
+	// so deactivate again
+	mockCtrlHandler_.activate( FALSE );
+
+	// install mockCtrlHandler as CtrlHandler
+	mockCtrlHandler_.activate( TRUE + 2 );
+
+	BOOST_CHECK( ctrlCCounter == 0 );
+	GenerateConsoleCtrlEvent( 1, 0 ); // generate CtrlBreak
+	Sleep( 1 );                      // yield to allow processing
+	BOOST_CHECK( ctrlCCounter == 1 );
+
+	// deactivate mock
+	mockCtrlHandler_.activate( FALSE );
+	// reactivate CtrlHandler
+	pApps::CtrlCHandler.activate( true );
+}
+
+BOOST_AUTO_TEST_SUITE_END()
