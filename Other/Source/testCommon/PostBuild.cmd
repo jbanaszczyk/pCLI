@@ -1,9 +1,21 @@
 @echo off
 
-if [%2] EQU [] goto :Usage
+REM echo ____________________________________ 
+REM echo TargetPath    %1
+REM echo TargetDir     %2
+REM echo PlatformName  %3
+REM echo Configuration %4
+REM echo ____________________________________ 
 
-echo %1 =^> %2..\..\
-copy %1 %2..\..\ >nul
+REM if [%2] EQU [] goto :Usage
+REM 
+REM echo %1 =^> %2..\..\
+REM copy %1 %2..\..\ >nul
+
+REM execute tests
+
+"%1"
+
 goto :Finish
 
 :Usage
@@ -15,3 +27,4 @@ echo $4: %4
 goto :Finish
 
 :Finish
+	

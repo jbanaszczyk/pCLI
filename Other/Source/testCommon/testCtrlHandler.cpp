@@ -42,8 +42,7 @@ public:
 
 BOOST_AUTO_TEST_SUITE( CtrlHandler )
 
-//BOOST_AUTO_TEST_CASE ( CtrlHandler, *boost::unit_test::disabled() ) {
-BOOST_AUTO_TEST_CASE(CtrlHandler) {
+BOOST_AUTO_TEST_CASE ( CtrlHandler, *boost::unit_test::disabled() ) {
 
 	// A bit difficult
 	// shut down installed CtrlHandler
