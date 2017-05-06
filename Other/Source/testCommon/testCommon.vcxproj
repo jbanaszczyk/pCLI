@@ -92,9 +92,6 @@
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="testCtrlHandler.cpp" />
     <ClCompile Include="testEnvironment.cpp" />
   </ItemGroup>

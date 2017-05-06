@@ -14,7 +14,7 @@ REM copy %1 %2..\..\ >nul
 
 REM execute tests
 
-"%1"
+"%1" --gtest_filter=-CtrlHandlers.*
 
 goto :Finish
 
@@ -27,4 +27,3 @@ echo $4: %4
 goto :Finish
 
 :Finish
-	

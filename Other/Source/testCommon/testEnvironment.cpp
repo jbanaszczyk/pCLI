@@ -9,6 +9,7 @@
 
 #include "../common/Environment.h"
 
+/*
 #include <functional>
 
 BOOST_AUTO_TEST_SUITE(Environment)
@@ -62,3 +63,5 @@ MOCK_CLASS(mock_class) {};
 //		boost::function1( fp );
 
 BOOST_AUTO_TEST_SUITE_END()
+
+*/

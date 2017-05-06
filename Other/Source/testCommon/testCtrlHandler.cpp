@@ -18,6 +18,8 @@
 #include "stdafx.h"
 #include "../common/CtrlHandler.cpp"
 
+#include <iostream>
+
 static volatile unsigned int ctrlCCounter = 0;
 
 static BOOL WINAPI mockCtrlHandler(_In_ DWORD ctrlType) {
@@ -38,56 +40,44 @@ public:
 	}
 };
 
-BOOST_AUTO_TEST_SUITE( CtrlHandler )
+class CtrlHandlers : public ::testing::Test {
+protected:
+	virtual void SetUp() { 
+		// A bit difficult
 
-BOOST_AUTO_TEST_CASE ( CtrlHandler, *boost::unit_test::disabled() ) {
+		ctrlCCounter = 0;
 
-	// A bit difficult
-	// shut down installed CtrlHandler
-	pApps::CtrlCHandler.activate ( false );
+		// shut down installed CtrlHandler
+		pApps::CtrlCHandler.activate(false);
 
-	// mocked ctor invokes activate again
+		// mocked ctor invokes activate again
+		// so deactivate again
+		mockCtrlHandler_.activate(FALSE);
+
+		// install mockCtrlHandler as CtrlHandler
+		mockCtrlHandler_.activate(TRUE + 2);
+	}
+
+	virtual void TearDown() {
+		// deactivate mock
+		mockCtrlHandler_.activate(FALSE);
+		// reactivate CtrlHandler
+		pApps::CtrlCHandler.activate(true);
+	}
+
 	mockCtrlHandlerManager mockCtrlHandler_;
-	// so deactivate again
-	mockCtrlHandler_.activate ( FALSE );
+};
 
-	// install mockCtrlHandler as CtrlHandler
-	mockCtrlHandler_.activate ( TRUE + 2 );
-
-	BOOST_CHECK ( ctrlCCounter == 0 );
-	GenerateConsoleCtrlEvent ( 0, 0 ); // generate CtrlC
-	Sleep ( 1 );                       // yield to allow processing
-	BOOST_CHECK ( ctrlCCounter == 1 );
-
-	// deactivate mock
-	mockCtrlHandler_.activate ( FALSE );
-	// reactivate CtrlHandler
-	pApps::CtrlCHandler.activate ( true );
+TEST_F(CtrlHandlers, CtrlCHandler) {
+	EXPECT_EQ(0, ctrlCCounter);
+	GenerateConsoleCtrlEvent(0, 0); // generate CtrlC
+	Sleep(1);                       // yield to allow processing
+	ASSERT_EQ(1, ctrlCCounter);
 }
 
-BOOST_AUTO_TEST_CASE( CtrlBreakHandler, *boost::unit_test::disabled() ) {
-
-	// A bit difficult
-	// shut down installed CtrlHandler
-	pApps::CtrlCHandler.activate( false );
-
-	// mocked ctor invokes activate again
-	mockCtrlHandlerManager mockCtrlHandler_;
-	// so deactivate again
-	mockCtrlHandler_.activate( FALSE );
-
-	// install mockCtrlHandler as CtrlHandler
-	mockCtrlHandler_.activate( TRUE + 2 );
-
-	BOOST_CHECK( ctrlCCounter == 0 );
-	GenerateConsoleCtrlEvent( 1, 0 ); // generate CtrlBreak
-	Sleep( 1 );                      // yield to allow processing
-	BOOST_CHECK( ctrlCCounter == 1 );
-
-	// deactivate mock
-	mockCtrlHandler_.activate( FALSE );
-	// reactivate CtrlHandler
-	pApps::CtrlCHandler.activate( true );
+TEST_F(CtrlHandlers, CtrlBreakHandler) {
+	EXPECT_EQ(0, ctrlCCounter);
+	GenerateConsoleCtrlEvent(1, 0); // generate CtrlBreak
+	Sleep(1);                       // yield to allow processing
+	ASSERT_EQ(1, ctrlCCounter);
 }
-
-BOOST_AUTO_TEST_SUITE_END()
