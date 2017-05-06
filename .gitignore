@@ -5,7 +5,8 @@
 
 # Libraries
 /Other/Source/Libraries/boost/boost_1_64_0
-/Other/Source/Libraries/googletest/googlemock/msvc/141
+/Other/Source/Libraries/googletest/googlemock/msvc/141/Win32
+/Other/Source/Libraries/googletest/googlemock/msvc/141/x64
 
 # PortableApps.com
 /Autorun.inf
