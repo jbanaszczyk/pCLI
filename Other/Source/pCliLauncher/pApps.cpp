@@ -356,7 +356,7 @@ namespace pApps {
 	*****************************************************************************/
 	std::tstring quote(const boost::filesystem::path& str) {
 		std::tstring retVal = unquote(str._tstring());
-		if ((retVal.length() > 0) && (retVal.find(_T(' ')) != std::string::npos)) {
+		if ((!retVal.empty() ) && (retVal.find(_T(' ')) != std::string::npos)) {
 			return _T("\"") + retVal + _T("\"");
 		}
 		return retVal;
@@ -371,7 +371,7 @@ namespace pApps {
 	std::tstring quote(std::tstring str) {
 		// boost:io:quote has no wchar_t support
 		str = unquote(str);
-		if ((str.length() > 0) && (str.find(_T(' ')) != std::string::npos)) {
+		if ((!str.empty() ) && (str.find(_T(' ')) != std::string::npos)) {
 			return _T("\"") + str + _T("\"");
 		}
 		return str;
@@ -630,15 +630,15 @@ pWait = tpWait::pWait_Wait;
 			pApps::abend(boost::_tformat(_T("Cann't execute %1%: %2%")) % cmdName % execError.get(), 1);
 		}
 
-		if (tpWait::pWait_Wait == pWait && nullptr != processInfo.hProcess) {
+		if (tpWait::pWait_Wait == pWait && processInfo.hProcess !=  nullptr ) {
 			WaitForSingleObject(processInfo.hProcess, INFINITE);
 		}
 
-		if (nullptr != processInfo.hProcess) {
+		if (processInfo.hProcess != nullptr ) {
 			CloseHandle(processInfo.hProcess);
 			processInfo.hProcess = nullptr;
 		}
-		if (nullptr != processInfo.hThread) {
+		if (processInfo.hThread != nullptr ) {
 			CloseHandle(processInfo.hThread);
 			processInfo.hThread = nullptr;
 		}

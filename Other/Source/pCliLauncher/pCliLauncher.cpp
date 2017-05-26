@@ -204,7 +204,7 @@ void parseCmdLine(const std::tstring& cmdLine, boost::optional<std::tstring>& co
 	int argc;
 	argv = CommandLineToArgvW((_T("dummy.exe ") + cmdLine).c_str(), &argc); // there is a difference in parsing argv0 and the rest
 
-	if (nullptr == argv) {
+	if (argv == nullptr ) {
 		return;
 	}
 

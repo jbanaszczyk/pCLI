@@ -21,6 +21,7 @@
 #include <iostream>
 
 static volatile unsigned int ctrlCCounter = 0;
+const DWORD sleepTime = 3;
 
 static BOOL WINAPI mockCtrlHandler(_In_ DWORD ctrlType) {
 	++ctrlCCounter;
@@ -52,32 +53,32 @@ protected:
 
 		// mocked ctor invokes activate again
 		// so deactivate again
-		mockCtrlHandler_.activate(FALSE);
+		mockCtrlHandler.activate(FALSE);
 
 		// install mockCtrlHandler as CtrlHandler
-		mockCtrlHandler_.activate(TRUE + 2);
+		mockCtrlHandler.activate(TRUE + 2);
 	}
 
 	virtual void TearDown() {
 		// deactivate mock
-		mockCtrlHandler_.activate(FALSE);
+		mockCtrlHandler.activate(FALSE);
 		// reactivate CtrlHandler
 		pApps::CtrlCHandler.activate(true);
 	}
 
-	mockCtrlHandlerManager mockCtrlHandler_;
+	mockCtrlHandlerManager mockCtrlHandler;
 };
 
 TEST_F(CtrlHandlers, CtrlCHandler) {
 	EXPECT_EQ(0, ctrlCCounter);
 	GenerateConsoleCtrlEvent(0, 0); // generate CtrlC
-	Sleep(1);                       // yield to allow processing
+	Sleep(sleepTime);               // yield to allow processing
 	ASSERT_EQ(1, ctrlCCounter);
 }
 
 TEST_F(CtrlHandlers, CtrlBreakHandler) {
 	EXPECT_EQ(0, ctrlCCounter);
 	GenerateConsoleCtrlEvent(1, 0); // generate CtrlBreak
-	Sleep(1);                       // yield to allow processing
+	Sleep(sleepTime);               // yield to allow processing
 	ASSERT_EQ(1, ctrlCCounter);
 }

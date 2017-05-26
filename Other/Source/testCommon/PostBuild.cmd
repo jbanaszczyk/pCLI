@@ -14,7 +14,7 @@ REM copy %1 %2..\..\ >nul
 
 REM execute tests
 
-"%1" --gtest_filter=-CtrlHandlers.*
+REM "%1" --gtest_filter=-CtrlHandlers.*
 
 goto :Finish
 

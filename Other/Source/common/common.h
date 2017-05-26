@@ -80,6 +80,8 @@
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 
+using namespace std::string_literals;
+
 #ifdef _INC_TCHAR
 	namespace std {
 		typedef std::basic_string<TCHAR>   tstring;

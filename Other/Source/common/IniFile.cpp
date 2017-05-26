@@ -67,7 +67,7 @@ namespace pApps {
 		while (true) {
 			buf.reset(new (std::nothrow) TCHAR[bufSize]);
 
-			if (nullptr == buf) {
+			if (buf == nullptr ) {
 				break;
 			}
 			errno = 0;
@@ -89,7 +89,7 @@ namespace pApps {
 			}
 			bufSize = maxBufSize / 2 >= bufSize ? 2 * bufSize : maxBufSize;
 		}
-		if (nullptr == buf) {
+		if (buf == nullptr ) {
 			return boost::none;
 		}
 		if (_T('\0') == buf.get()) {
@@ -240,7 +240,7 @@ namespace pApps {
 		size_t retVal = 0;
 		for (auto it = begin(_values); end(_values) != it; ++it) {
 			if (it->second.isModified()) {
-				if (WritePrivateProfileString(it->first.first.c_str(), it->first.second.c_str(), it->second.getValue().length() > 0 ? it->second.getValue().c_str() : nullptr, _iniName.c_str())) {
+				if (WritePrivateProfileString(it->first.first.c_str(), it->first.second.c_str(), ! it->second.getValue().empty() ? it->second.getValue().c_str() : nullptr, _iniName.c_str())) {
 					it->second.propagate();
 					++retVal;
 				}
@@ -256,7 +256,7 @@ namespace pApps {
 			return boost::none;
 		}
 		std::tstring retVal = ref->second.getValue();
-		if (0 == retVal.length()) {
+		if (retVal.empty()) {
 			return boost::none;
 		}
 		return retVal;
@@ -269,7 +269,7 @@ namespace pApps {
 			return boost::none;
 		}
 		std::tstring retVal = ref->second.getDefault();
-		if (0 == retVal.length()) {
+		if (retVal.empty()) {
 			return boost::none;
 		}
 		return retVal;
@@ -282,7 +282,7 @@ namespace pApps {
 			return _T("");
 		}
 		std::tstring retVal = ref->second.getValue();
-		if (0 == retVal.length()) {
+		if (retVal.empty()) {
 			retVal = ref->second.getDefault();
 		}
 		return retVal;

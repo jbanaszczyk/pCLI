@@ -58,7 +58,7 @@
 namespace pApps {
 FARPROC SysPidInfo::tGetProcAddress(const HMODULE hModule, const LPCSTR lpProcName) const {
 	FARPROC retVal = GetProcAddress(hModule, lpProcName);
-	if (nullptr == retVal) {
+	if (retVal == nullptr ) {
 		size_t len = strlen(lpProcName);
 		std::unique_ptr<char[]> tName(new (std::nothrow) char[len + 2]);
 		if (tName) {
@@ -226,7 +226,7 @@ boost::optional<boost::filesystem::path> SysPidInfo::getExeName(const DWORD aPid
 		return boost::none;
 	}
 	HANDLE hProcess = _fnOpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, aPid);
-	if (nullptr == hProcess) {
+	if (hProcess == nullptr  ) {
 		return boost::none;
 	}
 	HMODULE hMod;
@@ -276,7 +276,7 @@ boost::optional<boost::filesystem::path> SysPidInfo::getDllName(const std::tstri
 		return boost::none;
 	}
 	HANDLE hProcess = _fnOpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, aPid);
-	if (nullptr == hProcess) {
+	if (hProcess == nullptr ) {
 		return boost::none;
 	}
 	boost::optional<boost::filesystem::path> retVal = boost::none;
@@ -318,7 +318,7 @@ bool SysPidInfo::isWow64(const DWORD aPid) const {
 		return false;
 	}
 	HANDLE hProcess = _fnOpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, aPid);
-	if (nullptr == hProcess) {
+	if (hProcess == nullptr  ) {
 		return false;
 	}
 	BOOL isWow64 = FALSE;
@@ -338,7 +338,7 @@ DWORD SysPidInfo::GetPriorityClass(const DWORD aPid) const {
 		return NORMAL_PRIORITY_CLASS;
 	}
 	HANDLE hProcess = _fnOpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, aPid);
-	if (nullptr == hProcess) {
+	if (hProcess == nullptr  ) {
 		return NORMAL_PRIORITY_CLASS;
 	}
 	DWORD retVal = _fnGetPriorityClass(hProcess);
@@ -391,7 +391,7 @@ bool  SysPidInfo::getCommandLine(const DWORD aPid, std::vector<std::tstring>& ar
 		return false;
 	}
 	HANDLE hProcess = _fnOpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, aPid);
-	if (nullptr == hProcess) {
+	if (hProcess == nullptr ) {
 		return false;
 	}
 	bool retVal = false;

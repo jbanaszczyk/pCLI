@@ -32,7 +32,7 @@ namespace pApps {
 		if ( err )
 			return "";
 		char *chars = new ( std::nothrow ) char[ pReturnValue ];
-		if ( nullptr == chars )
+		if (chars  == nullptr )
 			return "";
 		err = wcsrtombs_s ( &pReturnValue, chars, pReturnValue, &wstr, _TRUNCATE , &mbstate );
 		if ( err )
