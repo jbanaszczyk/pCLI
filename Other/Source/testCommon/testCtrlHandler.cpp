@@ -18,19 +18,17 @@
 #include "stdafx.h"
 #include "../common/CtrlHandler.cpp"
 
-#include <iostream>
-
 static volatile unsigned int ctrlCCounter = 0;
 const DWORD sleepTime = 3;
 
-static BOOL WINAPI mockCtrlHandler(_In_ DWORD ctrlType) {
+static BOOL WINAPI mockCtrlHandler(DWORD ctrlType) {
 	++ctrlCCounter;
 	return TRUE;
 }
 
-class mockCtrlHandlerManager : public pApps::CtrlHandlerManager {
+class mockCtrlHandlerManager : public p_apps::CtrlHandlerManager {
 public:
-	BOOL WINAPI vSetConsoleCtrlHandler(_In_opt_ PHANDLER_ROUTINE HandlerRoutine, _In_ BOOL Add) override {
+	BOOL WINAPI vSetConsoleCtrlHandler(PHANDLER_ROUTINE HandlerRoutine, BOOL Add) override {
 		if (Add < 2) {
 			return SetConsoleCtrlHandler(HandlerRoutine, Add);
 		}
@@ -49,7 +47,7 @@ protected:
 		ctrlCCounter = 0;
 
 		// shut down installed CtrlHandler
-		pApps::CtrlCHandler.activate(false);
+		p_apps::ctrlCHandler.activate(false);
 
 		// mocked ctor invokes activate again
 		// so deactivate again
@@ -63,7 +61,7 @@ protected:
 		// deactivate mock
 		mockCtrlHandler.activate(FALSE);
 		// reactivate CtrlHandler
-		pApps::CtrlCHandler.activate(true);
+		p_apps::ctrlCHandler.activate(true);
 	}
 
 	mockCtrlHandlerManager mockCtrlHandler;

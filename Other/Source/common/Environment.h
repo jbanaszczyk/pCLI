@@ -22,7 +22,7 @@
 
 #include "./common.h"
 
-namespace pApps {
+namespace p_apps {
 	class Environment {
 	private:
 		template<typename T>
@@ -131,7 +131,6 @@ namespace pApps {
 			TCHAR *ref = result.get();
 
 			for (const auto& it : mEnv) {
-				TCHAR *xyz = ref;
 				size_t thisLen = it.first.length();
 				wcsncpy_s(ref, len, it.first.c_str(), thisLen);
 				ref += thisLen;
@@ -145,7 +144,7 @@ namespace pApps {
 				*(ref++) = _T('\0');
 				--len;
 			}
-			*(ref++) = _T('\0');
+			*ref = _T('\0');
 			--len;
 			assert(!len);
 		}

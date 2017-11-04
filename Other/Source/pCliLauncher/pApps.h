@@ -13,7 +13,7 @@
 #include "../common/Environment.h"
 #include "../common/CtrlHandler.h"
 
-namespace pApps {
+namespace p_apps {
 	/******************************************************************************
 	 *
 	 * Required: VER_PRODUCTNAME_STR
@@ -121,7 +121,7 @@ namespace pApps {
 	 *   In all cases findPAppsDir will point to <ROOT>\PortableApps\TccLePortable
 	 *
 	 *****************************************************************************/
-	boost::optional<boost::filesystem::path> findPAppsDir( const boost::filesystem::path& exePath, const boost::filesystem::path& argv0, pApps::Environment& mEnv );
+	boost::optional<boost::filesystem::path> findPAppsDir( const boost::filesystem::path& exePath, const boost::filesystem::path& argv0, p_apps::Environment& mEnv );
 
 	/******************************************************************************
 	*
@@ -131,7 +131,7 @@ namespace pApps {
 	*   env_PAppsC tries to setup them even if PortableApps paltform was not started
 	*
 	*****************************************************************************/
-	void env_PAppsC(const boost::optional<boost::filesystem::path>& exePath, pApps::Environment& mEnv);
+	void env_PAppsC(const boost::optional<boost::filesystem::path>& exePath, p_apps::Environment& mEnv);
 
 	/******************************************************************************
 	 *
@@ -248,6 +248,6 @@ namespace pApps {
 	 *****************************************************************************/
 	enum class tpWait { pWait_Auto, pWait_Wait, pWait_NoWait };
 
-	boost::optional<DWORD> launch( tpWait pWait, const std::tstring& cmdName, const std::vector<std::tstring>& cmdLine, const pApps::Environment& cmdEnvironment, boost::filesystem::path cwd );
+	boost::optional<DWORD> launch( tpWait pWait, const std::tstring& cmdName, const std::vector<std::tstring>& cmdLine, const p_apps::Environment& cmdEnvironment, boost::filesystem::path cwd );
 
 }

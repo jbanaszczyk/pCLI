@@ -8,17 +8,17 @@
 #include "stdafx.h"
 #include "CtrlHandler.h"
 
-namespace pApps {
+namespace p_apps {
 
 	//************************************
 	// Variable:  bool CtrlHandlerManager::DebugBeep_
 	// Brief:     Has to be static, because is referenced by static method
 	//************************************
-	bool CtrlHandlerManager::DebugBeep = false;
+	bool CtrlHandlerManager::debugBeep = false;
 
 	//************************************
 	// Variable:  CtrlHandlerManager::DebugBeep_
 	// Brief:     Has to be static, because is referenced by static method
 	//************************************
-	CtrlHandlerManager CtrlCHandler;
+	CtrlHandlerManager ctrlCHandler;
 }

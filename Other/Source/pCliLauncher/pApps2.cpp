@@ -8,9 +8,9 @@
 #include "stdafx.h"
 
 #include "./pApps2.h"
+#include "LauncherVersion.h"
 
-
-namespace pApps {
+namespace p_apps {
 
 	static const std::tstring PORTABLE_APPS;
 	static const std::tstring PORTABLE_APPS_INI;

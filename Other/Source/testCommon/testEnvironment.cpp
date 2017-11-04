@@ -17,14 +17,14 @@ using namespace ::testing;
 
 TEST (Environment, ctor) {
     const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
-    pApps::Environment env (envp);
+    p_apps::Environment env (envp);
 
     ASSERT_EQ (env.size (), 2);
 }
 
 TEST (Environment, exists) {
     const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
-    pApps::Environment env (envp);
+    p_apps::Environment env (envp);
 
     ASSERT_FALSE (env.exists (_T ("")));
     ASSERT_TRUE (env.exists (_T ("arg1")));
@@ -34,7 +34,7 @@ TEST (Environment, exists) {
 
 TEST (Environment, get) {
     const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
-    pApps::Environment env (envp);
+    p_apps::Environment env (envp);
 
     ASSERT_EQ (env.size (), 2);
 
@@ -48,28 +48,28 @@ TEST (Environment, get) {
 
 TEST (Environment, setupErr01) {
     const TCHAR *const envp[] = {_T ("arg1=val1"), _T (""), _T ("arg2=val2"), _T ("")};
-    pApps::Environment env (envp);
+    p_apps::Environment env (envp);
 
     ASSERT_EQ (env.size (), 1);
 }
 
 TEST (Environment, setupErr02) {
     const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("dummy="), _T ("arg2=val2"), _T ("")};
-    pApps::Environment env (envp);
+    p_apps::Environment env (envp);
 
     ASSERT_EQ (env.size (), 2);
 }
 
 TEST (Environment, setupErr03) {
     const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("=dummy"), _T ("arg2=val2"), _T ("")};
-    pApps::Environment env (envp);
+    p_apps::Environment env (envp);
 
     ASSERT_EQ (env.size (), 2);
 }
 
 TEST (Environment, erase01) {
     const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
-    pApps::Environment env (envp);
+    p_apps::Environment env (envp);
 
     ASSERT_EQ (env.size (), 2);
     env.erase (_T ("arg1"));
@@ -80,7 +80,7 @@ TEST (Environment, erase01) {
 
 TEST (Environment, erase02) {
     const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
-    pApps::Environment env (envp);
+    p_apps::Environment env (envp);
 
     ASSERT_EQ (env.size (), 2);
     env.erase (_T ("arg2"));
@@ -89,7 +89,7 @@ TEST (Environment, erase02) {
 
 TEST (Environment, erase03) {
     const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
-    pApps::Environment env (envp);
+    p_apps::Environment env (envp);
 
     ASSERT_EQ (env.size (), 2);
     env.erase (_T ("arg3"));
@@ -98,7 +98,7 @@ TEST (Environment, erase03) {
 
 TEST (Environment, erase04) {
     const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
-    pApps::Environment env (envp);
+    p_apps::Environment env (envp);
 
     ASSERT_EQ (env.size (), 2);
     env.erase (_T (""));
@@ -107,7 +107,7 @@ TEST (Environment, erase04) {
 
 TEST (Environment, set01) {
     const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
-    pApps::Environment env (envp);
+    p_apps::Environment env (envp);
 
     env.set (_T ("arg1"), _T ("val1"));
     ASSERT_EQ (env.size (), 2);
@@ -117,7 +117,7 @@ TEST (Environment, set01) {
 
 TEST (Environment, set02) {
     const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
-    pApps::Environment env (envp);
+    p_apps::Environment env (envp);
 
     env.set (_T ("arg2"), _T ("val2"));
     ASSERT_EQ (env.size (), 2);
@@ -127,7 +127,7 @@ TEST (Environment, set02) {
 
 TEST (Environment, set03) {
     const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
-    pApps::Environment env (envp);
+    p_apps::Environment env (envp);
 
     env.set (_T ("arg3"), _T ("val3"));
     ASSERT_EQ (env.size (), 3);
@@ -138,7 +138,7 @@ TEST (Environment, set03) {
 
 TEST (Environment, set04) {
     const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
-    pApps::Environment env (envp);
+    p_apps::Environment env (envp);
 
     env.set (_T ("arg1"), _T (""));
     ASSERT_EQ (env.size (), 1);
@@ -147,7 +147,7 @@ TEST (Environment, set04) {
 
 TEST (Environment, set05) {
     const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
-    pApps::Environment env (envp);
+    p_apps::Environment env (envp);
 
     env.set (_T (""), _T ("val1"));
     ASSERT_EQ (env.size (), 2);
@@ -155,7 +155,7 @@ TEST (Environment, set05) {
 
 TEST (Environment, setBak01) {
     const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
-    pApps::Environment env (envp);
+    p_apps::Environment env (envp);
 
     env.set (_T ("arg1"), _T ("val1"), _T ("arg1.bak"));
     ASSERT_EQ (env.size (), 3);
@@ -165,7 +165,7 @@ TEST (Environment, setBak01) {
 
 TEST (Environment, setBak02) {
     const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
-    pApps::Environment env (envp);
+    p_apps::Environment env (envp);
 
     env.set (_T ("arg1"), _T ("val1"), _T ("arg2"));
     ASSERT_EQ (env.size (), 2);
@@ -175,7 +175,7 @@ TEST (Environment, setBak02) {
 
 TEST (Environment, setBak03) {
     const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
-    pApps::Environment env (envp);
+    p_apps::Environment env (envp);
 
     env.set (_T ("arg3"), _T ("val3"), _T ("arg2"));
     ASSERT_EQ (env.size (), 2);
@@ -185,7 +185,7 @@ TEST (Environment, setBak03) {
 
 TEST (Environment, setBak04) {
     const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
-    pApps::Environment env (envp);
+    p_apps::Environment env (envp);
 
     env.set (_T (""), _T ("val"), _T ("arg1.bak"));
     ASSERT_EQ (env.size (), 2);
@@ -194,7 +194,7 @@ TEST (Environment, setBak04) {
 
 TEST (Environment, case01) {
     const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
-    pApps::Environment env (envp);
+    p_apps::Environment env (envp);
 
     ASSERT_TRUE (env.exists (_T ("ArG1")));
     ASSERT_TRUE (env.exists (_T ("aRg2")));
@@ -202,7 +202,7 @@ TEST (Environment, case01) {
 
 TEST (Environment, case02) {
     const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
-    pApps::Environment env (envp);
+    p_apps::Environment env (envp);
 
     ASSERT_EQ (env.get (_T ("ArG1")), _T ("val1"));
     ASSERT_EQ (env.get (_T ("aRg2")), _T ("val2"));
@@ -210,7 +210,7 @@ TEST (Environment, case02) {
 
 TEST (Environment, case03) {
     const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
-    pApps::Environment env (envp);
+    p_apps::Environment env (envp);
 
     ASSERT_EQ (env.size (), 2);
     env.erase (_T ("ArG1"));
@@ -221,7 +221,7 @@ TEST (Environment, case03) {
 
 TEST (Environment, case04) {
     const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
-    pApps::Environment env (envp);
+    p_apps::Environment env (envp);
 
     env.set (_T ("ArG1"), _T ("VaL1"));
     ASSERT_EQ (env.size (), 2);
@@ -266,7 +266,7 @@ TEST (Environment, expandEnv) {
     EXPECT_CALL (mock, mockExpandEnvironmentStrings (_, _, static_cast<DWORD>(sizeof expanded)))
         .WillOnce (cpy2arg1 (expanded));
 
-    auto retVal = pApps::Environment::expandEnv (std::tstring{argument}, mockExpandEnvironmentStrings);
+    auto retVal = p_apps::Environment::expandEnv (std::tstring{argument}, mockExpandEnvironmentStrings);
     EXPECT_EQ (retVal, expanded);
 }
 
@@ -280,7 +280,7 @@ TEST (Environment, expandEnvFail) {
         .WillByDefault (Return (static_cast<DWORD>(0)));
     EXPECT_CALL (mock, mockExpandEnvironmentStrings (_, nullptr, 0));
 
-    auto retVal = pApps::Environment::expandEnv (std::tstring{argument}, mockExpandEnvironmentStrings);
+    auto retVal = p_apps::Environment::expandEnv (std::tstring{argument}, mockExpandEnvironmentStrings);
     EXPECT_EQ (retVal, argument);
 
 }

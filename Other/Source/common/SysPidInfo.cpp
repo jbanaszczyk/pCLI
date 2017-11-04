@@ -55,7 +55,7 @@
  *     method fails if called from 32-bit app to query 64-bit process
  *
  *****************************************************************************/
-namespace pApps {
+namespace p_apps {
 FARPROC SysPidInfo::tGetProcAddress(const HMODULE hModule, const LPCSTR lpProcName) const {
 	FARPROC retVal = GetProcAddress(hModule, lpProcName);
 	if (retVal == nullptr ) {

@@ -12,7 +12,7 @@
 
 #include <windows.h>
 
-namespace pApps {
+namespace p_apps {
 	/******************************************************************************
 	 *
 	 * Required: VER_PRODUCTNAME_STR
@@ -149,7 +149,7 @@ namespace pApps {
 		} else
 #endif
 		{
-			boost::optional<boost::filesystem::path> myName = pApps::_sysPidInfo.getExeName();
+			boost::optional<boost::filesystem::path> myName = p_apps::_sysPidInfo.getExeName();
 			if (myName) {
 				argv0 = myName.get();
 			} else {
@@ -205,7 +205,7 @@ namespace pApps {
 	*   env_PAppsC tries to setup them even if PortableApps paltform was not started
 	*
 	*****************************************************************************/
-	void env_PAppsC(const boost::optional<boost::filesystem::path>& exePath, pApps::Environment& mEnv) {
+	void env_PAppsC(const boost::optional<boost::filesystem::path>& exePath, p_apps::Environment& mEnv) {
 		if (mEnv.exists(_T("PortableApps.comLanguageName")) || mEnv.exists(_T("PortableApps.comLanguageName_INTERNAL"))) {
 			return;						// executed from pApps platform, nothing to do
 		}
@@ -504,9 +504,9 @@ namespace pApps {
 	 *****************************************************************************/
 
 	void abend(const boost::_tformat msg, int errCode) {
-		if (pApps::_sysPidInfo.hasConsole()) {
+		if (p_apps::_sysPidInfo.hasConsole()) {
 			std::_tcerr << msg << std::endl;
-			if (pApps::_sysPidInfo.ownsConsole()) {
+			if (p_apps::_sysPidInfo.ownsConsole()) {
 				std::_tcerr << _T("Press [ENTER] key to exit.") << std::endl;
 				std::_tcin.get();
 			}
@@ -555,15 +555,15 @@ namespace pApps {
 	/*****************************************************************************
 	* like _texecve, but ComEmu / parent cmd aware. And more.
 	*****************************************************************************/
-	boost::optional<DWORD> launch(tpWait pWait, const std::tstring& cmdName, const std::vector<std::tstring>& cmdLine, const pApps::Environment& cmdEnvironment, boost::filesystem::path cwd) {
+	boost::optional<DWORD> launch(tpWait pWait, const std::tstring& cmdName, const std::vector<std::tstring>& cmdLine, const p_apps::Environment& cmdEnvironment, boost::filesystem::path cwd) {
 		if (tpWait::pWait_Auto == pWait) {
-			if (!pApps::_sysPidInfo.ownsConsole()) {
+			if (!p_apps::_sysPidInfo.ownsConsole()) {
 				pWait = tpWait::pWait_Wait;
 			}
 			if (tpWait::pWait_Auto == pWait) {
-				boost::optional<boost::filesystem::path> conEmu = pApps::_sysPidInfo.getDllName(_T("ConEmuHk.dll"));
+				boost::optional<boost::filesystem::path> conEmu = p_apps::_sysPidInfo.getDllName(_T("ConEmuHk.dll"));
 				if (!conEmu) {
-					conEmu = pApps::_sysPidInfo.getDllName(_T("ConEmuHk64.dll"));
+					conEmu = p_apps::_sysPidInfo.getDllName(_T("ConEmuHk64.dll"));
 				}
 				if (conEmu) {
 					pWait = tpWait::pWait_Wait;
@@ -601,7 +601,7 @@ pWait = tpWait::pWait_Wait;
 		STARTUPINFO startupInfo;
 		ZeroMemory(&startupInfo, sizeof startupInfo);
 		STARTUPINFO myStartupInfoPtr;
-		if (pApps::_sysPidInfo.GetStartupInfo(&myStartupInfoPtr)) {
+		if (p_apps::_sysPidInfo.GetStartupInfo(&myStartupInfoPtr)) {
 			CopyMemory(&startupInfo, &myStartupInfoPtr, sizeof startupInfo);
 		}
 		startupInfo.lpTitle = nullptr;
@@ -613,21 +613,21 @@ pWait = tpWait::pWait_Wait;
 		processInfo.hProcess = nullptr;
 		processInfo.hThread = nullptr;
 		//-------------------------------------------- go
-		BOOL ok = pApps::_sysPidInfo.CreateProcess(cmdName.c_str(), commandLine.get(), nullptr, nullptr, FALSE, creationFlags, env.get(), cwd.c_str(), &startupInfo, &processInfo);
+		BOOL ok = p_apps::_sysPidInfo.CreateProcess(cmdName.c_str(), commandLine.get(), nullptr, nullptr, FALSE, creationFlags, env.get(), cwd.c_str(), &startupInfo, &processInfo);
 		env.reset();
 		commandLine.reset();
 		if (!ok) {
-			pApps::abend(boost::_tformat(_T("Cann't execute %1%: %2%")) % cmdName % lastErrorMsg(), 1);
+			p_apps::abend(boost::_tformat(_T("Cann't execute %1%: %2%")) % cmdName % lastErrorMsg(), 1);
 		}
-		pApps::_sysPidInfo.SetPriorityClass(processInfo.hProcess, pApps::_sysPidInfo.GetPriorityClass());
+		p_apps::_sysPidInfo.SetPriorityClass(processInfo.hProcess, p_apps::_sysPidInfo.GetPriorityClass());
 
 		boost::optional<std::tstring> execError;
-		if (!pApps::_sysPidInfo.ResumeThread(processInfo.hThread)) {
+		if (!p_apps::_sysPidInfo.ResumeThread(processInfo.hThread)) {
 			execError = lastErrorMsg();
 		}
 
 		if (execError) {
-			pApps::abend(boost::_tformat(_T("Cann't execute %1%: %2%")) % cmdName % execError.get(), 1);
+			p_apps::abend(boost::_tformat(_T("Cann't execute %1%: %2%")) % cmdName % execError.get(), 1);
 		}
 
 		if (tpWait::pWait_Wait == pWait && processInfo.hProcess !=  nullptr ) {
