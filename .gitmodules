@@ -1,3 +1,5 @@
-[submodule "Other/Source/Libraries/turtle"]
-	path = Other/Source/Libraries/turtle
-	url = https://github.com/mat007/turtle.git
+[submodule "Other/Source/Libraries/googletest"]
+	path = Other/Source/Libraries/googletest
+	url = https://github.com/google/googletest.git
+	ignore = dirty
+	

@@ -26,13 +26,13 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="testCtrlHandler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="testEnvironment.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="_Extras.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

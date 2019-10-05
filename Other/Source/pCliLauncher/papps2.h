@@ -8,11 +8,10 @@
 #pragma once
 
 #include "../common/common.h"
-#include "LauncherVersion.h"
 
 // Some strings
 
-namespace pApps {
+namespace p_apps {
 
 	extern const std::tstring PORTABLE_APPS;
 	extern const std::tstring PORTABLE_APPS_INI;

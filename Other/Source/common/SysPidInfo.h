@@ -66,7 +66,7 @@
  *****************************************************************************/
 #include "./common.h"
 
-namespace pApps {
+namespace p_apps {
 
 	class SysPidInfo {
 		private:

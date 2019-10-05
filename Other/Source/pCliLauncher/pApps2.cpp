@@ -8,9 +8,9 @@
 #include "stdafx.h"
 
 #include "./pApps2.h"
+#include "LauncherVersion.h"
 
-
-namespace pApps {
+namespace p_apps {
 
 	static const std::tstring PORTABLE_APPS;
 	static const std::tstring PORTABLE_APPS_INI;
@@ -32,7 +32,7 @@ namespace pApps {
 		if ( err )
 			return "";
 		char *chars = new ( std::nothrow ) char[ pReturnValue ];
-		if ( nullptr == chars )
+		if (chars  == nullptr )
 			return "";
 		err = wcsrtombs_s ( &pReturnValue, chars, pReturnValue, &wstr, _TRUNCATE , &mbstate );
 		if ( err )

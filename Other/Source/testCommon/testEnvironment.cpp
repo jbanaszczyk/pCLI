@@ -7,150 +7,280 @@
 
 #include "stdafx.h"
 
-/*
-#include <boost/algorithm/string.hpp>
+#include <functional>
 #include <string>
-
-#include <boost/test/unit_test.hpp>
-#include <turtle/mock.hpp>
+#include <functional>
 
 #include "../common/Environment.h"
 
-#include <functional>
+using namespace ::testing;
 
+TEST (Environment, ctor) {
+    const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
+    p_apps::Environment env (envp);
 
-BOOST_AUTO_TEST_SUITE(Environment)
-
-BOOST_AUTO_TEST_CASE(ctor) {
-	pApps::Environment env;
-	env.set(_T("key"), _T("val"));
-
+    ASSERT_EQ (env.size (), 2);
 }
 
-DWORD WINAPI Mock_ExpandEnvironmentStrings__________(LPCTSTR lpSrc, LPTSTR lpDst, DWORD nSize) {
-	std::tstring src(lpSrc);
-	boost::to_upper(src);
+TEST (Environment, exists) {
+    const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
+    p_apps::Environment env (envp);
 
-	std::tstring retVal(lpSrc);
-
-	if (retVal.front() == _T('%') && retVal.back() == _T('%') && retVal.length() >= 2) {
-		retVal.erase(retVal.end() - 1);
-		retVal.erase(retVal.begin());
-	}
-
-	return 0;
+    ASSERT_FALSE (env.exists (_T ("")));
+    ASSERT_TRUE (env.exists (_T ("arg1")));
+    ASSERT_TRUE (env.exists (_T ("arg2")));
+    ASSERT_FALSE (env.exists (_T ("dummy")));
 }
 
+TEST (Environment, get) {
+    const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
+    p_apps::Environment env (envp);
 
+    ASSERT_EQ (env.size (), 2);
 
+    ASSERT_EQ (env.get (_T ("")), _T (""));
+    ASSERT_EQ (env.get (_T ("arg1")), _T ("val1"));
+    ASSERT_EQ (env.get (_T ("arg2")), _T ("val2"));
+    ASSERT_EQ (env.get (_T ("dummy")), _T (""));
 
-
-
-
-
-
-
-
-
-
-
-
-
-DWORD WINAPI Mock_ExpandEnvironmentStrings(LPCTSTR lpSrc, LPTSTR lpDst, DWORD nSize) {
-	std::cout << "Mocking" << std::endl;
-	return 0;
+    ASSERT_EQ (env.size (), 2);
 }
 
+TEST (Environment, setupErr01) {
+    const TCHAR *const envp[] = {_T ("arg1=val1"), _T (""), _T ("arg2=val2"), _T ("")};
+    p_apps::Environment env (envp);
 
-class MockedEnvironment {
+    ASSERT_EQ (env.size (), 1);
+}
+
+TEST (Environment, setupErr02) {
+    const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("dummy="), _T ("arg2=val2"), _T ("")};
+    p_apps::Environment env (envp);
+
+    ASSERT_EQ (env.size (), 2);
+}
+
+TEST (Environment, setupErr03) {
+    const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("=dummy"), _T ("arg2=val2"), _T ("")};
+    p_apps::Environment env (envp);
+
+    ASSERT_EQ (env.size (), 2);
+}
+
+TEST (Environment, erase01) {
+    const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
+    p_apps::Environment env (envp);
+
+    ASSERT_EQ (env.size (), 2);
+    env.erase (_T ("arg1"));
+    ASSERT_EQ (env.size (), 1);
+    env.erase (_T ("arg2"));
+    ASSERT_EQ (env.size (), 0);
+}
+
+TEST (Environment, erase02) {
+    const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
+    p_apps::Environment env (envp);
+
+    ASSERT_EQ (env.size (), 2);
+    env.erase (_T ("arg2"));
+    ASSERT_EQ (env.size (), 1);
+}
+
+TEST (Environment, erase03) {
+    const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
+    p_apps::Environment env (envp);
+
+    ASSERT_EQ (env.size (), 2);
+    env.erase (_T ("arg3"));
+    ASSERT_EQ (env.size (), 2);
+}
+
+TEST (Environment, erase04) {
+    const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
+    p_apps::Environment env (envp);
+
+    ASSERT_EQ (env.size (), 2);
+    env.erase (_T (""));
+    ASSERT_EQ (env.size (), 2);
+}
+
+TEST (Environment, set01) {
+    const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
+    p_apps::Environment env (envp);
+
+    env.set (_T ("arg1"), _T ("val1"));
+    ASSERT_EQ (env.size (), 2);
+    ASSERT_EQ (env.get (_T ("arg1")), _T ("val1"));
+    ASSERT_EQ (env.get (_T ("arg2")), _T ("val2"));
+}
+
+TEST (Environment, set02) {
+    const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
+    p_apps::Environment env (envp);
+
+    env.set (_T ("arg2"), _T ("val2"));
+    ASSERT_EQ (env.size (), 2);
+    ASSERT_EQ (env.get (_T ("arg1")), _T ("val1"));
+    ASSERT_EQ (env.get (_T ("arg2")), _T ("val2"));
+}
+
+TEST (Environment, set03) {
+    const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
+    p_apps::Environment env (envp);
+
+    env.set (_T ("arg3"), _T ("val3"));
+    ASSERT_EQ (env.size (), 3);
+    ASSERT_EQ (env.get (_T ("arg1")), _T ("val1"));
+    ASSERT_EQ (env.get (_T ("arg2")), _T ("val2"));
+    ASSERT_EQ (env.get (_T ("arg3")), _T ("val3"));
+}
+
+TEST (Environment, set04) {
+    const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
+    p_apps::Environment env (envp);
+
+    env.set (_T ("arg1"), _T (""));
+    ASSERT_EQ (env.size (), 1);
+    ASSERT_FALSE (env.exists (_T ("arg1")));
+}
+
+TEST (Environment, set05) {
+    const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
+    p_apps::Environment env (envp);
+
+    env.set (_T (""), _T ("val1"));
+    ASSERT_EQ (env.size (), 2);
+}
+
+TEST (Environment, setBak01) {
+    const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
+    p_apps::Environment env (envp);
+
+    env.set (_T ("arg1"), _T ("val1"), _T ("arg1.bak"));
+    ASSERT_EQ (env.size (), 3);
+    ASSERT_EQ (env.get (_T ("arg1")), _T ("val1"));
+    ASSERT_EQ (env.get (_T ("arg1.bak")), _T ("val1"));
+}
+
+TEST (Environment, setBak02) {
+    const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
+    p_apps::Environment env (envp);
+
+    env.set (_T ("arg1"), _T ("val1"), _T ("arg2"));
+    ASSERT_EQ (env.size (), 2);
+    ASSERT_EQ (env.get (_T ("arg1")), _T ("val1"));
+    ASSERT_EQ (env.get (_T ("arg2")), _T ("val1"));
+}
+
+TEST (Environment, setBak03) {
+    const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
+    p_apps::Environment env (envp);
+
+    env.set (_T ("arg3"), _T ("val3"), _T ("arg2"));
+    ASSERT_EQ (env.size (), 2);
+    ASSERT_EQ (env.get (_T ("arg3")), _T ("val3"));
+    ASSERT_EQ (env.get (_T ("arg2")), _T (""));
+}
+
+TEST (Environment, setBak04) {
+    const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
+    p_apps::Environment env (envp);
+
+    env.set (_T (""), _T ("val"), _T ("arg1.bak"));
+    ASSERT_EQ (env.size (), 2);
+    ASSERT_EQ (env.get (_T ("arg1.bak")), _T (""));
+}
+
+TEST (Environment, case01) {
+    const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
+    p_apps::Environment env (envp);
+
+    ASSERT_TRUE (env.exists (_T ("ArG1")));
+    ASSERT_TRUE (env.exists (_T ("aRg2")));
+}
+
+TEST (Environment, case02) {
+    const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
+    p_apps::Environment env (envp);
+
+    ASSERT_EQ (env.get (_T ("ArG1")), _T ("val1"));
+    ASSERT_EQ (env.get (_T ("aRg2")), _T ("val2"));
+}
+
+TEST (Environment, case03) {
+    const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
+    p_apps::Environment env (envp);
+
+    ASSERT_EQ (env.size (), 2);
+    env.erase (_T ("ArG1"));
+    ASSERT_EQ (env.size (), 1);
+    env.erase (_T ("aRg2"));
+    ASSERT_EQ (env.size (), 0);
+}
+
+TEST (Environment, case04) {
+    const TCHAR *const envp[] = {_T ("arg1=val1"), _T ("arg2=val2"), _T ("")};
+    p_apps::Environment env (envp);
+
+    env.set (_T ("ArG1"), _T ("VaL1"));
+    ASSERT_EQ (env.size (), 2);
+    ASSERT_EQ (env.get (_T ("aRg1")), _T ("VaL1"));
+}
+
+//////////////////////////
+
+static std::function<DWORD (LPCWSTR lpSrc, LPWSTR lpDst, DWORD nSize)> ForwardExpandEnvironmentStrings;
+
+DWORD WINAPI mockExpandEnvironmentStrings (LPCWSTR lpSrc, LPWSTR lpDst, DWORD nSize) {
+    return ForwardExpandEnvironmentStrings (lpSrc, lpDst, nSize);
+}
+
+class MockExpandEnvironmentStrings {
 public:
-	DWORD WINAPI cMock_ExpandEnvironmentStrings(LPCTSTR lpSrc, LPTSTR lpDst, DWORD nSize) {
-		return 0;
-	}
+    MockExpandEnvironmentStrings (void) {
+        ForwardExpandEnvironmentStrings = [this](LPCWSTR lpSrc, LPWSTR lpDst, DWORD nSize) {
+            return mockExpandEnvironmentStrings (lpSrc, lpDst, nSize);
+        };
+    };
+    MOCK_CONST_METHOD3_WITH_CALLTYPE (WINAPI, mockExpandEnvironmentStrings, DWORD (LPCTSTR, LPWSTR, DWORD));
+    ~MockExpandEnvironmentStrings (void) {
+        ForwardExpandEnvironmentStrings = {};
+    };
 };
 
-MOCK_CLASS(mock_class) {};
-
-
-
-
-
-
-
-
-#include <functional>
-
-class EventHandler {
-public:
-	void addHandler(std::function<void(int)> callback) {
-		std::cout << "Handler added..." << std::endl;
-		callback(1);
-	}
-};
-
-EventHandler* handler;
-
-
-class MyClass {
-public:
-	MyClass();
-	void Callback(int x);
-private:
-	int private_x;
-};
-
-
-private_x = 5;
-handler->addHandler(std::bind(&MyClass::Callback, this, std::placeholders::_1));
+ACTION_P (cpy2arg1, value) {
+    wcsncpy_s (arg1, arg2 / sizeof (TCHAR), value, arg2);
+    return arg2;
 }
-MyClass::MyClass() {
 
-	void MyClass::Callback(int x) {
-		std::cout << x + private_x << std::endl;
-	}
+TEST (Environment, expandEnv) {
+    MockExpandEnvironmentStrings mock;
 
+    WCHAR argument[]{_T ("_%TEMP%_")};
+    WCHAR expanded[]{_T ("_C:\\TEMP_")};
 
-	void freeStandingCallback(int x) {
-		// ...
-	}
+    ON_CALL (mock, mockExpandEnvironmentStrings (_, _, _))
+        .WillByDefault (Return (static_cast<DWORD>(sizeof expanded)));
+    EXPECT_CALL (mock, mockExpandEnvironmentStrings (_, nullptr, 0));
+    EXPECT_CALL (mock, mockExpandEnvironmentStrings (_, _, static_cast<DWORD>(sizeof expanded)))
+        .WillOnce (cpy2arg1 (expanded));
 
-	BOOST_AUTO_TEST_CASE(expandEnv) {
+    auto retVal = p_apps::Environment::expandEnv (std::tstring{argument}, mockExpandEnvironmentStrings);
+    EXPECT_EQ (retVal, expanded);
+}
 
+TEST (Environment, expandEnvFail) {
 
-		handler->addHandler(freeStandingCallback);
+    MockExpandEnvironmentStrings mock;
 
+    WCHAR argument[]{_T ("_%TEMP%_")};
 
+    ON_CALL (mock, mockExpandEnvironmentStrings (_, _, _))
+        .WillByDefault (Return (static_cast<DWORD>(0)));
+    EXPECT_CALL (mock, mockExpandEnvironmentStrings (_, nullptr, 0));
 
+    auto retVal = p_apps::Environment::expandEnv (std::tstring{argument}, mockExpandEnvironmentStrings);
+    EXPECT_EQ (retVal, argument);
 
-		//	std::tstring tmp;
-		//	tmp =    pApps::Environment::expandEnv( _T( "%TMP%" ) );
-		//	tmp =    pApps::Environment::expandEnv( _T( "%windir%" ) );
-		//	tmp =    pApps::Environment::expandEnv( _T( "%WINDIR%" ) );
-		//	BOOST   _CHECK( tmp == _T("C:\\TEMP" ));
-		//	tmp =     pApps::Environment::expandEnv( _T( "%TEMP%" ), Mock_ExpandEnvironmentStrings );
-
-		MockedEnvironment mock;
-
-		TCHAR retVal[100];
-
-
-
-
-		// auto fp = std::bind( &MockedEnvironment::Mock_ExpandEnvironmentStrings, mock, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3 );
-		// fp( _T( "%TEMP%" ), retVal, 0 );
-
-
-		//	std::function<void( int, int )>
-
-		//std::tstring tmp = pApps::Environment::expandEnv( _T( "%TEMP%" ), fp);
-
-		//		boost::function1( fp );
-
-
-	}
-
-
-
-	BOOST_AUTO_TEST_SUITE_END()
-
-	*/
+}
