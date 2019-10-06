@@ -1,17 +1,17 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(APPVEYOR)'!='True'" Label="Boost">
-    <___BoostDir___>$(SolutionDir)..\Libraries\boost\1.62.0</___BoostDir___>
-    <BoostDir>D:\CPP\Libraries\boost\boost_1_64_0</BoostDir>    
+    <BoostDir>$(SolutionDir)..\Libraries\boost\boost_1_71_0\</BoostDir>    
     <BoostDirLib>$(BoostDir)\stage\msvc\$(PlatFormToolsetVersion)\$(Platform)</BoostDirLib>
+    <BoostDirLib>$(BoostDir)\lib32-msvc-14.2</BoostDirLib>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(APPVEYOR)'=='True' And '$(Platform)'=='Win32'" Label="Boost">
-    <BoostDir>C:\Libraries\boost_1_64_0</BoostDir>
-    <BoostDirLib>$(BoostDir)\lib32-msvc-14.1</BoostDirLib>
+    <BoostDir>C:\Libraries\boost_1_71_0</BoostDir>
+    <BoostDirLib>$(BoostDir)\lib32-msvc-14.2</BoostDirLib>
   </PropertyGroup>
   <PropertyGroup Condition="'$(APPVEYOR)'=='True' And '$(Platform)'=='x64'" Label="Boost">
-    <BoostDir>C:\Libraries\boost_1_64_0</BoostDir>
-    <BoostDirLib>$(BoostDir)\lib64-msvc-14.1</BoostDirLib>
+    <BoostDir>C:\Libraries\boost_1_71_0</BoostDir>
+    <BoostDirLib>$(BoostDir)\lib64-msvc-14.2</BoostDirLib>
   </PropertyGroup>
 
   <ItemDefinitionGroup>

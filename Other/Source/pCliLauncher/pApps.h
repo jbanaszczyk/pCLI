@@ -12,6 +12,7 @@
 
 #include "../common/Environment.h"
 #include "../common/CtrlHandler.h"
+#include <boost/filesystem/path.hpp>
 
 namespace p_apps {
 	/******************************************************************************

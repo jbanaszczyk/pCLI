@@ -21,6 +21,7 @@
 *
 *****************************************************************************/
 #include "./common.h"
+#include <boost/optional/optional.hpp>
 
 namespace p_apps {
 

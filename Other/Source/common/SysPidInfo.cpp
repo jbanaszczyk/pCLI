@@ -7,6 +7,9 @@
 
 #include "stdafx.h"
 #include "./SysPidInfo.h"
+#include <memory>
+#include <boost/optional/optional.hpp>
+#include <boost/filesystem/path.hpp>
 
 /******************************************************************************
  *

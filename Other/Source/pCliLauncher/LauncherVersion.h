@@ -23,6 +23,10 @@
  *
  *****************************************************************************/
 
+#ifdef VER_PRODUCTNAME_STR
+#undef VER_PRODUCTNAME_STR
+#endif
+
 #define VERSION_MAJOR             1
 #define VERSION_MINOR             0
 #define VERSION_REVISION          0
@@ -32,7 +36,7 @@
 #define VER_FILE_COMPANY_STR     "Jacek Banaszczyk"
 #define VER_FILE_DESCRIPTION_STR "TCC/LE Portable Launcher"
 #define VER_TRADEMARKS_STR       "PortableApps.com is a Trademark of Rare Ideas, LLC."
-#define VER_URL_STR              "http://sourceforge.net/projects/tccleportable"
+#define VER_URL_STR              "https://github.com/jbanaszczyk/pCli"
 
 #ifndef VER_TARGETNAME_STR
 	#pragma message( "RC_Warning: Probably VER_TARGETNAME_STR is not defined, #define VER_TARGETNAME_STR=$(TargetFileName) for both resources and source code." )
