@@ -11,6 +11,10 @@
 #include "../common/IniFile.h"
 
 #include <windows.h>
+#include <boost/algorithm/string/join.hpp>
+#include <boost/format.hpp>
+#include <iostream>
+#include <boost/filesystem/operations.hpp>
 
 namespace p_apps {
 	/******************************************************************************
@@ -20,41 +24,41 @@ namespace p_apps {
 	 *
 	 *****************************************************************************/
 
-	/******************************************************************************
-	 *
-	 * Some handy strings
-	 *
-	 * LAUNCHER_INI
-	 *   Name of launcher INI file
-	 *
-	 * PORTABLE_APPS
-	 *   Directory, where PortableApps paltform is expected
-	 *
-	 * PORTABLE_APPS_APP
-	 *   Legacy name of application directory ( ie. "App" )
-	 *
-	 * PORTABLE_APPS_APP_LE_32
-	 *   Not legacy name of application 32-bit directory ( ie. "App\\32" )
-	 *
-	 * PORTABLE_APPS_APP_LE_64
-	 *   Not legacy name of application 64-bit directory ( ie. "App\\64" )
-	 *
-	 * PORTABLE_APPS_DATA
-	 *   Legacy name of data directory ( ie. "Data" )
-	 *
-	 * PORTABLE_APPS_DEFAULT
-	 *   Legacy name of defaults directory ( ie. "App\\DefaultData" )
-	 *
-	 * PORTABLE_APPS_INI
-	 *   Name (relative to PORTABLE_APPS)
-	 *
-	 * PORTABLE_APPS_OTHER_LOCALE
-	 *   Location of launcher' locale files
-	 *
-	 * LOCATIONS[]
-	 *   where proper launcher' directory should be located relative to this exe
-	 *
-	 *****************************************************************************/
+	 /******************************************************************************
+	  *
+	  * Some handy strings
+	  *
+	  * LAUNCHER_INI
+	  *   Name of launcher INI file
+	  *
+	  * PORTABLE_APPS
+	  *   Directory, where PortableApps paltform is expected
+	  *
+	  * PORTABLE_APPS_APP
+	  *   Legacy name of application directory ( ie. "App" )
+	  *
+	  * PORTABLE_APPS_APP_LE_32
+	  *   Not legacy name of application 32-bit directory ( ie. "App\\32" )
+	  *
+	  * PORTABLE_APPS_APP_LE_64
+	  *   Not legacy name of application 64-bit directory ( ie. "App\\64" )
+	  *
+	  * PORTABLE_APPS_DATA
+	  *   Legacy name of data directory ( ie. "Data" )
+	  *
+	  * PORTABLE_APPS_DEFAULT
+	  *   Legacy name of defaults directory ( ie. "App\\DefaultData" )
+	  *
+	  * PORTABLE_APPS_INI
+	  *   Name (relative to PORTABLE_APPS)
+	  *
+	  * PORTABLE_APPS_OTHER_LOCALE
+	  *   Location of launcher' locale files
+	  *
+	  * LOCATIONS[]
+	  *   where proper launcher' directory should be located relative to this exe
+	  *
+	  *****************************************************************************/
 	static const boost::filesystem::path LAUNCHER_INI(_T(VER_PRODUCTNAME_STR) _T(".ini"));
 
 	static const boost::filesystem::path PORTABLE_APPS_APP = _T("App");
@@ -100,7 +104,7 @@ namespace p_apps {
 	std::string tstring2string(const std::tstring& sou) {
 #ifdef _UNICODE
 		std::locale const loc("");
-		wchar_t const *const from = sou.c_str();
+		wchar_t const* const from = sou.c_str();
 		std::size_t const len = sou.size();
 		std::vector<char> buffer(len + 1);
 		std::use_facet<std::ctype<wchar_t> >(loc).narrow(from, from + len, '_', &buffer[0]);
@@ -119,7 +123,7 @@ namespace p_apps {
 	std::tstring string2tstring(const std::string& sou) {
 #ifdef _UNICODE
 		std::locale const loc("");
-		const char *const from = sou.c_str();
+		const char* const from = sou.c_str();
 		std::size_t const len = sou.size();
 		std::vector<wchar_t> buffer(len + 1);
 		std::use_facet<std::ctype<wchar_t> >(loc).widen(from, from + len, &buffer[0]);
@@ -140,19 +144,21 @@ namespace p_apps {
 	 *     argv[0]
 	 *
 	 *****************************************************************************/
-	boost::filesystem::path getArgv0(const TCHAR *const argv[], Environment& mEnv) {
+	boost::filesystem::path getArgv0(const TCHAR* const argv[], Environment& mEnv) {
 		boost::filesystem::path argv0;
 #ifdef _DEBUG
 		if (mEnv.exists(envArgv0Name)) {
 			argv0 = mEnv.get(envArgv0Name);
 			mEnv.erase(envArgv0Name);
-		} else
+		}
+		else
 #endif
 		{
 			boost::optional<boost::filesystem::path> myName = p_apps::_sysPidInfo.getExeName();
 			if (myName) {
 				argv0 = myName.get();
-			} else {
+			}
+			else {
 				argv0 = argv[0];
 			}
 		}
@@ -356,7 +362,7 @@ namespace p_apps {
 	*****************************************************************************/
 	std::tstring quote(const boost::filesystem::path& str) {
 		std::tstring retVal = unquote(str._tstring());
-		if ((!retVal.empty() ) && (retVal.find(_T(' ')) != std::string::npos)) {
+		if ((!retVal.empty()) && (retVal.find(_T(' ')) != std::string::npos)) {
 			return _T("\"") + retVal + _T("\"");
 		}
 		return retVal;
@@ -371,7 +377,7 @@ namespace p_apps {
 	std::tstring quote(std::tstring str) {
 		// boost:io:quote has no wchar_t support
 		str = unquote(str);
-		if ((!str.empty() ) && (str.find(_T(' ')) != std::string::npos)) {
+		if ((!str.empty()) && (str.find(_T(' ')) != std::string::npos)) {
 			return _T("\"") + str + _T("\"");
 		}
 		return str;
@@ -439,12 +445,12 @@ namespace p_apps {
 
 	std::tstring pathToUnc(const boost::filesystem::path netPath) {
 		DWORD bufSize = 0;
-		UNIVERSAL_NAME_INFO * nothing = nullptr;
+		UNIVERSAL_NAME_INFO* nothing = nullptr;
 		if (ERROR_MORE_DATA == WNetGetUniversalName(netPath._tstring().c_str(), UNIVERSAL_NAME_INFO_LEVEL, &nothing, &bufSize)) {
 			std::unique_ptr< BYTE[] > buf(new (std::nothrow) BYTE[bufSize]);
 			if (buf) {
 				WNetGetUniversalName(netPath._tstring().c_str(), UNIVERSAL_NAME_INFO_LEVEL, buf.get(), &bufSize);
-				UNIVERSAL_NAME_INFO * pUni = (UNIVERSAL_NAME_INFO *)buf.get();
+				UNIVERSAL_NAME_INFO* pUni = (UNIVERSAL_NAME_INFO*)buf.get();
 				return pUni->lpUniversalName;
 			}
 		}
@@ -487,8 +493,8 @@ namespace p_apps {
 		std::cin.imbue(std::locale());
 #ifdef _UNICODE
 		(void) _setmode(_fileno(stdout), _O_WTEXT);
-		(void) _setmode(_fileno(stdin), _O_WTEXT);
-		(void) _setmode(_fileno(stderr), _O_WTEXT);
+		(void)_setmode(_fileno(stdin), _O_WTEXT);
+		(void)_setmode(_fileno(stderr), _O_WTEXT);
 #endif
 	}
 	/******************************************************************************
@@ -510,7 +516,8 @@ namespace p_apps {
 				std::_tcerr << _T("Press [ENTER] key to exit.") << std::endl;
 				std::_tcin.get();
 			}
-		} else {
+		}
+		else {
 			MessageBox(nullptr, msg.str().c_str(), (boost::_tformat(_T("Cann't continue."))).str().c_str(), MB_OK | MB_ICONERROR);
 		}
 		exit(errCode);
@@ -542,7 +549,7 @@ namespace p_apps {
 		SetLastError(ERROR_SUCCESS);
 		if (err) {
 			LPCTSTR lpMsgBuf = nullptr;
-			DWORD bufLen = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_ARGUMENT_ARRAY | FORMAT_MESSAGE_ALLOCATE_BUFFER, nullptr, err, 0, (LPTSTR)&lpMsgBuf, 0, nullptr);
+			DWORD bufLen = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_ARGUMENT_ARRAY | FORMAT_MESSAGE_ALLOCATE_BUFFER, nullptr, err, 0, (LPTSTR)& lpMsgBuf, 0, nullptr);
 			if (bufLen) {
 				std::tstring result(lpMsgBuf, lpMsgBuf + bufLen);
 				LocalFree((HLOCAL)lpMsgBuf);
@@ -574,8 +581,8 @@ namespace p_apps {
 			}
 		}
 
-// pWait jest nie ustawione ok????
-pWait = tpWait::pWait_Wait;
+		// pWait jest nie ustawione ok????
+		pWait = tpWait::pWait_Wait;
 
 		//-------------------------------------------- lpApplicationName
 		//-------------------------------------------- lpCommandLine
@@ -594,8 +601,8 @@ pWait = tpWait::pWait_Wait;
 		creationFlags |= CREATE_UNICODE_ENVIRONMENT;
 #endif
 		//-------------------------------------------- lpEnvironment
-		std::unique_ptr<TCHAR[]> env;
-		cmdEnvironment.dump(env);
+		std::unique_ptr< TCHAR[]> env = cmdEnvironment.dump();
+
 		//-------------------------------------------- lpCurrentDirectory
 		//-------------------------------------------- lpStartupInfo
 		STARTUPINFO startupInfo;
@@ -630,15 +637,15 @@ pWait = tpWait::pWait_Wait;
 			p_apps::abend(boost::_tformat(_T("Cann't execute %1%: %2%")) % cmdName % execError.get(), 1);
 		}
 
-		if (tpWait::pWait_Wait == pWait && processInfo.hProcess !=  nullptr ) {
+		if (tpWait::pWait_Wait == pWait && processInfo.hProcess != nullptr) {
 			WaitForSingleObject(processInfo.hProcess, INFINITE);
 		}
 
-		if (processInfo.hProcess != nullptr ) {
+		if (processInfo.hProcess != nullptr) {
 			CloseHandle(processInfo.hProcess);
 			processInfo.hProcess = nullptr;
 		}
-		if (processInfo.hThread != nullptr ) {
+		if (processInfo.hThread != nullptr) {
 			CloseHandle(processInfo.hThread);
 			processInfo.hThread = nullptr;
 		}

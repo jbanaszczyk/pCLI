@@ -25,7 +25,6 @@
 
 namespace p_apps {
 	class Environment {
-	private:
 		template<typename T>
 		struct fuLess : std::binary_function < T, T, bool > {
 			bool operator() (const T& s1, const T& s2) const {
@@ -40,55 +39,58 @@ namespace p_apps {
 		Environment() = delete;
 		Environment(const Environment&) = delete;
 		Environment(const Environment&&) = delete;
-		Environment& Environment:: operator= (const Environment&) = delete;
-		Environment&& Environment:: operator= (const Environment&&) = delete;
+		Environment& operator= (const Environment&) = delete;
+		Environment&& operator= (const Environment&&) = delete;
 
-		Environment(const TCHAR *const envp[]) {
+		explicit Environment(const TCHAR* const envp[]) {
 			setUp(envp);
 		}
 
-		typedef DWORD(WINAPI *ExpandEnvironmentStrings_t) (LPCTSTR, LPWSTR, DWORD);
-
-		static std::tstring expandEnv(const std::tstring& str, ExpandEnvironmentStrings_t ExpandEnvironmentStrings_f = ExpandEnvironmentStrings) {
-			auto bufSize = ExpandEnvironmentStrings_f(str.c_str(), nullptr, 0);
-
-            std::unique_ptr< TCHAR[] > buf(new (std::nothrow) TCHAR[bufSize]);
-			if (bufSize == 0 || buf.get() == nullptr) {
+		typedef DWORD(WINAPI* ExpandEnvironmentStrings_t) (LPCTSTR, LPWSTR, DWORD);
+		static std::tstring expandEnv(const std::tstring& str, const ExpandEnvironmentStrings_t expandEnvironmentStringsMock = ExpandEnvironmentStrings) {
+			const auto bufSize = expandEnvironmentStringsMock(str.c_str(), nullptr, 0);
+			if (bufSize == 0) {
 				return str;
 			}
-			if (ExpandEnvironmentStrings_f(str.c_str(), buf.get(), bufSize) != bufSize) {
+
+			const std::unique_ptr< TCHAR[] > buf(new (std::nothrow) TCHAR[bufSize]);
+			if (buf == nullptr) {
+				return str;
+			}
+			if (expandEnvironmentStringsMock(str.c_str(), buf.get(), bufSize) != bufSize) {
 				return str;
 			}
 			return buf.get();
 		}
 
-		void setUp(const TCHAR *const envp[]) {
+		void setUp(const TCHAR* const envp[]) {
 			if (envp == nullptr) {
 				return;
 			}
-			for (auto *ref = envp; (*ref != nullptr) && (**ref != _T('\0')); ++ref) {
-				auto *sep = _tcschr(*ref, _T('='));
+			for (auto* ref = envp; *ref != nullptr && **ref != _T('\0'); ++ref) {
+
+				auto* sep = _tcschr(*ref, _T('='));
 				if (sep == nullptr) {
-					break; // garbage
+					continue; // garbage
 				}
-				size_t len = sep - *ref;
+				const size_t len = sep - *ref;
 				if (len == 0) {
-					continue; // mallformed
+					continue; // malformed
 				}
 				++sep;
 				if (*sep == _T('\0')) {
-					continue; // mallformed
+					continue; // malformed
 				}
 				mEnv.insert(std::pair<std::tstring, std::tstring>(std::tstring{ *ref, len }, std::tstring{ sep }));
 			}
 		}
 
-		size_t size(void) {
+		size_t size() const {
 			return mEnv.size();
 		}
 
 		bool exists(const std::tstring& name) const {
-			if (name.empty() ) {
+			if (name.empty()) {
 				return false;
 			}
 			return mEnv.end() != mEnv.find(name);
@@ -99,10 +101,9 @@ namespace p_apps {
 		}
 
 		std::tstring get(const std::tstring& name) {
-			if (!exists(name)) {
-				return std::tstring{};
-			}
-			return mEnv[name];
+			return exists(name)
+				? mEnv[name]
+				: std::tstring{};
 		}
 
 		void set(const std::tstring& name, const std::tstring& value, const std::tstring& nameBackup = std::tstring{}) {
@@ -112,42 +113,46 @@ namespace p_apps {
 			if (!name.empty()) {
 				if (value.empty()) {
 					erase(name);
-				} else {
+				}
+				else {
 					mEnv[name] = value;
 				}
 			}
 		}
 
-		void dump(std::unique_ptr<TCHAR[]>& result) const {
+		std::unique_ptr< TCHAR[]> dump() const {
+
 			size_t len = 2 * mEnv.size() + 1; // equal signs, zeros after every string, extra zero
 			for (const auto& it : mEnv) {
 				len += it.first.length() + it.second.length();
 			}
-			result.reset(new (std::nothrow) TCHAR[len]);
+
+			auto result = std::unique_ptr<TCHAR[]>{ (new (std::nothrow) TCHAR[len]) };
 
 			if (!result) {
-				return;
+				return result;
 			}
 
-			TCHAR *ref = result.get();
+			auto ref = result.get();
 
 			for (const auto& it : mEnv) {
-				size_t thisLen = it.first.length();
-				wcsncpy_s(ref, len, it.first.c_str(), thisLen);
-				ref += thisLen;
-				len -= thisLen;
-				*(ref++) = _T('=');
-				--len;
-				thisLen = it.second.length();
-				wcsncpy_s(ref, len, it.second.c_str(), thisLen);
-				ref += thisLen;
-				len -= thisLen;
-				*(ref++) = _T('\0');
-				--len;
+				addHalfStringToDump(len, ref, it.first, _T('='));
+				addHalfStringToDump(len, ref, it.second, _T('\0'));
 			}
 			*ref = _T('\0');
 			--len;
-			assert(!len);
+			assert(len == 0);
+			return result;
+		}
+
+	private:
+		void addHalfStringToDump(size_t& len, TCHAR*& ref, const std::tstring& piece, const TCHAR tailChar) const {
+			auto pieceLength = piece.length();
+			wcsncpy_s(ref, len, piece.c_str(), pieceLength);
+			ref += pieceLength;
+			*ref = tailChar;
+			ref++;
+			len -= pieceLength + 1;
 		}
 	};
 }

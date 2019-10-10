@@ -19,9 +19,9 @@
 #include "../common/CtrlHandler.cpp"
 
 static volatile unsigned int ctrlCCounter = 0;
-const DWORD sleepTime = 3;
+const DWORD                  sleepTime = 3;
 
-static BOOL WINAPI mockCtrlHandler(DWORD ctrlType) {
+static BOOL WINAPI mockCtrlHandler(DWORD) {
 	++ctrlCCounter;
 	return TRUE;
 }
@@ -39,9 +39,9 @@ public:
 	}
 };
 
-class CtrlHandlers : public ::testing::Test {
+class CtrlHandlers : public testing::Test {
 protected:
-	virtual void SetUp() { 
+	void SetUp() override {
 		// A bit difficult
 
 		ctrlCCounter = 0;
@@ -57,7 +57,7 @@ protected:
 		mockCtrlHandler.activate(TRUE + 2);
 	}
 
-	virtual void TearDown() {
+	void TearDown() override {
 		// deactivate mock
 		mockCtrlHandler.activate(FALSE);
 		// reactivate CtrlHandler
@@ -67,14 +67,14 @@ protected:
 	mockCtrlHandlerManager mockCtrlHandler;
 };
 
-TEST_F(CtrlHandlers, CtrlCHandler) {
+TEST_F(CtrlHandlers, DISABLED_CtrlCHandler) {
 	EXPECT_EQ(0, ctrlCCounter);
 	GenerateConsoleCtrlEvent(0, 0); // generate CtrlC
 	Sleep(sleepTime);               // yield to allow processing
 	ASSERT_EQ(1, ctrlCCounter);
 }
 
-TEST_F(CtrlHandlers, CtrlBreakHandler) {
+TEST_F(CtrlHandlers, DISABLED_CtrlBreakHandler) {
 	EXPECT_EQ(0, ctrlCCounter);
 	GenerateConsoleCtrlEvent(1, 0); // generate CtrlBreak
 	Sleep(sleepTime);               // yield to allow processing
