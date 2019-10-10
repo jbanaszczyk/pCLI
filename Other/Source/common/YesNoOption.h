@@ -7,19 +7,19 @@
 
 #pragma once
 
-/******************************************************************************
-*
-* class pApps::YesNoOption converts strings to boolan
-*
-* Supported strings: "Yes", "No", "true", "false", "1", "0"
-*
-* addString(tstring, bool)
-*   adds/modifies more string/bool conversions
-*
-* functor ()
-*   translates tstring or boost::optional<tstring> to bool
-*
-*****************************************************************************/
+ /******************************************************************************
+ *
+ * class pApps::YesNoOption converts strings to boolan
+ *
+ * Supported strings: "Yes", "No", "true", "false", "1", "0"
+ *
+ * addString(tstring, bool)
+ *   adds/modifies more string/bool conversions
+ *
+ * functor ()
+ *   translates tstring or boost::optional<tstring> to bool
+ *
+ *****************************************************************************/
 #include "./common.h"
 #include <boost/optional/optional.hpp>
 
@@ -50,23 +50,23 @@ namespace p_apps {
 			{ _T("no"), false },
 			{ _T("false"), false },
 			{ _T("0"), false }
-		}) { }
+			}) { }
 
-			~YesNoOption() {};
+		~YesNoOption() {};
 
-			void addString(const std::tstring& key, const bool value) {
-				_values[key] = value;
-			}
+		void addString(const std::tstring& key, const bool value) {
+			_values[key] = value;
+		}
 
-			bool operator()(const std::tstring& key, const bool defValue = true) {
-				return getOption(key, defValue);
-			};
+		bool operator()(const std::tstring& key, const bool defValue = true) {
+			return getOption(key, defValue);
+		};
 
-			bool operator()(const boost::optional<std::tstring>& key, const bool defValue = true) {
-				if (!key)
-					return defValue;
-				return getOption(key.get(), defValue);
-			};
+		bool operator()(const boost::optional<std::tstring>& key, const bool defValue = true) {
+			if (!key)
+				return defValue;
+			return getOption(key.get(), defValue);
+		};
 
 	};
 }
