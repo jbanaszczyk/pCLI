@@ -11,10 +11,8 @@
  *
  * class pApps::YesNoOption converts strings to boolean
  *
- * Supported strings: "Yes", "No", "true", "false", "1", "0"
- *
- * addString(tstring, bool)
- *   adds/modifies more string/bool conversions
+ * Supported strings (case insensitive):
+ *   "Yes", "No", "true", "false", "1", "0"
  *
  * functor ()
  *   translates tstring or boost::optional<tstring> to bool
@@ -33,32 +31,33 @@ namespace p_apps {
 			}
 		};
 
-		std::map<std::tstring, bool, fuLess<std::tstring>> _values;
+		std::map<std::tstring, bool, fuLess<std::tstring>> allowedValues;
 
 		bool getOption(const std::tstring& key, const bool defValue) const {
-            const auto itValues = _values.find(key);
-			if (_values.end() == itValues)
-				return defValue;
-			return itValues->second;
+			const auto itValues = allowedValues.find(key);
+			return
+				allowedValues.end() != itValues
+				? itValues->second
+				: defValue;
 		}
 
 	public:
-		YesNoOption() : _values({
-			{_T("yes"), true}, {_T("true"), true}, {_T("1"), true}, {_T("no"), false}, {_T("false"), false}, {_T("0"), false}
-			}) {
-		}
+		YesNoOption() : allowedValues({
+			{_T("yes"), true}, {_T("true"), true}, {_T("1"), true},
+			{_T("no"), false}, {_T("false"), false}, {_T("0"), false} })
+		{}
 
 		~YesNoOption() = default;
 
-        bool operator()(const std::tstring& key, const bool defValue = true) const {
+		bool operator()(const std::tstring& key, const bool defValue = true) const {
 			return getOption(key, defValue);
 		}
 
 		bool operator()(const boost::optional<std::tstring>& key, const bool defValue = true) const {
-			if (!key)
-				return defValue;
-			return getOption(key.get(), defValue);
+			return
+				key
+				? getOption(key.get(), defValue)
+				: defValue;
 		}
-
 	};
 }
