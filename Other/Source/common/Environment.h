@@ -21,7 +21,6 @@
   *****************************************************************************/
 
 #include "./common.h"
-#include <memory>
 
 namespace p_apps {
 	class Environment {
