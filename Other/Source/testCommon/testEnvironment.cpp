@@ -7,7 +7,6 @@
 
 #include "stdafx.h"
 
-#include <functional>
 #include <string>
 #include <functional>
 
