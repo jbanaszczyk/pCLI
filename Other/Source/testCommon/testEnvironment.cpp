@@ -12,7 +12,6 @@
 #include <functional>
 
 #include "../common/Environment.h"
-#include "testEnvironment.h"
 
 using namespace testing;
 
