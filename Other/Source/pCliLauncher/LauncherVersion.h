@@ -31,7 +31,7 @@
 #define VERSION_MINOR             0
 #define VERSION_REVISION          0
 #define VERSION_BUILD             0
-#define VER_PRODUCTNAME_STR      "TccLePortable"
+#define VER_PRODUCTNAME_STR      "pCli"
 #define VER_COPYRIGHT_STR        "(C)2013 Jacek Banaszczyk"
 #define VER_FILE_COMPANY_STR     "Jacek Banaszczyk"
 #define VER_FILE_DESCRIPTION_STR "TCC/LE Portable Launcher"
