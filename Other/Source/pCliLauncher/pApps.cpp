@@ -32,7 +32,7 @@ namespace p_apps {
 	  *   Name of launcher INI file
 	  *
 	  * PORTABLE_APPS
-	  *   Directory, where PortableApps paltform is expected
+	  *   Directory, where PortableApps platform is expected
 	  *
 	  * PORTABLE_APPS_APP
 	  *   Legacy name of application directory ( ie. "App" )
@@ -73,8 +73,8 @@ namespace p_apps {
 	static const boost::filesystem::path PORTABLE_APPS_DOCUMENTS = _T("Documents");
 
 	static const boost::filesystem::path LOCATIONS[] = {
-		_T(VER_PRODUCTNAME_STR),					// legacy PA.c location
-		_T(""),
+		_T(VER_PRODUCTNAME_STR),
+		_T("."),
 		PORTABLE_APPS / _T(VER_PRODUCTNAME_STR),
 		_T("..")
 	};
@@ -83,86 +83,16 @@ namespace p_apps {
 
 	/******************************************************************************
 	 *
-	 * If compiled with _DEBUG
-	 *   you can your own value of argv0
-	 *
-	 * Example:
-	 *   set ARGV0_TCCLEPORTABLE=D:\P4\PortableApps\PortableApps\TccLePortable\TccLePortable.exe
-	 *
-	 *****************************************************************************/
-#ifdef _DEBUG
-	const std::tstring envArgv0Name = _T("ARGV0_") _T(VER_PRODUCTNAME_STR);
-#endif
-
-	/******************************************************************************
-	 *
-	 * tstring2string
-	 * string2tstring
-	 *   Simple conversions tstring / string
-	 *
-	 *****************************************************************************/
-	std::string tstring2string(const std::tstring& sou) {
-#ifdef _UNICODE
-		std::locale const loc("");
-		wchar_t const* const from = sou.c_str();
-		std::size_t const len = sou.size();
-		std::vector<char> buffer(len + 1);
-		std::use_facet<std::ctype<wchar_t> >(loc).narrow(from, from + len, '_', &buffer[0]);
-		return std::string(&buffer[0], &buffer[len]);
-#else
-		return sou;
-#endif
-	}
-
-	/******************************************************************************
-	 *
-	 * string2tstring
-	 *   Simple conversion string -> tstring
-	 *
-	 *****************************************************************************/
-	std::tstring string2tstring(const std::string& sou) {
-#ifdef _UNICODE
-		std::locale const loc("");
-		const char* const from = sou.c_str();
-		std::size_t const len = sou.size();
-		std::vector<wchar_t> buffer(len + 1);
-		std::use_facet<std::ctype<wchar_t> >(loc).widen(from, from + len, &buffer[0]);
-		std::tstring s = std::tstring(&buffer[0], &buffer[len]);
-		return std::tstring(&buffer[0], &buffer[len]);
-#else
-		return sou;
-#endif
-	}
-
-	/******************************************************************************
-	 *
 	 * getArgv0
-	 *   Retrive argv[0] for the currebt process:
+	 *   Retrieve argv[0] for the current process:
 	 *   order:
-	 *     #ifdef _DEBUG  Env. variable ARGV0_....   (see note above)
-	 *     real process executable name (from process snapshoot)
+	 *     real process executable name (from process snapshot)
 	 *     argv[0]
 	 *
 	 *****************************************************************************/
-	boost::filesystem::path getArgv0(const TCHAR* const argv[], Environment& mEnv) {
-		boost::filesystem::path argv0;
-#ifdef _DEBUG
-		if (mEnv.exists(envArgv0Name)) {
-			argv0 = mEnv.get(envArgv0Name);
-			mEnv.erase(envArgv0Name);
-		}
-		else
-#endif
-		{
-			boost::optional<boost::filesystem::path> myName = p_apps::_sysPidInfo.getExeName();
-			if (myName) {
-				argv0 = myName.get();
-			}
-			else {
-				argv0 = argv[0];
-			}
-		}
-		return boost::filesystem::absolute(argv0);
+	boost::filesystem::path getArgv0(const TCHAR* const argv[]) {
+		boost::optional<boost::filesystem::path> myName = p_apps::_sysPidInfo.getExeName();
+		return boost::filesystem::absolute(myName ? myName.get() : argv[0]);
 	}
 
 	/******************************************************************************
@@ -171,7 +101,7 @@ namespace p_apps {
 	 *   Find standard launcher' directory (where launcher ini exist)
 	 *   You will get something like <ROOT>\PortableApps\TccLePortable
 	 *
-	 *   Launcher executable can be exexcuted from any of
+	 *   Launcher executable can be executed from any of
 	 *     <ROOT>
 	 *     <ROOT>\PortableApps
 	 *     <ROOT>\PortableApps\TccLePortable
@@ -206,9 +136,9 @@ namespace p_apps {
 	/******************************************************************************
 	*
 	* env_PAppsC
-	*   setup environment as PortableApps paltform would set
-	*   PortableApps paltform, if running sets up many env vars named PortableApps.com*
-	*   env_PAppsC tries to setup them even if PortableApps paltform was not started
+	*   setup environment as PortableApps platform would set
+	*   PortableApps platform, if running sets up many env vars named PortableApps.com*
+	*   env_PAppsC tries to setup them even if PortableApps platform was not started
 	*
 	*****************************************************************************/
 	void env_PAppsC(const boost::optional<boost::filesystem::path>& exePath, p_apps::Environment& mEnv) {

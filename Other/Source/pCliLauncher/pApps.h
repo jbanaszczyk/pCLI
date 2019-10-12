@@ -30,7 +30,7 @@ namespace p_apps {
 	 *   Name of launcher INI file
 	 *
 	 * PORTABLE_APPS
-	 *   Directory, where PortableApps paltform is expected
+	 *   Directory, where PortableApps platform is expected
 	 *
 	 * PORTABLE_APPS_APP
 	 *   Legacy name of application directory ( ie. "App" )
@@ -76,37 +76,14 @@ namespace p_apps {
 
 	/******************************************************************************
 	 *
-	 * If compiled with _DEBUG
-	 *   you can your own value of argv0
-	 *
-	 * Example:
-	 *   set ARGV0_TCCLEPORTABLE=D:\P4\PortableApps\PortableApps\TccLePortable\TccLePortable.exe
-	 *
-	 *****************************************************************************/
-
-	// extern const std::tstring envArgv0Name;
-
-	/******************************************************************************
-	 *
-	 * tstring2string
-	 * string2tstring
-	 *   Simple conversions tstring / string
-	 *
-	 *****************************************************************************/
-	std::string tstring2string( const std::tstring& sou );
-	std::tstring string2tstring( const std::string& sou );
-
-	/******************************************************************************
-	 *
 	 * getArgv0
-	 *   Retrive argv[0] for the currebt process:
+	 *   Retrieve argv[0] for the current process:
 	 *   order:
-	 *     #ifdef _DEBUG  Env. variable ARGV0_....   (see note above)
-	 *     real process executable name (from process snapshoot)
+	 *     real process executable name (from process snapshot)
 	 *     argv[0]
 	 *
 	 *****************************************************************************/
-	boost::filesystem::path getArgv0( const TCHAR *const argv[], Environment& mEnv );
+	boost::filesystem::path getArgv0(const TCHAR* const argv[]);
 
 	/******************************************************************************
 	 *
@@ -127,9 +104,9 @@ namespace p_apps {
 	/******************************************************************************
 	*
 	* env_PAppsC
-	*   setup environment as PortableApps paltform would set
-	*   PortableApps paltform, if running sets up many env vars named PortableApps.com*
-	*   env_PAppsC tries to setup them even if PortableApps paltform was not started
+	*   setup environment as PortableApps platform would set
+	*   PortableApps platform, if running sets up many env vars named PortableApps.com*
+	*   env_PAppsC tries to setup them even if PortableApps platform was not started
 	*
 	*****************************************************************************/
 	void env_PAppsC(const boost::optional<boost::filesystem::path>& exePath, p_apps::Environment& mEnv);
