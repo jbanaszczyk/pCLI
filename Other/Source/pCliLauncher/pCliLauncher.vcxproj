@@ -105,6 +105,7 @@
     <ClInclude Include="..\common\CtrlHandler.h" />
     <ClInclude Include="..\common\Environment.h" />
     <ClInclude Include="..\common\IniFile.h" />
+    <ClInclude Include="..\common\UniquePointers.h" />
     <ClInclude Include="..\common\stdafx.h" />
     <ClInclude Include="..\common\SysPidInfo.h" />
     <ClInclude Include="..\common\YesNoOption.h" />
