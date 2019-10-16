@@ -48,6 +48,9 @@
     <ClInclude Include="..\common\YesNoOption.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\common\UniquePointers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
