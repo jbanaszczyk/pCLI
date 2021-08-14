@@ -27,6 +27,9 @@
     <ClInclude Include="pApps.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="papps2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="..\common\common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -48,9 +51,6 @@
     <ClInclude Include="..\common\YesNoOption.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\common\UniquePointers.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -68,15 +68,13 @@
     <ClCompile Include="pApps.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="pApps2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="pCliLauncher.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="appicon.ico">
-      <Filter>Resource Files</Filter>
-    </Image>
   </ItemGroup>
 </Project>

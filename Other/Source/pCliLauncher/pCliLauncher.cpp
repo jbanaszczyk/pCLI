@@ -19,9 +19,6 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/foreach.hpp>
 #include <boost/tokenizer.hpp>
-#include <boost/system/error_code.hpp>
-#include <boost/format.hpp>
-#include <boost/filesystem/operations.hpp>
 
 static const boost::filesystem::path PORTABLE_APPS_APP_LE_32 = p_apps::PORTABLE_APPS_APP / _T("TCCLE32");
 static const boost::filesystem::path PORTABLE_APPS_APP_LE_64 = p_apps::PORTABLE_APPS_APP / _T("TCCLE64");
@@ -251,7 +248,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[]) {
 	/*******************************************************
 	*	Identify startup directory
 	*******************************************************/
-	
+	auto myPid = p_apps::_sysPidInfo.getMyPID();
 	auto argv0 = p_apps::getArgv0(argv, mEnv);
 	auto pAppsDir = p_apps::findPAppsDir(PORTABLE_APPS_APP_LE_32 / TCC_EXE_LE_32, argv0, mEnv);
 
@@ -489,7 +486,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[]) {
 	*	32-bit? 64-bit? TCC licensed or LE
 	*******************************************************/
 	bool runLicensed = yesNoOption(launcherIni.getValue(_SECTION_STARTUP, _INI_NAME_LICENSE));
-	bool runX64 = !yesNoOption(launcherIni.getValue(_SECTION_STARTUP, _INI_NAME_FORCE32)) && (p_apps::sysPidInfo.isWow64());
+	bool runX64 = !yesNoOption(launcherIni.getValue(_SECTION_STARTUP, _INI_NAME_FORCE32)) && (p_apps::_sysPidInfo.isWow64());
 	runLicensed &= runX64 ? boost::filesystem::exists(pAppsDir.get() / PORTABLE_APPS_APP_FULL_64 / TCC_EXE_FULL_64) : boost::filesystem::exists(pAppsDir.get() / PORTABLE_APPS_APP_FULL_32 / TCC_EXE_FULL_32);
 	runX64 &= runLicensed ? boost::filesystem::exists(pAppsDir.get() / PORTABLE_APPS_APP_FULL_64 / TCC_EXE_FULL_64) : boost::filesystem::exists(pAppsDir.get() / PORTABLE_APPS_APP_LE_64 / TCC_EXE_LE_64);
 	boost::filesystem::path appDir;

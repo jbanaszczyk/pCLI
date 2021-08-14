@@ -19,64 +19,73 @@
 #include "../common/CtrlHandler.cpp"
 
 static volatile unsigned int ctrlCCounter = 0;
-const DWORD                  sleepTime = 3;
+const DWORD sleepTime = 3;
 
-static BOOL WINAPI mockCtrlHandler(DWORD) {
-	++ctrlCCounter;
-	return TRUE;
+static BOOL WINAPI mockCtrlHandler(DWORD /*ctrlType*/)
+{
+    ++ctrlCCounter;
+    return TRUE;
 }
 
-class mockCtrlHandlerManager : public p_apps::CtrlHandlerManager {
+class MockCtrlHandlerManager : public p_apps::CtrlHandlerManager
+{
 public:
-	BOOL WINAPI vSetConsoleCtrlHandler(PHANDLER_ROUTINE HandlerRoutine, BOOL Add) override {
-		if (Add < 2) {
-			return SetConsoleCtrlHandler(HandlerRoutine, Add);
-		}
+    BOOL WINAPI vSetConsoleCtrlHandler(const PHANDLER_ROUTINE handlerRoutine, BOOL add) override
+    {
+        if (add < 2)
+        {
+            return SetConsoleCtrlHandler(handlerRoutine, add);
+        }
 
-		Add -= 2;
-		ctrlCCounter = 0;
-		return SetConsoleCtrlHandler(mockCtrlHandler, Add);
-	}
+        add -= 2;
+        ctrlCCounter = 0;
+        return SetConsoleCtrlHandler(mockCtrlHandler, add);
+    }
 };
 
-class CtrlHandlers : public testing::Test {
+class CtrlHandlers : public testing::Test
+{
 protected:
-	void SetUp() override {
-		// A bit difficult
+    void SetUp() override
+    {
+        // A bit difficult
 
-		ctrlCCounter = 0;
+        ctrlCCounter = 0;
 
-		// shut down installed CtrlHandler
-		p_apps::ctrlCHandler.activate(false);
+        // shut down installed CtrlHandler
+        p_apps::ctrlCHandler.activate(false);
 
-		// mocked ctor invokes activate again
-		// so deactivate again
-		mockCtrlHandler.activate(FALSE);
+        // mocked ctor invokes activate again
+        // so deactivate again
+        mockCtrlHandler.activate(FALSE);
 
-		// install mockCtrlHandler as CtrlHandler
-		mockCtrlHandler.activate(TRUE + 2);
-	}
+        // install mockCtrlHandler as CtrlHandler
+        mockCtrlHandler.activate(TRUE + 2);
+    }
 
-	void TearDown() override {
-		// deactivate mock
-		mockCtrlHandler.activate(FALSE);
-		// reactivate CtrlHandler
-		p_apps::ctrlCHandler.activate(true);
-	}
+    void TearDown() override
+    {
+        // deactivate mock
+        mockCtrlHandler.activate(FALSE);
+        // reactivate CtrlHandler
+        p_apps::ctrlCHandler.activate(true);
+    }
 
-	mockCtrlHandlerManager mockCtrlHandler;
+    MockCtrlHandlerManager mockCtrlHandler;
 };
 
-TEST_F(CtrlHandlers, DISABLED_CtrlCHandler) {
-	EXPECT_EQ(0, ctrlCCounter);
-	GenerateConsoleCtrlEvent(0, 0); // generate CtrlC
-	Sleep(sleepTime);               // yield to allow processing
-	ASSERT_EQ(1, ctrlCCounter);
+TEST_F(CtrlHandlers, CtrlCHandler)
+{
+EXPECT_EQ(0, ctrlCCounter);
+    GenerateConsoleCtrlEvent(0, 0); // generate CtrlC
+    Sleep(sleepTime); // yield to allow processing
+ASSERT_EQ(1, ctrlCCounter);
 }
 
-TEST_F(CtrlHandlers, DISABLED_CtrlBreakHandler) {
-	EXPECT_EQ(0, ctrlCCounter);
-	GenerateConsoleCtrlEvent(1, 0); // generate CtrlBreak
-	Sleep(sleepTime);               // yield to allow processing
-	ASSERT_EQ(1, ctrlCCounter);
+TEST_F(CtrlHandlers, CtrlBreakHandler)
+{
+EXPECT_EQ(0, ctrlCCounter);
+    GenerateConsoleCtrlEvent(1, 0); // generate CtrlBreak
+    Sleep(sleepTime); // yield to allow processing
+ASSERT_EQ(1, ctrlCCounter);
 }

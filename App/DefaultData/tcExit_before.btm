@@ -1,0 +1,10 @@
+
+::--------------------------------------------------------------------------------
+:: Put there extra exit code
+:: Will be executed before 4exit.btm
+:: For example:
+
+*rem *Echo =======================================
+*rem *Echo I'm leaving you. Your %@Name[%_cmdspec]
+*rem *Echo     Your %@Name[%_cmdspec]
+*rem *Pause

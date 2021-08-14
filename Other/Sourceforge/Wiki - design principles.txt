@@ -1,0 +1,8 @@
+The idea of PortableApps.com is awesome.
+PortableApps allows us to use Windows applications in a non Windows manner - no installation, no machine dependant settings...
+Great. Most of my daily use utilities, at home and at work are portable. Switching to the new hardware? Starting new virtual machine? It is enough to copy my "portable" partition and my environment is ready to use.
+
+But some of the design principles are not good enough for me.
+- First of all: I have no problems with command-line, I like it. In fact, I'm an Unix professional admin since many years.
+- Second: I'm using JP Software since more than twenty years, since 3.x 4DOS. 4DOS was transformed to 4NT, than TakeCommand/TCC, now there is 15.x version of TakeCommand. And last, but not least - very nice subset of TakeCommand, named TCC/LE (TakeCommand Console / Light Edition) is free, even for commercial purposes (there are some minor exclusions, read the license.txt).
+- So, I've created my own TCC/LE launcher,

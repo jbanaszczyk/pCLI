@@ -12,7 +12,6 @@
 
 #include "../common/Environment.h"
 #include "../common/CtrlHandler.h"
-#include <boost/filesystem/path.hpp>
 
 namespace p_apps {
 	/******************************************************************************
@@ -30,7 +29,7 @@ namespace p_apps {
 	 *   Name of launcher INI file
 	 *
 	 * PORTABLE_APPS
-	 *   Directory, where PortableApps platform is expected
+	 *   Directory, where PortableApps paltform is expected
 	 *
 	 * PORTABLE_APPS_APP
 	 *   Legacy name of application directory ( ie. "App" )
@@ -76,14 +75,37 @@ namespace p_apps {
 
 	/******************************************************************************
 	 *
+	 * If compiled with _DEBUG
+	 *   you can your own value of argv0
+	 *
+	 * Example:
+	 *   set ARGV0_TCCLEPORTABLE=D:\P4\PortableApps\PortableApps\TccLePortable\TccLePortable.exe
+	 *
+	 *****************************************************************************/
+
+	// extern const std::tstring envArgv0Name;
+
+	/******************************************************************************
+	 *
+	 * tstring2string
+	 * string2tstring
+	 *   Simple conversions tstring / string
+	 *
+	 *****************************************************************************/
+	std::string tstring2string( const std::tstring& sou );
+	std::tstring string2tstring( const std::string& sou );
+
+	/******************************************************************************
+	 *
 	 * getArgv0
-	 *   Retrieve argv[0] for the current process:
+	 *   Retrive argv[0] for the currebt process:
 	 *   order:
-	 *     real process executable name (from process snapshot)
+	 *     #ifdef _DEBUG  Env. variable ARGV0_....   (see note above)
+	 *     real process executable name (from process snapshoot)
 	 *     argv[0]
 	 *
 	 *****************************************************************************/
-	boost::filesystem::path getArgv0(const TCHAR* const argv[]);
+	boost::filesystem::path getArgv0( const TCHAR *const argv[], Environment& mEnv );
 
 	/******************************************************************************
 	 *
@@ -104,9 +126,9 @@ namespace p_apps {
 	/******************************************************************************
 	*
 	* env_PAppsC
-	*   setup environment as PortableApps platform would set
-	*   PortableApps platform, if running sets up many env vars named PortableApps.com*
-	*   env_PAppsC tries to setup them even if PortableApps platform was not started
+	*   setup environment as PortableApps paltform would set
+	*   PortableApps paltform, if running sets up many env vars named PortableApps.com*
+	*   env_PAppsC tries to setup them even if PortableApps paltform was not started
 	*
 	*****************************************************************************/
 	void env_PAppsC(const boost::optional<boost::filesystem::path>& exePath, p_apps::Environment& mEnv);
@@ -229,3 +251,4 @@ namespace p_apps {
 	boost::optional<DWORD> launch( tpWait pWait, const std::tstring& cmdName, const std::vector<std::tstring>& cmdLine, const p_apps::Environment& cmdEnvironment, boost::filesystem::path cwd );
 
 }
+

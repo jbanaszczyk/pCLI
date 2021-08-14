@@ -87,6 +87,9 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile />
+    <ClCompile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile />
@@ -105,25 +108,23 @@
     <ClInclude Include="..\common\CtrlHandler.h" />
     <ClInclude Include="..\common\Environment.h" />
     <ClInclude Include="..\common\IniFile.h" />
-    <ClInclude Include="..\common\UniquePointers.h" />
     <ClInclude Include="..\common\stdafx.h" />
     <ClInclude Include="..\common\SysPidInfo.h" />
     <ClInclude Include="..\common\YesNoOption.h" />
     <ClInclude Include="LauncherVersion.h" />
     <ClInclude Include="pApps.h" />
+    <ClInclude Include="papps2.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\common\CtrlHandler.cpp" />
     <ClCompile Include="..\common\SysPidInfo.cpp" />
     <ClCompile Include="pApps.cpp" />
+    <ClCompile Include="pApps2.cpp" />
     <ClCompile Include="pCliLauncher.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="pCliLauncher.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="appicon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,0 +1,3 @@
+TCC/LE is a basic command processor (shell) derived from award winning 4NT command processor, packaged as a port ableapp. TCC/LE v13 is compatible with any version of Microsoft XP, 2003, Vista, 2008, and Windows 7, including 64-bit versions.
+The TCC/LE Portable Launcher allows you to run TCC/LE from a removable drive. It leaves no personal information behind on the machine you run it on, so you can take your shell wherever you go.
+TCC/LE Portable comes with powerful start-up script. It automatically registers extensions like (portable) Perl, Java, Python, etc.

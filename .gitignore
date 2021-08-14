@@ -5,6 +5,8 @@
 
 # Libraries
 /Other/Source/Libraries/boost/boost_1_64_0
+/Other/Source/Libraries/googletest/googlemock/msvc/141/Win32
+/Other/Source/Libraries/googletest/googlemock/msvc/141/x64
 
 # PortableApps.com
 /Autorun.inf
@@ -26,9 +28,19 @@
 /App/TCMD64/*
 !/App/TCMD64/README.md
 
+/App/TCC_RT_28/*
+!/App/TCC_RT_28/README.md
+
+/CommonFiles/*
+!/CommonFiles/README.md
+
+/Libraries/*
+!/Libraries/README.md
+
+
 /Data
 /pCLI.exe
-/pCLI.ini
+# /pCLI.ini
 
 # Build results *.exe
 pCli.exe

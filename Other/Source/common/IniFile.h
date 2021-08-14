@@ -267,16 +267,16 @@ namespace p_apps {
             if (!saveOnExit_) {
                 return 0;
             }
-            size_t retVal = 0;
+            size_t result = 0;
             for (auto it = begin (values); end (values) != it; ++it) {
                 if (it->second.isModified ()) {
                     if (WritePrivateProfileString (it->first.first.c_str (), it->first.second.c_str (), !it->second.getValue ().empty () ? it->second.getValue ().c_str () : nullptr, iniName_.c_str ())) {
                         it->second.propagate ();
-                        ++retVal;
+                        ++result;
                     }
                 }
             }
-            return retVal;
+            return result;
         }
 
         boost::optional<std::tstring> getValue (const std::tstring section, const std::tstring name) const {
@@ -285,11 +285,11 @@ namespace p_apps {
             if (values.end () == ref) {
                 return boost::none;
             }
-            std::tstring retVal = ref->second.getValue ();
-            if (retVal.empty ()) {
+            std::tstring result = ref->second.getValue ();
+            if (result.empty ()) {
                 return boost::none;
             }
-            return retVal;
+            return result;
         }
 
         boost::optional<std::tstring> getDefault (const std::tstring section, const std::tstring name) const {
@@ -298,11 +298,11 @@ namespace p_apps {
             if (values.end () == ref) {
                 return boost::none;
             }
-            std::tstring retVal = ref->second.getDefault ();
-            if (retVal.empty ()) {
+            std::tstring result = ref->second.getDefault ();
+            if (result.empty ()) {
                 return boost::none;
             }
-            return retVal;
+            return result;
         }
 
         std::tstring getValueNonEmpty (const std::tstring section, const std::tstring name) const {
@@ -311,11 +311,11 @@ namespace p_apps {
             if (values.end () == ref) {
                 return _T ("");
             }
-            std::tstring retVal = ref->second.getValue ();
-            if (retVal.empty ()) {
-                retVal = ref->second.getDefault ();
+            std::tstring result = ref->second.getValue ();
+            if (result.empty ()) {
+                result = ref->second.getDefault ();
             }
-            return retVal;
+            return result;
         }
 
         void enumSections (namesSet& result) const {

@@ -1,9 +1,0 @@
-
-::--------------------------------------------------------------------------------
-:: Put there extra start code
-:: it Will be executed before 4start.btm
-:: useful if you wish to setup env. variables for plugins
-:: For example:
-
-*rem *Echo =======================================
-*rem *Echo Welcome. Your code will be executed now

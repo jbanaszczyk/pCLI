@@ -14,10 +14,10 @@
 @*Echo off
 
 ::--------------------------------------------------------------------------------
-:: Transfer flow to tcStart_first.btm
+:: Transfer flow to tcStart_before.btm
 :: useful if you wish to setup env. variables for plugins
 
-*If exist %@Quote[%@Path[%_BatchName]\%@Name[%_BatchName]_first.btm] *Call %@Quote[%@Path[%_BatchName]\%@Name[%_BatchName]_first.btm]
+*If exist %@Quote[%@Path[%_BatchName]\%@Name[%_BatchName]_before.btm] *Call %@Quote[%@Path[%_BatchName]\%@Name[%_BatchName]_before.btm]
 
 ::--------------------------------------------------------------------------------
 :: Inheritance
@@ -79,8 +79,8 @@ Breakpoint Start
 :: _wow64 _x64     Win TCC                                        _x3264
 ::      0    0 ==>  32  32 ==>                                         32 (clean Win32, Tcc32, only 32-bit apps)
 ::      0    1 ==>  64  64 ==>                                         64 (clean Win64, Tcc64, all apps allowed)
-::      1    0 ==>  64  32 ==> if exist exist App\64\tcc.exe           32 (that means TccLePortable selected Tcc32 due to Force32; only 32-bit apps)
-::      1    0 ==>  64  32 ==> if not exist exist App\64\tcc.exe   look through TcclePortable.ini, if Force32 would be active
+::      1    0 ==>  64  32 ==> if exist exist App\64\tcc.exe           32 (that means pCli selected Tcc32 due to Force32; only 32-bit apps)
+::      1    0 ==>  64  32 ==> if not exist exist App\64\tcc.exe   look through pCli.ini, if Force32 would be active
 
 *Iff "%_wow64" == "0" Then
 	*Set _x3264=%@If[%_x64==0,32,64]
@@ -100,7 +100,7 @@ Breakpoint Start
 
 ::--------------------------------------------------------------------------------
 :: Basic directories:
-:: _TccDir is always defined, contains TccLePortable.exe and subdirs, like Z:\PortableApps\TccLePortable
+:: _TccDir is always defined, contains pCli.exe and subdirs, like Z:\PortableApps\pCli
 :: _PortableDir is not always defined, contains PortableApp and subdirs Z:\PortableApps
 :: Both are: quoted, with trailing backslash
 
@@ -226,9 +226,9 @@ BreakPoint Finish
 *If "%_BDEBUGGER" != "1" .AND. IsAlias Breakpoint *UnAlias Breakpoint
 
 ::--------------------------------------------------------------------------------
-:: Transfer flow to tcStart_next.btm
+:: Transfer flow to tcStart_after.btm
 
-*If exist %@Quote[%@Path[%_BatchName]\%@Name[%_BatchName]_next.btm] *Call %@Quote[%@Path[%_BatchName]\%@Name[%_BatchName]_next.btm]
+*If exist %@Quote[%@Path[%_BatchName]\%@Name[%_BatchName]_after.btm] *Call %@Quote[%@Path[%_BatchName]\%@Name[%_BatchName]_after.btm]
 
 ::--------------------------------------------------------------------------------
 :: Finish!
@@ -307,7 +307,7 @@ BreakPoint Finish
 
 	*Iff not defined _TCC$enabled Then
 		:: Register the app for future use
-		*Set _TCC$value=%@IniWrite[%@path[%_cmdspec]..\..\TccLePortable.ini,Apps,%_TCC$dirName,1]
+		*Set _TCC$value=%@IniWrite[%@path[%_cmdspec]..\..\pCli.ini,Apps,%_TCC$dirName,1]
 		*Set _TCC$enabled=1
 	*EndIff
 
@@ -474,10 +474,10 @@ BreakPoint Finish
 	:: _thisBinDir  - [quoted] one of App or App\32 or App\64 subdirs %_thisAppDir
 	:: _thisDataDir - _thisAppDir\Data
 	:: _thisIniDir  - [quoted] directory comnatining this .INI. May be %_thisAppDir\App\4TCC or %_thisAppDir\Data\4TCC
-	:: _thisApp     - last part od %_thisAppDir - something like TccLePortable or Java
+	:: _thisApp     - last part od %_thisAppDir - something like pCli or Java
 	:: _thisName    - retrived from appinfo.ini or plugininstaller.ini
 	:: _thisAppId   - retrived from appinfo.ini or plugininstaller.ini
-	:: _TccDir      - [quoted] points to the root of TccLePortable (example above: z:\PortableApps\TccLePortable )
+	:: _TccDir      - [quoted] points to the root of pCli (example above: z:\PortableApps\pCli )
 	:: _PortableDir - [quoted] points to the root of PortableApps (example above: z:\PortableApps )
 	::                _PortableDir is not defined if there is no PortableApps framework
 	:: _this3264    - equals to 32 xor 64
@@ -892,7 +892,7 @@ BreakPoint Finish
 	*Return 0
 
 ::===============================================================
-:: getPortableIni - get value from TccLePortable.ini, aware on profile settings and specific machine/user INI files
+:: getPortableIni - get value from pCli.ini, aware on profile settings and specific machine/user INI files
 :: Paradigm:
 ::   getPortableIni is valid only in tcStart - probably just after start it was unchanged
 ::   getPortableIni is not valid only in tcExit - it is possible, that it was changed. So any values related to tcExit should be passed via environment variables
@@ -903,9 +903,9 @@ BreakPoint Finish
 
 	*Set _TCC_$profile=%@Quote[%@path[%_cmdspec]..\..]
 
-	*Set _TCC_$value=%@IniRead[%_TCC_$profile\TccLePortable.ini,%_section,%_name]
+	*Set _TCC_$value=%@IniRead[%_TCC_$profile\pCli.ini,%_section,%_name]
 
-	*Set _TCC_$iniValue=%@IniRead[%_TCC_$profile\TccLePortable.ini,TccLePortable,ProfileDirectory]
+	*Set _TCC_$iniValue=%@IniRead[%_TCC_$profile\pCli.ini,pCli,ProfileDirectory]
 	*If not defined _TCC_$iniValue *Set _TCC_$iniValue=profile
 	*Set _TCC_$profile=%_TCC_$profile\Data\%_TCC_$iniValue
 	*GoSub CleanPath _TCC_$profile
@@ -914,7 +914,7 @@ BreakPoint Finish
 		*Set _TCC_$profile=%@Quote[%_TCC_$profile\%_TCC_$subProfile]
 		*If not isDir %_TCC_$profile *Leave
 
-		*Set _TCC_$iniValue=%@IniRead[%_TCC_$profile\TccLePortable.ini,%_section,%_name]
+		*Set _TCC_$iniValue=%@IniRead[%_TCC_$profile\pCli.ini,%_section,%_name]
 		*If defined _TCC_$iniValue *Set _TCC_$value=%_TCC_$iniValue
 	*EndDo
 

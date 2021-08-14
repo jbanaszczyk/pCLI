@@ -1,8 +1,0 @@
-
-::--------------------------------------------------------------------------------
-:: Put there extra start code
-:: it Will be executed afer 4start.btm
-:: For example:
-
-*rem *Echo =======================================
-*rem *Echo Welcome. Your code will be executed now

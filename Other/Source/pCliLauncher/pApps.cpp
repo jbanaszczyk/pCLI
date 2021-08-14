@@ -11,10 +11,6 @@
 #include "../common/IniFile.h"
 
 #include <windows.h>
-#include <boost/algorithm/string/join.hpp>
-#include <boost/format.hpp>
-#include <iostream>
-#include <boost/filesystem/operations.hpp>
 
 namespace p_apps {
 	/******************************************************************************
@@ -24,41 +20,41 @@ namespace p_apps {
 	 *
 	 *****************************************************************************/
 
-	 /******************************************************************************
-	  *
-	  * Some handy strings
-	  *
-	  * LAUNCHER_INI
-	  *   Name of launcher INI file
-	  *
-	  * PORTABLE_APPS
-	  *   Directory, where PortableApps platform is expected
-	  *
-	  * PORTABLE_APPS_APP
-	  *   Legacy name of application directory ( ie. "App" )
-	  *
-	  * PORTABLE_APPS_APP_LE_32
-	  *   Not legacy name of application 32-bit directory ( ie. "App\\32" )
-	  *
-	  * PORTABLE_APPS_APP_LE_64
-	  *   Not legacy name of application 64-bit directory ( ie. "App\\64" )
-	  *
-	  * PORTABLE_APPS_DATA
-	  *   Legacy name of data directory ( ie. "Data" )
-	  *
-	  * PORTABLE_APPS_DEFAULT
-	  *   Legacy name of defaults directory ( ie. "App\\DefaultData" )
-	  *
-	  * PORTABLE_APPS_INI
-	  *   Name (relative to PORTABLE_APPS)
-	  *
-	  * PORTABLE_APPS_OTHER_LOCALE
-	  *   Location of launcher' locale files
-	  *
-	  * LOCATIONS[]
-	  *   where proper launcher' directory should be located relative to this exe
-	  *
-	  *****************************************************************************/
+	/******************************************************************************
+	 *
+	 * Some handy strings
+	 *
+	 * LAUNCHER_INI
+	 *   Name of launcher INI file
+	 *
+	 * PORTABLE_APPS
+	 *   Directory, where PortableApps paltform is expected
+	 *
+	 * PORTABLE_APPS_APP
+	 *   Legacy name of application directory ( ie. "App" )
+	 *
+	 * PORTABLE_APPS_APP_LE_32
+	 *   Not legacy name of application 32-bit directory ( ie. "App\\32" )
+	 *
+	 * PORTABLE_APPS_APP_LE_64
+	 *   Not legacy name of application 64-bit directory ( ie. "App\\64" )
+	 *
+	 * PORTABLE_APPS_DATA
+	 *   Legacy name of data directory ( ie. "Data" )
+	 *
+	 * PORTABLE_APPS_DEFAULT
+	 *   Legacy name of defaults directory ( ie. "App\\DefaultData" )
+	 *
+	 * PORTABLE_APPS_INI
+	 *   Name (relative to PORTABLE_APPS)
+	 *
+	 * PORTABLE_APPS_OTHER_LOCALE
+	 *   Location of launcher' locale files
+	 *
+	 * LOCATIONS[]
+	 *   where proper launcher' directory should be located relative to this exe
+	 *
+	 *****************************************************************************/
 	static const boost::filesystem::path LAUNCHER_INI(_T(VER_PRODUCTNAME_STR) _T(".ini"));
 
 	static const boost::filesystem::path PORTABLE_APPS_APP = _T("App");
@@ -73,8 +69,8 @@ namespace p_apps {
 	static const boost::filesystem::path PORTABLE_APPS_DOCUMENTS = _T("Documents");
 
 	static const boost::filesystem::path LOCATIONS[] = {
-		_T(VER_PRODUCTNAME_STR),
-		_T("."),
+		_T(VER_PRODUCTNAME_STR),					// legacy PA.c location
+		_T(""),
 		PORTABLE_APPS / _T(VER_PRODUCTNAME_STR),
 		_T("..")
 	};
@@ -83,22 +79,84 @@ namespace p_apps {
 
 	/******************************************************************************
 	 *
+	 * If compiled with _DEBUG
+	 *   you can your own value of argv0
+	 *
+	 * Example:
+	 *   set ARGV0_TCCLEPORTABLE=D:\P4\PortableApps\PortableApps\TccLePortable\TccLePortable.exe
+	 *
+	 *****************************************************************************/
+#ifdef _DEBUG
+	const std::tstring envArgv0Name = _T("ARGV0_") _T(VER_PRODUCTNAME_STR);
+#endif
+
+	/******************************************************************************
+	 *
+	 * tstring2string
+	 * string2tstring
+	 *   Simple conversions tstring / string
+	 *
+	 *****************************************************************************/
+	std::string tstring2string(const std::tstring& sou) {
+#ifdef _UNICODE
+		std::locale const loc("");
+		wchar_t const *const from = sou.c_str();
+		std::size_t const len = sou.size();
+		std::vector<char> buffer(len + 1);
+		std::use_facet<std::ctype<wchar_t> >(loc).narrow(from, from + len, '_', &buffer[0]);
+		return std::string(&buffer[0], &buffer[len]);
+#else
+		return sou;
+#endif
+	}
+
+	/******************************************************************************
+	 *
+	 * string2tstring
+	 *   Simple conversion string -> tstring
+	 *
+	 *****************************************************************************/
+	std::tstring string2tstring(const std::string& sou) {
+#ifdef _UNICODE
+		std::locale const loc("");
+		const char *const from = sou.c_str();
+		std::size_t const len = sou.size();
+		std::vector<wchar_t> buffer(len + 1);
+		std::use_facet<std::ctype<wchar_t> >(loc).widen(from, from + len, &buffer[0]);
+		std::tstring s = std::tstring(&buffer[0], &buffer[len]);
+		return std::tstring(&buffer[0], &buffer[len]);
+#else
+		return sou;
+#endif
+	}
+
+	/******************************************************************************
+	 *
 	 * getArgv0
-	 *   Retrieve argv[0] for the current process:
+	 *   Retrive argv[0] for the currebt process:
 	 *   order:
-	 *     real process executable name (from process snapshot)
+	 *     #ifdef _DEBUG  Env. variable ARGV0_....   (see note above)
+	 *     real process executable name (from process snapshoot)
 	 *     argv[0]
 	 *
 	 *****************************************************************************/
-    boost::filesystem::path getArgv0(const TCHAR* const argv[], IEnvironment& mEnv) {
+	boost::filesystem::path getArgv0(const TCHAR *const argv[], Environment& mEnv) {
+		boost::filesystem::path argv0;
 #ifdef _DEBUG
-		if (mEnv.exists(ENV_ARGV0_NAME)) {
-            const boost::filesystem::path argv0 = mEnv.get(ENV_ARGV0_NAME);
-			mEnv.erase(ENV_ARGV0_NAME);
-			return boost::filesystem::absolute(argv0);
+		if (mEnv.exists(envArgv0Name)) {
+			argv0 = mEnv.get(envArgv0Name);
+			mEnv.erase(envArgv0Name);
+		} else
+#endif
+		{
+			boost::optional<boost::filesystem::path> myName = p_apps::_sysPidInfo.getExeName();
+			if (myName) {
+				argv0 = myName.get();
+			} else {
+				argv0 = argv[0];
+			}
 		}
-#endif		
-		return boost::filesystem::absolute(p_apps::sysPidInfo->getExeName(argv[0]));
+		return boost::filesystem::absolute(argv0);
 	}
 
 	/******************************************************************************
@@ -107,7 +165,7 @@ namespace p_apps {
 	 *   Find standard launcher' directory (where launcher ini exist)
 	 *   You will get something like <ROOT>\PortableApps\TccLePortable
 	 *
-	 *   Launcher executable can be executed from any of
+	 *   Launcher executable can be exexcuted from any of
 	 *     <ROOT>
 	 *     <ROOT>\PortableApps
 	 *     <ROOT>\PortableApps\TccLePortable
@@ -142,9 +200,9 @@ namespace p_apps {
 	/******************************************************************************
 	*
 	* env_PAppsC
-	*   setup environment as PortableApps platform would set
-	*   PortableApps platform, if running sets up many env vars named PortableApps.com*
-	*   env_PAppsC tries to setup them even if PortableApps platform was not started
+	*   setup environment as PortableApps paltform would set
+	*   PortableApps paltform, if running sets up many env vars named PortableApps.com*
+	*   env_PAppsC tries to setup them even if PortableApps paltform was not started
 	*
 	*****************************************************************************/
 	void env_PAppsC(const boost::optional<boost::filesystem::path>& exePath, p_apps::Environment& mEnv) {
@@ -272,22 +330,22 @@ namespace p_apps {
 	std::tstring normalize(const boost::filesystem::path& str) {
 		boost::system::error_code errCode;
 
-		std::tstring retVal = str._tstring();
-		boost::erase_all(retVal, _T("\""));                             // unquote; double quote is not allowed at all
+		std::tstring result = str._tstring();
+		boost::erase_all(result, _T("\""));                             // unquote; double quote is not allowed at all
 
 		static const std::tstring illegalFnameChars = _T("<>|");		// Reference: http://msdn.microsoft.com/en-us/library/aa365247%28VS.85%29.aspx
-		std::size_t found = retVal.find_first_of(illegalFnameChars);
+		std::size_t found = result.find_first_of(illegalFnameChars);
 		if (found != std::string::npos) {
-			retVal.erase(retVal.find_first_of(illegalFnameChars));
+			result.erase(result.find_first_of(illegalFnameChars));
 		}      // cut off unexpected redirections
 
-		boost::filesystem::path normalized = boost::filesystem::canonical(boost::filesystem::absolute(boost::filesystem::path(retVal), boost::filesystem::current_path(errCode)), errCode);
+		boost::filesystem::path normalized = boost::filesystem::canonical(boost::filesystem::absolute(boost::filesystem::path(result), boost::filesystem::current_path(errCode)), errCode);
 		if (boost::system::errc::success != errCode.value()) {
-			normalized = retVal;
+			normalized = result;
 		}                                        // undo canonical on error
-		retVal = normalized._tstring();
-		boost::replace_all(retVal, "/", "\\");                          // error: canonical() translates the first '\' to '/'
-		return retVal;
+		result = normalized._tstring();
+		boost::replace_all(result, "/", "\\");                          // error: canonical() translates the first '\' to '/'
+		return result;
 	}
 
 	/******************************************************************************
@@ -297,11 +355,11 @@ namespace p_apps {
 	*
 	*****************************************************************************/
 	std::tstring quote(const boost::filesystem::path& str) {
-		std::tstring retVal = unquote(str._tstring());
-		if ((!retVal.empty()) && (retVal.find(_T(' ')) != std::string::npos)) {
-			return _T("\"") + retVal + _T("\"");
+		std::tstring result = unquote(str._tstring());
+		if ((!result.empty() ) && (result.find(_T(' ')) != std::string::npos)) {
+			return _T("\"") + result + _T("\"");
 		}
-		return retVal;
+		return result;
 	}
 
 	/******************************************************************************
@@ -313,7 +371,7 @@ namespace p_apps {
 	std::tstring quote(std::tstring str) {
 		// boost:io:quote has no wchar_t support
 		str = unquote(str);
-		if ((!str.empty()) && (str.find(_T(' ')) != std::string::npos)) {
+		if ((!str.empty() ) && (str.find(_T(' ')) != std::string::npos)) {
 			return _T("\"") + str + _T("\"");
 		}
 		return str;
@@ -351,10 +409,10 @@ namespace p_apps {
 		std::unique_ptr< TCHAR[] > buf(new (std::nothrow) TCHAR[bufSize]);
 		if (buf) {
 			if (GetUserNameEx(NameSamCompatible, buf.get(), &bufSize)) {
-				std::tstring retVal = buf.get();
-				boost::trim_if(retVal, std::bind2nd(std::equal_to<TCHAR>(), _T('\\')));  // domain version can add trailing backslashes
-				if (boost::find_first(retVal, _T("\\"))) {
-					return retVal;
+				std::tstring result = buf.get();
+				boost::trim_if(result, std::bind2nd(std::equal_to<TCHAR>(), _T('\\')));  // domain version can add trailing backslashes
+				if (boost::find_first(result, _T("\\"))) {
+					return result;
 				}
 			}
 		}
@@ -381,12 +439,12 @@ namespace p_apps {
 
 	std::tstring pathToUnc(const boost::filesystem::path netPath) {
 		DWORD bufSize = 0;
-		UNIVERSAL_NAME_INFO* nothing = nullptr;
+		UNIVERSAL_NAME_INFO * nothing = nullptr;
 		if (ERROR_MORE_DATA == WNetGetUniversalName(netPath._tstring().c_str(), UNIVERSAL_NAME_INFO_LEVEL, &nothing, &bufSize)) {
 			std::unique_ptr< BYTE[] > buf(new (std::nothrow) BYTE[bufSize]);
 			if (buf) {
 				WNetGetUniversalName(netPath._tstring().c_str(), UNIVERSAL_NAME_INFO_LEVEL, buf.get(), &bufSize);
-				UNIVERSAL_NAME_INFO* pUni = (UNIVERSAL_NAME_INFO*)buf.get();
+				UNIVERSAL_NAME_INFO * pUni = (UNIVERSAL_NAME_INFO *)buf.get();
 				return pUni->lpUniversalName;
 			}
 		}
@@ -400,7 +458,7 @@ namespace p_apps {
 	 *
 	 *****************************************************************************/
 	bool makeDirWriteable(const boost::filesystem::path dir) {
-		bool retVal = false;
+		bool result = false;
 		boost::system::error_code errCode;
 		boost::filesystem::path testDir = dir / boost::filesystem::unique_path(_T("%%%%-%%%%-%%%%-%%%%"));
 		if (boost::system::errc::success != errCode.value()) {
@@ -412,9 +470,9 @@ namespace p_apps {
 		boost::filesystem::create_directories(testDir, errCode);
 		if (boost::system::errc::success == errCode.value()) {
 			boost::filesystem::remove(testDir); // remove only the top one
-			retVal = true;
+			result = true;
 		}
-		return retVal;
+		return result;
 	}
 
 	/******************************************************************************
@@ -429,8 +487,8 @@ namespace p_apps {
 		std::cin.imbue(std::locale());
 #ifdef _UNICODE
 		(void) _setmode(_fileno(stdout), _O_WTEXT);
-		(void)_setmode(_fileno(stdin), _O_WTEXT);
-		(void)_setmode(_fileno(stderr), _O_WTEXT);
+		(void) _setmode(_fileno(stdin), _O_WTEXT);
+		(void) _setmode(_fileno(stderr), _O_WTEXT);
 #endif
 	}
 	/******************************************************************************
@@ -446,14 +504,13 @@ namespace p_apps {
 	 *****************************************************************************/
 
 	void abend(const boost::_tformat msg, int errCode) {
-		if (p_apps::sysPidInfo.hasConsole()) {
+		if (p_apps::_sysPidInfo.hasConsole()) {
 			std::_tcerr << msg << std::endl;
-			if (p_apps::sysPidInfo.ownsConsole()) {
+			if (p_apps::_sysPidInfo.ownsConsole()) {
 				std::_tcerr << _T("Press [ENTER] key to exit.") << std::endl;
 				std::_tcin.get();
 			}
-		}
-		else {
+		} else {
 			MessageBox(nullptr, msg.str().c_str(), (boost::_tformat(_T("Cann't continue."))).str().c_str(), MB_OK | MB_ICONERROR);
 		}
 		exit(errCode);
@@ -485,7 +542,7 @@ namespace p_apps {
 		SetLastError(ERROR_SUCCESS);
 		if (err) {
 			LPCTSTR lpMsgBuf = nullptr;
-			DWORD bufLen = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_ARGUMENT_ARRAY | FORMAT_MESSAGE_ALLOCATE_BUFFER, nullptr, err, 0, (LPTSTR)& lpMsgBuf, 0, nullptr);
+			DWORD bufLen = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_ARGUMENT_ARRAY | FORMAT_MESSAGE_ALLOCATE_BUFFER, nullptr, err, 0, (LPTSTR)&lpMsgBuf, 0, nullptr);
 			if (bufLen) {
 				std::tstring result(lpMsgBuf, lpMsgBuf + bufLen);
 				LocalFree((HLOCAL)lpMsgBuf);
@@ -500,20 +557,25 @@ namespace p_apps {
 	*****************************************************************************/
 	boost::optional<DWORD> launch(tpWait pWait, const std::tstring& cmdName, const std::vector<std::tstring>& cmdLine, const p_apps::Environment& cmdEnvironment, boost::filesystem::path cwd) {
 		if (tpWait::pWait_Auto == pWait) {
-			if (!p_apps::sysPidInfo.ownsConsole()) {
+			if (!p_apps::_sysPidInfo.ownsConsole()) {
 				pWait = tpWait::pWait_Wait;
 			}
 			if (tpWait::pWait_Auto == pWait) {
-				if (p_apps::sysPidInfo.hasInjectedDll(_T("ConEmuHk.dll")) || p_apps::sysPidInfo.hasInjectedDll(_T("ConEmuHk64.dll")))
+				boost::optional<boost::filesystem::path> conEmu = p_apps::_sysPidInfo.getDllName(_T("ConEmuHk.dll"));
+				if (!conEmu) {
+					conEmu = p_apps::_sysPidInfo.getDllName(_T("ConEmuHk64.dll"));
+				}
+				if (conEmu) {
 					pWait = tpWait::pWait_Wait;
+				}
 			}
 			if (tpWait::pWait_Auto == pWait) {
 				pWait = tpWait::pWait_NoWait;
 			}
 		}
 
-		// pWait jest nie ustawione ok????
-		pWait = tpWait::pWait_Wait;
+// pWait jest nie ustawione ok????
+pWait = tpWait::pWait_Wait;
 
 		//-------------------------------------------- lpApplicationName
 		//-------------------------------------------- lpCommandLine
@@ -532,14 +594,14 @@ namespace p_apps {
 		creationFlags |= CREATE_UNICODE_ENVIRONMENT;
 #endif
 		//-------------------------------------------- lpEnvironment
-		std::unique_ptr< TCHAR[]> env = cmdEnvironment.dump();
-
+		std::unique_ptr<TCHAR[]> env;
+		cmdEnvironment.dump(env);
 		//-------------------------------------------- lpCurrentDirectory
 		//-------------------------------------------- lpStartupInfo
 		STARTUPINFO startupInfo;
 		ZeroMemory(&startupInfo, sizeof startupInfo);
 		STARTUPINFO myStartupInfoPtr;
-		if (p_apps::sysPidInfo.getStartupInfo(&myStartupInfoPtr)) {
+		if (p_apps::_sysPidInfo.GetStartupInfo(&myStartupInfoPtr)) {
 			CopyMemory(&startupInfo, &myStartupInfoPtr, sizeof startupInfo);
 		}
 		startupInfo.lpTitle = nullptr;
@@ -551,16 +613,16 @@ namespace p_apps {
 		processInfo.hProcess = nullptr;
 		processInfo.hThread = nullptr;
 		//-------------------------------------------- go
-		BOOL ok = p_apps::sysPidInfo.createProcess(cmdName.c_str(), commandLine.get(), nullptr, nullptr, FALSE, creationFlags, env.get(), cwd.c_str(), &startupInfo, &processInfo);
+		BOOL ok = p_apps::_sysPidInfo.CreateProcess(cmdName.c_str(), commandLine.get(), nullptr, nullptr, FALSE, creationFlags, env.get(), cwd.c_str(), &startupInfo, &processInfo);
 		env.reset();
 		commandLine.reset();
 		if (!ok) {
 			p_apps::abend(boost::_tformat(_T("Cann't execute %1%: %2%")) % cmdName % lastErrorMsg(), 1);
 		}
-		p_apps::sysPidInfo.setPriorityClass(processInfo.hProcess, p_apps::sysPidInfo.getPriorityClass());
+		p_apps::_sysPidInfo.SetPriorityClass(processInfo.hProcess, p_apps::_sysPidInfo.GetPriorityClass());
 
 		boost::optional<std::tstring> execError;
-		if (!p_apps::sysPidInfo.resumeThread(processInfo.hThread)) {
+		if (!p_apps::_sysPidInfo.ResumeThread(processInfo.hThread)) {
 			execError = lastErrorMsg();
 		}
 
@@ -568,15 +630,15 @@ namespace p_apps {
 			p_apps::abend(boost::_tformat(_T("Cann't execute %1%: %2%")) % cmdName % execError.get(), 1);
 		}
 
-		if (tpWait::pWait_Wait == pWait && processInfo.hProcess != nullptr) {
+		if (tpWait::pWait_Wait == pWait && processInfo.hProcess !=  nullptr ) {
 			WaitForSingleObject(processInfo.hProcess, INFINITE);
 		}
 
-		if (processInfo.hProcess != nullptr) {
+		if (processInfo.hProcess != nullptr ) {
 			CloseHandle(processInfo.hProcess);
 			processInfo.hProcess = nullptr;
 		}
-		if (processInfo.hThread != nullptr) {
+		if (processInfo.hThread != nullptr ) {
 			CloseHandle(processInfo.hThread);
 			processInfo.hThread = nullptr;
 		}
