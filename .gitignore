@@ -37,10 +37,13 @@
 /Libraries/*
 !/Libraries/README.md
 
-
+/pCLI.ini
 /Data
 /pCLI.exe
-/pCLI.ini
+/pCli32.exe
+/pCli32_d.exe
+/pCli64.exe
+/pCli64_d.exe
 
 # Build results *.exe
 pCli.exe
