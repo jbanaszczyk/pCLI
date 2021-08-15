@@ -7,7 +7,7 @@
 
 #include "stdafx.h"
 
-#include "./pApps2.h"
+#include "pAppsUtils.h"
 #include "LauncherVersion.h"
 
 namespace p_apps {

@@ -113,14 +113,14 @@
     <ClInclude Include="..\common\YesNoOption.h" />
     <ClInclude Include="LauncherVersion.h" />
     <ClInclude Include="pApps.h" />
-    <ClInclude Include="papps2.h" />
+    <ClInclude Include="pAppsUtils.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\common\CtrlHandler.cpp" />
     <ClCompile Include="..\common\SysPidInfo.cpp" />
     <ClCompile Include="pApps.cpp" />
-    <ClCompile Include="pApps2.cpp" />
+    <ClCompile Include="pAppsUtils.cpp" />
     <ClCompile Include="pCliLauncher.cpp" />
   </ItemGroup>
   <ItemGroup>
