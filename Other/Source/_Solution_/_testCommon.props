@@ -2,16 +2,19 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup>
+  <PropertyGroup Label="gTest">
+    <GTestDir>X:\PortableApps\CommonFiles\Libraries\googletest</GTestDir>
+    <GTestDirLib>$(GTestDir)\stage\msvc\$(PlatFormToolsetVersion)\$(Platform)\$(Configuration)</GTestDirLib>
+    <GTestDirInclude>$(GTestDir)\googletest\include;$(GTestDir)\googlemock\include;</GTestDirInclude>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\Libraries\googletest\googletest\include;$(SolutionDir)..\Libraries\googletest\googlemock\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(GTestDirInclude);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\Libraries\googletest\googlemock\msvc\$(PlatFormToolsetVersion)\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-			<AdditionalDependencies>gmock.lib;gmock_main.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(GTestDirLib);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>gmock.lib;gmock_main.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup />
@@ -36,7 +39,3 @@
     </ClCompile>
   </ItemDefinitionGroup>
 </Project>
-
-
-
-
