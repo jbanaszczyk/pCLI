@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright 2013 Jacek.Banaszczyk@gmail.com
+ * Copyright 2011 jacek.banaszczyk@gmail.com
  * Part of pCli project: https://github.com/jbanaszczyk/pCli
  *
  *****************************************************************************/
@@ -92,8 +92,8 @@ namespace p_apps {
 	 *   Simple conversions tstring / string
 	 *
 	 *****************************************************************************/
-	std::string tstring2string( const std::tstring& sou );
-	std::tstring string2tstring( const std::string& sou );
+	auto tstring2string(const std::tstring& sou) -> std::string;
+	auto string2tstring(const std::string& sou) -> std::tstring;
 
 	/******************************************************************************
 	 *
@@ -105,7 +105,7 @@ namespace p_apps {
 	 *     argv[0]
 	 *
 	 *****************************************************************************/
-	boost::filesystem::path getArgv0( const TCHAR *const argv[], Environment& mEnv );
+	auto getArgv0(const TCHAR* const argv[ ], Environment& mEnv) -> boost::filesystem::path;
 
 	/******************************************************************************
 	 *
@@ -121,7 +121,7 @@ namespace p_apps {
 	 *   In all cases findPAppsDir will point to <ROOT>\PortableApps\TccLePortable
 	 *
 	 *****************************************************************************/
-	boost::optional<boost::filesystem::path> findPAppsDir( const boost::filesystem::path& exePath, const boost::filesystem::path& argv0, p_apps::Environment& mEnv );
+	auto findPAppsDir(const boost::filesystem::path& exePath, const boost::filesystem::path& argv0, Environment& mEnv) -> boost::optional<boost::filesystem::path>;
 
 	/******************************************************************************
 	*
@@ -131,7 +131,7 @@ namespace p_apps {
 	*   env_PAppsC tries to setup them even if PortableApps paltform was not started
 	*
 	*****************************************************************************/
-	void env_PAppsC(const boost::optional<boost::filesystem::path>& exePath, p_apps::Environment& mEnv);
+	auto env_PAppsC(const boost::optional<boost::filesystem::path>& exePath, Environment& mEnv) -> void;
 
 	/******************************************************************************
 	 *
@@ -139,7 +139,7 @@ namespace p_apps {
 	 *   like boost::filesystem::copy, but if source is directory - copies whole tree
 	 *
 	 *****************************************************************************/
-	bool copyCopy( boost::filesystem::path const& source, boost::filesystem::path const& destination, boost::system::error_code& ec );
+	auto copyCopy(const boost::filesystem::path& source, const boost::filesystem::path& destination, boost::system::error_code& ec) -> bool;
 
 	/******************************************************************************
 	 *
@@ -147,7 +147,7 @@ namespace p_apps {
 	 *   remove existing quotes from the string (probably path)
 	 *
 	 *****************************************************************************/
-	std::tstring unquote( const std::tstring& str );
+	auto unquote(const std::tstring& str) -> std::tstring;
 
 	/******************************************************************************
 	 *
@@ -155,9 +155,9 @@ namespace p_apps {
 	 *   quote path containing spaces
 	 *
 	 *****************************************************************************/
-	std::tstring quote( std::tstring str );
-	std::tstring quote(const boost::filesystem::path& str);
-	std::tstring normalize(const boost::filesystem::path& str);
+	auto quote(std::tstring str) -> std::tstring;
+	auto quote(const boost::filesystem::path& str) -> std::tstring;
+	auto normalize(const boost::filesystem::path& str) -> std::tstring;
 
 	/******************************************************************************
 	 *
@@ -165,7 +165,7 @@ namespace p_apps {
 	 *   retrieve NetBIOS computer name
 	 *
 	 *****************************************************************************/
-	std::tstring getComputerName();
+	auto getComputerName() -> std::tstring;
 
 	/******************************************************************************
 	 *
@@ -173,7 +173,7 @@ namespace p_apps {
 	 *   retrieve SamCompatible user name. Something like Engineering\JSmith
 	 *
 	 *****************************************************************************/
-	std::tstring getUserName();
+	auto getUserName() -> std::tstring;
 
 	/******************************************************************************
 	*
@@ -181,7 +181,7 @@ namespace p_apps {
 	*   compatible with getUserName
 	*
 	*****************************************************************************/
-	std::tstring getDomainName();
+	auto getDomainName() -> std::tstring;
 
 	/******************************************************************************
 	*
@@ -189,7 +189,7 @@ namespace p_apps {
 	*   Convert path to UNC
 	*
 	*****************************************************************************/
-	std::tstring pathToUnc(const boost::filesystem::path netPath);
+	auto pathToUnc(boost::filesystem::path netPath) -> std::tstring;
 
 	/******************************************************************************
 	 *
@@ -197,7 +197,7 @@ namespace p_apps {
 	 *   creates (if required) and check, if directory is writeable
 	 *
 	 *****************************************************************************/
-	bool makeDirWriteable( const boost::filesystem::path dir );
+	auto makeDirWriteable(boost::filesystem::path dir) -> bool;
 
 	/******************************************************************************
 	*
@@ -205,7 +205,7 @@ namespace p_apps {
 	*   made stdin/stdout/stderr locale-aware
 	*
 	*****************************************************************************/
-	void imbueIO();
+	auto imbueIO() -> void;
 
 	/******************************************************************************
 	 *
@@ -218,7 +218,7 @@ namespace p_apps {
 	 *       _T( "Cann't to continue." )
 	 *
 	 *****************************************************************************/
-	void abend( const boost::_tformat msg, int errCode );
+	auto abend(boost::_tformat msg, int errCode) -> void;
 
 	/******************************************************************************
 	 *
@@ -227,7 +227,7 @@ namespace p_apps {
 	 *   clears errno
 	 *
 	 *****************************************************************************/
-	std::tstring errnoMsg();
+	auto errnoMsg() -> std::tstring;
 
 	/******************************************************************************
 	 *
@@ -236,7 +236,7 @@ namespace p_apps {
 	 *   clears LastError
 	 *
 	 *****************************************************************************/
-	std::tstring lastErrorMsg();
+	auto lastErrorMsg() -> std::tstring;
 
 	/******************************************************************************
 	 *
@@ -246,9 +246,12 @@ namespace p_apps {
 	 *   boost::undef
 	 *
 	 *****************************************************************************/
-	enum class tpWait { pWait_Auto, pWait_Wait, pWait_NoWait };
+	enum class tpWait {
+		pWait_Auto,
+		pWait_Wait,
+		pWait_NoWait
+	};
 
-	boost::optional<DWORD> launch( tpWait pWait, const std::tstring& cmdName, const std::vector<std::tstring>& cmdLine, const p_apps::Environment& cmdEnvironment, boost::filesystem::path cwd );
+	auto launch(tpWait pWait, const std::tstring& cmdName, const std::vector<std::tstring>& cmdLine, const Environment& cmdEnvironment, boost::filesystem::path cwd) -> boost::optional<DWORD>;
 
 }
-

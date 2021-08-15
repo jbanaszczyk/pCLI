@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright 2013 Jacek.Banaszczyk@gmail.com
+ * Copyright 2011 jacek.banaszczyk@gmail.com
  * Part of pCli project: https://github.com/jbanaszczyk/pCli
  *
  *****************************************************************************/
@@ -70,45 +70,45 @@ namespace p_apps {
 
 	class SysPidInfo {
 		private:
-			typedef BOOL     ( WINAPI *__CREATE_PROCESS )               ( LPCTSTR, LPTSTR, LPSECURITY_ATTRIBUTES, LPSECURITY_ATTRIBUTES, BOOL, DWORD, LPVOID, LPCTSTR, LPSTARTUPINFO, LPPROCESS_INFORMATION );
-			typedef BOOL     ( WINAPI *__ENUM_PROCESS_MODULES )         ( HANDLE, HMODULE *, DWORD, LPDWORD );
-			typedef BOOL     ( WINAPI *__IS_WOW64_PROCESS )             ( HANDLE, PBOOL );
-			typedef BOOL     ( WINAPI *__PROCESS32_FIRST )              ( HANDLE, LPPROCESSENTRY32 );
-			typedef BOOL     ( WINAPI *__PROCESS32_NEXT )               ( HANDLE, LPPROCESSENTRY32 );
-			typedef BOOL     ( WINAPI *__READ_PROCESS_MEMORY )          ( HANDLE, LPCVOID, LPVOID, SIZE_T, SIZE_T * );
-			typedef BOOL     ( WINAPI *__SET_PRIORITY_CLASS )           ( HANDLE, DWORD );
-			typedef DWORD    ( WINAPI *__GETCURRENT_PROCESS_ID )        ( VOID );
-			typedef DWORD    ( WINAPI *__GETMODULE_FILE_NAME_EX )       ( HANDLE, HMODULE, LPTSTR, DWORD );
-			typedef DWORD    ( WINAPI *__GETPROCESS_IMAGE_FILE_NAME )   ( HANDLE, LPTSTR, DWORD ) ;
-			typedef DWORD    ( WINAPI *__GET_PRIORITY_CLASS )           ( HANDLE );
-			typedef DWORD    ( WINAPI *__GET_WINDOW_THREAD_PROCESS_ID ) ( HWND, LPDWORD );
-			typedef DWORD    ( WINAPI *__QUERY_DOS_DEVICE )             ( LPCTSTR, LPTSTR, DWORD );
-			typedef DWORD    ( WINAPI *__RESUME_THREAD)                 ( HANDLE );
-			typedef HANDLE   ( WINAPI *__CREATE_TOOLHELP32_SNAPSHOT )   ( DWORD, DWORD );
-			typedef HANDLE   ( WINAPI *__OPEN_PROCESS )                 ( DWORD, BOOL, DWORD );
-			typedef HWND     ( WINAPI *__GET_CONSOLE_WINDOW )           ( VOID );
-			typedef NTSTATUS ( WINAPI *__NT_QUERY_INFORMATION_PROCESS ) ( HANDLE, PROCESSINFOCLASS, PVOID, ULONG, PULONG );
-			typedef VOID     ( WINAPI *__GET_STARTUP_INFO )             ( LPSTARTUPINFO );
+			using __CREATE_PROCESS = BOOL( WINAPI *)(LPCTSTR, LPTSTR, LPSECURITY_ATTRIBUTES, LPSECURITY_ATTRIBUTES, BOOL, DWORD, LPVOID, LPCTSTR, LPSTARTUPINFO, LPPROCESS_INFORMATION);
+			using __ENUM_PROCESS_MODULES = BOOL( WINAPI *)(HANDLE, HMODULE*, DWORD, LPDWORD);
+			using __IS_WOW64_PROCESS = BOOL( WINAPI *)(HANDLE, PBOOL);
+			using __PROCESS32_FIRST = BOOL( WINAPI *)(HANDLE, LPPROCESSENTRY32);
+			using __PROCESS32_NEXT = BOOL( WINAPI *)(HANDLE, LPPROCESSENTRY32);
+			using __READ_PROCESS_MEMORY = BOOL( WINAPI *)(HANDLE, LPCVOID, LPVOID, SIZE_T, SIZE_T*);
+			using __SET_PRIORITY_CLASS = BOOL( WINAPI *)(HANDLE, DWORD);
+			using __GETCURRENT_PROCESS_ID = DWORD( WINAPI *)(VOID);
+			using __GETMODULE_FILE_NAME_EX = DWORD( WINAPI *)(HANDLE, HMODULE, LPTSTR, DWORD);
+			using __GETPROCESS_IMAGE_FILE_NAME = DWORD( WINAPI *)(HANDLE, LPTSTR, DWORD);
+			using __GET_PRIORITY_CLASS = DWORD( WINAPI *)(HANDLE);
+			using __GET_WINDOW_THREAD_PROCESS_ID = DWORD( WINAPI *)(HWND, LPDWORD);
+			using __QUERY_DOS_DEVICE = DWORD( WINAPI *)(LPCTSTR, LPTSTR, DWORD);
+			using __RESUME_THREAD = DWORD( WINAPI *)(HANDLE);
+			using __CREATE_TOOLHELP32_SNAPSHOT = HANDLE( WINAPI *)(DWORD, DWORD);
+			using __OPEN_PROCESS = HANDLE( WINAPI *)(DWORD, BOOL, DWORD);
+			using __GET_CONSOLE_WINDOW = HWND( WINAPI *)(VOID);
+			using __NT_QUERY_INFORMATION_PROCESS = NTSTATUS( WINAPI *)(HANDLE, PROCESSINFOCLASS, PVOID, ULONG, PULONG);
+			using __GET_STARTUP_INFO = VOID( WINAPI *)(LPSTARTUPINFO);
 
-			__CREATE_PROCESS               _fnCreateProcess;
-			__CREATE_TOOLHELP32_SNAPSHOT   _fnCreateToolhelp32Snapshot;
-			__ENUM_PROCESS_MODULES         _fnEnumProcessModules;
-			__GETCURRENT_PROCESS_ID        _fnGetCurrentProcessId;
-			__GETMODULE_FILE_NAME_EX       _fnGetModuleFileNameEx;
-			__GETPROCESS_IMAGE_FILE_NAME   _fnGetProcessImageFileName;
-			__GET_CONSOLE_WINDOW           _fnGetConsoleWindow;
-			__GET_PRIORITY_CLASS           _fnGetPriorityClass;
-			__GET_STARTUP_INFO             _fnGetStartupInfo;
+			__CREATE_PROCESS _fnCreateProcess;
+			__CREATE_TOOLHELP32_SNAPSHOT _fnCreateToolhelp32Snapshot;
+			__ENUM_PROCESS_MODULES _fnEnumProcessModules;
+			__GETCURRENT_PROCESS_ID _fnGetCurrentProcessId;
+			__GETMODULE_FILE_NAME_EX _fnGetModuleFileNameEx;
+			__GETPROCESS_IMAGE_FILE_NAME _fnGetProcessImageFileName;
+			__GET_CONSOLE_WINDOW _fnGetConsoleWindow;
+			__GET_PRIORITY_CLASS _fnGetPriorityClass;
+			__GET_STARTUP_INFO _fnGetStartupInfo;
 			__GET_WINDOW_THREAD_PROCESS_ID _fnGetWindowThreadProcessId;
-			__IS_WOW64_PROCESS             _fnIsWow64Process;
+			__IS_WOW64_PROCESS _fnIsWow64Process;
 			__NT_QUERY_INFORMATION_PROCESS _fnNtQueryInformationProcess;
-			__OPEN_PROCESS                 _fnOpenProcess;
-			__PROCESS32_FIRST              _fnProcess32First;
-			__PROCESS32_NEXT               _fnProcess32Next;
-			__QUERY_DOS_DEVICE             _fnQueryDosDevice;
-			__READ_PROCESS_MEMORY          _fnReadProcessMemory;
-			__RESUME_THREAD                _fnResumeThread;
-			__SET_PRIORITY_CLASS           _fnSetPriorityClass;
+			__OPEN_PROCESS _fnOpenProcess;
+			__PROCESS32_FIRST _fnProcess32First;
+			__PROCESS32_NEXT _fnProcess32Next;
+			__QUERY_DOS_DEVICE _fnQueryDosDevice;
+			__READ_PROCESS_MEMORY _fnReadProcessMemory;
+			__RESUME_THREAD _fnResumeThread;
+			__SET_PRIORITY_CLASS _fnSetPriorityClass;
 
 			HINSTANCE _hInstDllKernel;
 			HINSTANCE _hInstDllPsApi;
@@ -120,34 +120,35 @@ namespace p_apps {
 			SysPidInfo();
 			~SysPidInfo();
 		public:
-			DWORD getMyPID() const;
-			boost::optional<DWORD> getParentPID () const;
-			boost::optional<DWORD> getParentPID ( const DWORD aPid ) const;
-			boost::optional<std::tstring> getName () const;
-			boost::optional<std::tstring> getName ( const DWORD aPid ) const;
-			boost::optional<boost::filesystem::path> getExeName () const;
-			boost::optional<boost::filesystem::path> getExeName ( const DWORD aPid ) const;
-			boost::optional<boost::filesystem::path> getDllName ( const std::tstring dllName ) const;
-			boost::optional<boost::filesystem::path> getDllName ( const std::tstring dllName, const DWORD aPid ) const;
-			bool isWow64() const;
-			bool isWow64 ( const DWORD aPid ) const;
+			auto getMyPID() const -> DWORD;
+			auto getParentPID() const -> boost::optional<DWORD>;
+			auto getParentPID(DWORD aPid) const -> boost::optional<DWORD>;
+			auto getName() const -> boost::optional<std::tstring>;
+			auto getName(DWORD aPid) const -> boost::optional<std::tstring>;
+			auto getExeName() const -> boost::optional<boost::filesystem::path>;
+			auto getExeName(DWORD aPid) const -> boost::optional<boost::filesystem::path>;
+			auto getDllName(std::tstring dllName) const -> boost::optional<boost::filesystem::path>;
+			auto getDllName(std::tstring dllName, DWORD aPid) const -> boost::optional<boost::filesystem::path>;
+			auto isWow64() const -> bool;
+			auto isWow64(DWORD aPid) const -> bool;
 
-			DWORD GetPriorityClass() const;
-			DWORD GetPriorityClass( const DWORD aPid ) const;
+			auto GetPriorityClass() const -> DWORD;
+			auto GetPriorityClass(DWORD aPid) const -> DWORD;
 
-			void SetPriorityClass( HANDLE hProcess, DWORD dwPriorityClass ) const;
-			bool ResumeThread ( HANDLE hThread ) const;
+			auto SetPriorityClass(HANDLE hProcess, DWORD dwPriorityClass) const -> void;
+			auto ResumeThread(HANDLE hThread) const -> bool;
 
-			HWND hasConsole() const;
-			bool ownsConsole() const;
-			bool getCommandLine ( const DWORD aPid, std::vector<std::tstring>& args ) const;
+			auto hasConsole() const -> HWND;
+			auto ownsConsole() const -> bool;
+			auto getCommandLine(DWORD aPid, std::vector<std::tstring>& args) const -> bool;
 
-			BOOL GetStartupInfo( LPSTARTUPINFO lpStartupInfo ) const;
-			BOOL CreateProcess( LPCTSTR lpApplicationName, LPTSTR lpCommandLine, LPSECURITY_ATTRIBUTES lpProcessAttributes, LPSECURITY_ATTRIBUTES lpThreadAttributes, BOOL bInheritHandles, DWORD dwCreationFlags, LPVOID lpEnvironment, LPCTSTR lpCurrentDirectory, LPSTARTUPINFO lpStartupInfo, LPPROCESS_INFORMATION lpProcessInformation ) const;
+			auto GetStartupInfo(LPSTARTUPINFO lpStartupInfo) const -> BOOL;
+			auto CreateProcess(LPCTSTR lpApplicationName, LPTSTR lpCommandLine, LPSECURITY_ATTRIBUTES lpProcessAttributes, LPSECURITY_ATTRIBUTES lpThreadAttributes, BOOL bInheritHandles, DWORD dwCreationFlags,
+			                   LPVOID lpEnvironment, LPCTSTR lpCurrentDirectory, LPSTARTUPINFO lpStartupInfo, LPPROCESS_INFORMATION lpProcessInformation) const -> BOOL;
 		private:
-			void clear(void);
-			bool findProcessInfo ( PROCESSENTRY32& procEntry, const DWORD aPid ) const;
-			FARPROC SysPidInfo::tGetProcAddress ( const HMODULE hModule, const LPCSTR lpProcName ) const;
+			auto clear(void) -> void;
+			auto findProcessInfo(PROCESSENTRY32& procEntry, DWORD aPid) const -> bool;
+			auto SysPidInfo::tGetProcAddress(HMODULE hModule, LPCSTR lpProcName) const -> FARPROC;
 	};
 
 	extern SysPidInfo _sysPidInfo;

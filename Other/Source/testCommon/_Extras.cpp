@@ -1,6 +1,6 @@
 /******************************************************************************
 *
-* Copyright 2013 Jacek.Banaszczyk@gmail.com
+* Copyright 2011 jacek.banaszczyk@gmail.com
 * Part of pCli project: https://github.com/jbanaszczyk/pCli
 *
 *****************************************************************************/

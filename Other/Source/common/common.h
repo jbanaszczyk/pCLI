@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright 2013 Jacek.Banaszczyk@gmail.com
+ * Copyright 2011 jacek.banaszczyk@gmail.com
  * Part of pCli project: https://github.com/jbanaszczyk/pCli
  *
  *****************************************************************************/
@@ -83,12 +83,12 @@
 using namespace std::string_literals;
 
 #ifdef _INC_TCHAR
-	namespace std {
-		typedef std::basic_string<TCHAR>   tstring;
-		typedef std::basic_ifstream<TCHAR> tifstream;
-	}
+namespace std {
+	using tstring = std::basic_string<TCHAR>;
+	using tifstream = std::basic_ifstream<TCHAR>;
+}
 
-	#ifndef _UNICODE
+#ifndef _UNICODE
 		#define _tcout cout
 		#define _tcerr cerr
 		#define _tcin  cin
@@ -96,39 +96,39 @@ using namespace std::string_literals;
 		#define _tstring string			// to be used with boost:: filesystem
 		#define _texecve _execve
 		#define _tspawnve _spawnve
-	#else
-		#define _tcout wcout
-		#define _tcerr wcerr
-		#define _tcin  wcin
-		#define _tformat wformat		// to be usedx with boost:: format
-		#define _tstring wstring		// to be used with boost:: filesystem
-		#define _texecve _wexecve
-		#define _tspawnve _wspawnve
-	#endif
+#else
+#define _tcout wcout
+#define _tcerr wcerr
+#define _tcin  wcin
+#define _tformat wformat		// to be usedx with boost:: format
+#define _tstring wstring		// to be used with boost:: filesystem
+#define _texecve _wexecve
+#define _tspawnve _wspawnve
+#endif
 #endif
 
 #ifdef MAX_PATH
-	#undef MAX_PATH
-	#define MAX_PATH 32767
+#undef MAX_PATH
+#define MAX_PATH 32767
 #endif
 
 #ifdef _HEAP_MAXREQ
-	// real maximum allocation size is a bit les, than _HEAP_MAXREQ
-	#ifdef _DEBUG
-		#ifdef _WIN64
+// real maximum allocation size is a bit les, than _HEAP_MAXREQ
+#ifdef _DEBUG
+#ifdef _WIN64
 			const size_t heapMaxReqReal = _HEAP_MAXREQ - 52;
-		#else
+#else
 			const size_t heapMaxReqReal = _HEAP_MAXREQ - 36;
-		#endif
-	#else
-		const size_t heapMaxReqReal = _HEAP_MAXREQ;
-	#endif
+#endif
+#else
+const size_t heapMaxReqReal = _HEAP_MAXREQ;
+#endif
 
-	#ifdef _WIN64
-		#define GWL_WNDPROC_6432 GWLP_WNDPROC
-	#else
+#ifdef _WIN64
+#define GWL_WNDPROC_6432 GWLP_WNDPROC
+#else
 		#define GWL_WNDPROC_6432 GWL_WNDPROC
-	#endif
+#endif
 
 #endif
 
@@ -141,8 +141,7 @@ using namespace std::string_literals;
 #endif
 
 #ifndef STATUS_SUCCESS
-	#define STATUS_SUCCESS	((NTSTATUS)0x00000000L)  // from of NtStatus.h
+#define STATUS_SUCCESS	((NTSTATUS)0x00000000L)  // from of NtStatus.h
 #endif
 
 /***************************************************************************************/
-

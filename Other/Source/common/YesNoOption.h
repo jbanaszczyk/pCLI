@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * Copyright 2013 Jacek.Banaszczyk@gmail.com
+ * Copyright 2011 jacek.banaszczyk@gmail.com
  * Part of pCli project: https://github.com/jbanaszczyk/pCli
  *
  *****************************************************************************/
@@ -25,45 +25,51 @@
 namespace p_apps {
 
 	class YesNoOption {
-	private:
-		template<typename T>
-		struct fuLess : std::binary_function < T, T, bool > {
-			bool operator() (const T& s1, const T& s2) const {
-				return boost::ilexicographical_compare(s1, s2);
-			}
-		};
-		std::map< std::tstring, bool, fuLess<std::tstring>> _values;
+		private:
+			template <typename T>
+			struct fuLess: std::binary_function<T, T, bool> {
+				auto operator()(const T& s1, const T& s2) const -> bool {
+					return boost::ilexicographical_compare(s1, s2);
+				}
+			};
 
-		bool getOption(const std::tstring& key, const bool defValue) const {
-			auto itValues = _values.find(key);
-			if (_values.end() == itValues)
-				return defValue;
-			return itValues->second;
-		};
+			std::map<std::tstring, bool, fuLess<std::tstring>> _values;
 
-	public:
-		YesNoOption() : _values({
-			{ _T("yes"), true },
-			{ _T("true"), true },
-			{ _T("1"), true },
-			{ _T("no"), false },
-			{ _T("false"), false },
-			{ _T("0"), false }
-		}) { }
+			auto getOption(const std::tstring& key, const bool defValue) const -> bool {
+				auto itValues = _values.find(key);
+				if (_values.end() == itValues){
+					return defValue;
+				}
+				return itValues->second;
+			};
 
-			~YesNoOption() {};
-
-			void addString(const std::tstring& key, const bool value) {
-				_values[key] = value;
+		public:
+			YesNoOption()
+				: _values({
+					{_T("yes"), true},
+					{_T("true"), true},
+					{_T("1"), true},
+					{_T("no"), false},
+					{_T("false"), false},
+					{_T("0"), false}
+				}) {
 			}
 
-			bool operator()(const std::tstring& key, const bool defValue = true) {
+			~YesNoOption() {
+			};
+
+			auto addString(const std::tstring& key, const bool value) -> void {
+				_values[ key ] = value;
+			}
+
+			auto operator()(const std::tstring& key, const bool defValue = true) -> bool {
 				return getOption(key, defValue);
 			};
 
-			bool operator()(const boost::optional<std::tstring>& key, const bool defValue = true) {
-				if (!key)
+			auto operator()(const boost::optional<std::tstring>& key, const bool defValue = true) -> bool {
+				if (!key){
 					return defValue;
+				}
 				return getOption(key.get(), defValue);
 			};
 
