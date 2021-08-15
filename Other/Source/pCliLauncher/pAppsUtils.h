@@ -12,14 +12,6 @@
 // Some strings
 
 namespace p_apps {
-
-	extern const std::tstring PORTABLE_APPS;
-	extern const std::tstring PORTABLE_APPS_INI;
-	extern const std::tstring locations[ 4 ];
-
-	// Tools
-
 	// convert tstring to string
 	auto tstring2string(std::tstring sou) -> std::string;
-
 }

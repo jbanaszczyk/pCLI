@@ -32,7 +32,7 @@ const boost::filesystem::path TCC_EXE_FULL_64 = _T("tcc.exe");
 
 static const std::tstring _SECTION_COMMAND = _T("Command");
 static const std::tstring _SECTION_ENVIRONMENT = _T("Environment");
-static const std::tstring _SECTION_LAUNCHER = _T("TccLePortable");
+static const std::tstring _SECTION_LAUNCHER = _T("pCli");
 static const std::tstring _SECTION_PROFILE = _T("Profile");
 static const std::tstring _SECTION_STARTUP = _T("StartUp");
 
@@ -296,7 +296,7 @@ auto _tmain(int argc, TCHAR* argv[ ], TCHAR* envp[ ]) -> int {
 	launcherIni.setDefaults(_SECTION_LAUNCHER, _INI_NAME_PROFILE_DIRECTORY, _INI_VALUE_PROFILE_DIRECTORY);
 	launcherIni.readIniFile(pAppsDir.get() / p_apps::LAUNCHER_INI, false);
 	/*******************************************************
-	*	Additional TccLePortable.ini files
+	*	Additional pCli.ini files
 	*	per Domain, Domain\User, Domain\User\ComputerName
 	*	it i ssupported and expected by 4Start.btm: [Command]Force32
 	*******************************************************/
@@ -373,7 +373,7 @@ auto _tmain(int argc, TCHAR* argv[ ], TCHAR* envp[ ]) -> int {
 		p_apps::copyCopy(absolute(p_apps::PORTABLE_APPS_DEFAULT, pAppsDir.get()), settingsDirectory, errCode);
 	}
 
-	// iniFileName can be passed as an argument or retrieved from TccLePortable.ini
+	// iniFileName can be passed as an argument or retrieved from pCli.ini
 	auto tccIniFilename = commandInifile
 		                      ? commandInifile.get()
 		                      : absolute(p_apps::Environment::expandEnv(launcherIni.getValueNonEmpty(_SECTION_LAUNCHER, _INI_NAME_INI_FILE)), settingsDirectory);
@@ -393,7 +393,7 @@ auto _tmain(int argc, TCHAR* argv[ ], TCHAR* envp[ ]) -> int {
 	/*******************************************************
 	*	Temp directory
 	*	  Since PortableApps 10.0.2, if there is directory TempForPortableApps in the root of portable apps, it is used as TEMP
-	*	  If setting [TccLePortable]TempForPortableApps is true (default), and ..\..\TempForPortableApps exist, it is used and [TccLePortable]TempDirectory is ignored
+	*	  If setting [pCli]TempForPortableApps is true (default), and ..\..\TempForPortableApps exist, it is used and [pCli]TempDirectory is ignored
 	*******************************************************/
 	auto tempPath = pAppsDir.get() / _T("..\\..\\TempForPortableApps");
 	if (!is_directory(tempPath)){

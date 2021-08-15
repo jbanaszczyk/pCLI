@@ -72,8 +72,10 @@ namespace p_apps {
 		_T(VER_PRODUCTNAME_STR),					// legacy PA.c location
 		_T(""),
 		PORTABLE_APPS / _T(VER_PRODUCTNAME_STR),
-		_T("..")
+		_T("..\\"),
+		_T(".\\"),
 	};
+
 
 	static const boost::filesystem::path PORTABLE_APPS_OTHER_LOCALE = _T("Other\\Locale");
 
@@ -81,9 +83,6 @@ namespace p_apps {
 	 *
 	 * If compiled with _DEBUG
 	 *   you can your own value of argv0
-	 *
-	 * Example:
-	 *   set ARGV0_TCCLEPORTABLE=D:\P4\PortableApps\PortableApps\TccLePortable\TccLePortable.exe
 	 *
 	 *****************************************************************************/
 #ifdef _DEBUG
@@ -163,14 +162,14 @@ namespace p_apps {
 	 *
 	 * findPAppsDir
 	 *   Find standard launcher' directory (where launcher ini exist)
-	 *   You will get something like <ROOT>\PortableApps\TccLePortable
+	 *   You will get something like <ROOT>\pCli
 	 *
-	 *   Launcher executable can be exexcuted from any of
+	 *   Launcher executable can be executed from any of
 	 *     <ROOT>
 	 *     <ROOT>\PortableApps
-	 *     <ROOT>\PortableApps\TccLePortable
-	 *     <ROOT>\PortableApps\TccLePortable\Other
-	 *   In all cases findPAppsDir will point to <ROOT>\PortableApps\TccLePortable
+	 *     <ROOT>\PortableApps\pCli
+	 *     <ROOT>\PortableApps\pCli\Other
+	 *   In all cases findPAppsDir will point to <ROOT>\PortableApps\pCli
 	 *
 	 *****************************************************************************/
 	auto findPAppsDir(const boost::filesystem::path& exePath, const boost::filesystem::path& argv0, Environment& mEnv) -> boost::optional<boost::filesystem::path> {

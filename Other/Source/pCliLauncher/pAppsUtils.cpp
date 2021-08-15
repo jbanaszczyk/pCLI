@@ -12,15 +12,6 @@
 
 namespace p_apps {
 
-	static const std::tstring PORTABLE_APPS;
-	static const std::tstring PORTABLE_APPS_INI;
-	static const std::tstring locations[ ] = {
-		_T("..\\"),
-		_T(".\\"),
-		_T(VER_PRODUCTNAME_STR),
-		PORTABLE_APPS + _T("\\") + _T(VER_PRODUCTNAME_STR),
-	};
-
 	/*****************************************************/
 
 	auto tstring2string(const std::tstring sou) -> std::string {
@@ -45,5 +36,4 @@ namespace p_apps {
 		return sou;
 #endif
 	}
-
 }
