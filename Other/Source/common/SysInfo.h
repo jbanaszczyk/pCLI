@@ -8,29 +8,8 @@
 #pragma once
 
  /******************************************************************************
-  *
-  * singleton pApps::SysPidInfo allows queries about processes usid PID
-  *
-  * singleton should be manipulated using pApps::_sysPidInfo.
-  *
-  * All process related functions are accessed via LoadLibrary/GetProcAddress()
-  * Some methods are overloaded.
-  *   If there is nothing about PID - it means "current process"
-  * Some methods (getDllName, getCommandLine)
-  *   fails accessing 64-bit process from 32-bit application
-  * From the same reason getExeName in some circumstances is not able to resolve
-  *   \Device\Partition notation
-  *
-  * Toolhelp32Snapshot is taken during constructor.
-  *   Refresh snapshoot to get current state.
-  *
+  * 
   * Methods:
-  *   getMyPID()
-  *     return current process ID
-  *   getParentPID()
-  *     returns PID of parent process
-  *   getName()
-  *     returns short name of the process (for example: cmd.exe)
   *   getExeName()
   *     returns full path of the process executable
   *     for example: c:\windows\system32\cmd.exe
@@ -45,23 +24,10 @@
   *   bool isWow64()
   *     check if process is running on Wow64
   *     (!) 64-bit processes running on 64-bit platform ar not using Wow64
-  *   isWow64(): without params
-  *     returns true ifdef _WIN64
-  *     for legacy isWow64() call isWow64( getInstance().getMyPID() );
-  *   hasConsole()
-  *     returns true, if current process has allocated console
   *   ownsConsole()
   *     returns true,
   *       if current process has allocated console
   *       and console was created by current process
-  *   bool getCommandLine
-  *     retrieves whole command line of the given process
-  *     not guaranted.
-  *     method fails if called from 32-bit app to query 64-bit process
-  *
-  *   GetStartupInfo
-  *   CreateProcess
-  *     Wrappers for WinAPI, but uses dynamic function address
   *
   *****************************************************************************/
 #include "./common.h"
