@@ -6,8 +6,8 @@ if [%3] EQU [Win32] (set localCopy=32) ELSE (set localCopy=64)
 if [%4] EQU [Debug] set localCopy=%localCopy%_d
 set localCopy=%~n1%localCopy%%~x1
 
-echo %1 =^> %2..\..\..\%localCopy%
-copy %1 %2..\..\..\%localCopy%
+echo %1 =^> %2..\..\%localCopy%
+copy %1 %2..\..\%localCopy%
 
 if [%3_%4] NEQ [x64_Release] goto :EOF
 

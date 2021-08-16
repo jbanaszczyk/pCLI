@@ -40,10 +40,10 @@
 /pCLI.ini
 /Data
 /pCLI.exe
-/pCli32.exe
-/pCli32_d.exe
-/pCli64.exe
-/pCli64_d.exe
+/Other/pCli32.exe
+/Other/pCli32_d.exe
+/Other/pCli64.exe
+/Other/pCli64_d.exe
 
 # Build results *.exe
 pCli.exe
