@@ -55,25 +55,23 @@ namespace p_apps {
 	 *   where proper launcher' directory should be located relative to this exe
 	 *
 	 *****************************************************************************/
-	static const boost::filesystem::path LAUNCHER_INI(_T(VER_PRODUCTNAME_STR) _T(".ini"));
+	const boost::filesystem::path LAUNCHER_INI(_T(VER_PRODUCTNAME_STR) _T(".ini"));
 
-	static const boost::filesystem::path PORTABLE_APPS_APP = _T("App");
+	const boost::filesystem::path PORTABLE_APPS_APP = _T("App");
 
-	static const boost::filesystem::path PORTABLE_APPS_DEFAULT = _T("App\\DefaultData");
+	const boost::filesystem::path PORTABLE_APPS_DEFAULT = _T("App\\DefaultData");
 
-	static const boost::filesystem::path PORTABLE_APPS_DATA = _T("Data");
+	const boost::filesystem::path PORTABLE_APPS_DATA = _T("Data");
 
-	static const boost::filesystem::path PORTABLE_APPS = _T("PortableApps");
-	static const boost::filesystem::path PORTABLE_APPS_INI = _T("Data\\PortableAppsMenu.ini");
+	const boost::filesystem::path PORTABLE_APPS = _T("PortableApps");
+	const boost::filesystem::path PORTABLE_APPS_INI = _T("Data\\PortableAppsMenu.ini");
 
-	static const boost::filesystem::path PORTABLE_APPS_DOCUMENTS = _T("Documents");
+	const boost::filesystem::path PORTABLE_APPS_DOCUMENTS = _T("Documents");
 
-	static const boost::filesystem::path LOCATIONS[ ] = {
-		_T(VER_PRODUCTNAME_STR),					// legacy PA.c location
-		_T(""),
+	const boost::filesystem::path LOCATIONS[ ] = {
 		PORTABLE_APPS / _T(VER_PRODUCTNAME_STR),
-		_T("..\\"),
-		_T(".\\"),
+		_T(VER_PRODUCTNAME_STR),
+		_T(""),
 	};
 
 
@@ -132,7 +130,7 @@ namespace p_apps {
 	/******************************************************************************
 	 *
 	 * getArgv0
-	 *   Retrive argv[0] for the currebt process:
+	 *   Retrieve argv[0] for the current process:
 	 *   order:
 	 *     #ifdef _DEBUG  Env. variable ARGV0_....   (see note above)
 	 *     real process executable name (from process snapshoot)
@@ -142,7 +140,7 @@ namespace p_apps {
 	auto getArgv0(const TCHAR* const argv[ ], Environment& mEnv) -> boost::filesystem::path {
 		boost::filesystem::path argv0;
 #ifdef _DEBUG
-		if (mEnv.exists(envArgv0Name)) {
+		if (mEnv.exists(envArgv0Name)){
 			argv0 = mEnv.get(envArgv0Name);
 			mEnv.erase(envArgv0Name);
 		} else
@@ -181,6 +179,8 @@ namespace p_apps {
 		for (size_t idx = 0; _countof(LOCATIONS) > idx; ++idx){
 			boost::system::error_code errCode;
 			if (exists(pAppsDir / LOCATIONS[ idx ] / exePath, errCode)){
+				mEnv.set(L"ABC1", pAppsDir.wstring());
+				mEnv.set(L"ABC2", LOCATIONS[ idx ].wstring());
 				pAppsDir /= LOCATIONS[ idx ];
 				pAppsDirValid = true;
 				break;
@@ -444,9 +444,10 @@ namespace p_apps {
 		if (ERROR_MORE_DATA == WNetGetUniversalName(netPath._tstring().c_str(), UNIVERSAL_NAME_INFO_LEVEL, &nothing, &bufSize)){
 			std::unique_ptr<BYTE[ ]> buf(new(std::nothrow) BYTE[ bufSize ]);
 			if (buf){
-				WNetGetUniversalName(netPath._tstring().c_str(), UNIVERSAL_NAME_INFO_LEVEL, buf.get(), &bufSize);
-				auto pUni = (UNIVERSAL_NAME_INFO*)buf.get();
-				return pUni->lpUniversalName;
+				if (WNetGetUniversalName(netPath._tstring().c_str(), UNIVERSAL_NAME_INFO_LEVEL, buf.get(), &bufSize) == NO_ERROR){
+					auto pUni = (UNIVERSAL_NAME_INFO*)buf.get();
+					return pUni->lpUniversalName;
+				}
 			}
 		}
 		return _T("");

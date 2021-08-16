@@ -70,8 +70,8 @@ namespace p_apps {
 	extern const boost::filesystem::path PORTABLE_APPS_INI;
 	extern const boost::filesystem::path PORTABLE_APPS_OTHER_LOCALE;
 	extern const boost::filesystem::path PORTABLE_APPS_DOCUMENTS;
-	extern const boost::filesystem::path LOCATIONS[5];
-	
+	extern const boost::filesystem::path LOCATIONS[ 3 ];
+
 	/******************************************************************************
 	 *
 	 * If compiled with _DEBUG
