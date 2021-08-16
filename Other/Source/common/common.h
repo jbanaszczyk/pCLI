@@ -31,7 +31,6 @@
 #define WINVER         0x0601  // _WIN32_WINNT_WIN7 
 #define _WIN32_WINDOWS 0x0601  // _WIN32_WINNT_WIN7 
 #define _WIN32_WINNT   0x0601  // _WIN32_WINNT_WIN7 
-#include <SDKDDKVer.h>
 
 #define SECURITY_WIN32
 
@@ -40,8 +39,8 @@
 #define WIN32_LEAN_AND_MEAN
 
 #ifdef _DEBUG
-	#define _CRTDBG_MAP_ALLOC
-	#include <crtdbg.h>
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
 #endif
 
 #pragma comment(lib,"Secur32.lib")	// GetUserNameExW
@@ -53,20 +52,20 @@
 
 /** Common headers *********************************************************************/
 
-#include <assert.h>
+#include <cassert>
 #include <windows.h>
 #include <tchar.h>
 #include <set>
 #include <map>
 #include <vector>
-#include <tlhelp32.h>
+#include <TlHelp32.h>
 #include <psapi.h>
 #include <functional>
 #include <utility>
 #include <io.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <Winternl.h>
+#include <winternl.h>
 #include <Shellapi.h>
 #include <Security.h>
 #include <process.h>
@@ -100,7 +99,7 @@ namespace std {
 #define _tcout wcout
 #define _tcerr wcerr
 #define _tcin  wcin
-#define _tformat wformat		// to be usedx with boost:: format
+#define _tformat wformat		// to be used with boost:: format
 #define _tstring wstring		// to be used with boost:: filesystem
 #define _texecve _wexecve
 #define _tspawnve _wspawnve
@@ -116,7 +115,7 @@ namespace std {
 // real maximum allocation size is a bit les, than _HEAP_MAXREQ
 #ifdef _DEBUG
 #ifdef _WIN64
-			const size_t heapMaxReqReal = _HEAP_MAXREQ - 52;
+const size_t heapMaxReqReal = _HEAP_MAXREQ - 52;
 #else
 			const size_t heapMaxReqReal = _HEAP_MAXREQ - 36;
 #endif

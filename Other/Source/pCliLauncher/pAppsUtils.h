@@ -12,6 +12,5 @@
 // Some strings
 
 namespace p_apps {
-	// convert tstring to string
-	auto tstring2string(std::tstring sou) -> std::string;
+
 }

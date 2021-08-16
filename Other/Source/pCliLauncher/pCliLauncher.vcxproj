@@ -109,7 +109,7 @@
     <ClInclude Include="..\common\Environment.h" />
     <ClInclude Include="..\common\IniFile.h" />
     <ClInclude Include="..\common\stdafx.h" />
-    <ClInclude Include="..\common\SysPidInfo.h" />
+    <ClInclude Include="..\common\SysInfo.h" />
     <ClInclude Include="..\common\YesNoOption.h" />
     <ClInclude Include="LauncherVersion.h" />
     <ClInclude Include="pApps.h" />
@@ -118,7 +118,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\common\CtrlHandler.cpp" />
-    <ClCompile Include="..\common\SysPidInfo.cpp" />
+    <ClCompile Include="..\common\SysInfo.cpp" />
     <ClCompile Include="pApps.cpp" />
     <ClCompile Include="pAppsUtils.cpp" />
     <ClCompile Include="pCliLauncher.cpp" />
