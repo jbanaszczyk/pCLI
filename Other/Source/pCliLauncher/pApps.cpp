@@ -147,7 +147,7 @@ namespace p_apps {
 		else
 #endif
 		{
-			auto myName = SysInfo::getExeName();
+			auto myName = sys_info::getExeName();
 			if (myName) {
 				argv0 = myName.get();
 			}
@@ -512,7 +512,7 @@ namespace p_apps {
 	auto abend(const boost::_tformat msg, int errCode) -> void {
 		if (GetConsoleWindow()) {
 			std::_tcerr << msg << std::endl;
-			if (SysInfo::ownsConsole()) {
+			if (sys_info::ownsConsole()) {
 				std::_tcerr << _T("Press [ENTER] key to exit.") << std::endl;
 				std::_tcin.get();
 			}
@@ -564,13 +564,13 @@ namespace p_apps {
 	*****************************************************************************/
 	auto launch(tpWait pWait, const std::tstring& cmdName, const std::vector<std::tstring>& cmdLine, const Environment& cmdEnvironment, boost::filesystem::path cwd) -> boost::optional<DWORD> {
 		if (tpWait::pWait_Auto == pWait) {
-			if (!SysInfo::ownsConsole()) {
+			if (!sys_info::ownsConsole()) {
 				pWait = tpWait::pWait_Wait;
 			}
 			if (tpWait::pWait_Auto == pWait) {
-				auto conEmu = SysInfo::getDllName(_T("ConEmuHk.dll"));
+				auto conEmu = sys_info::getDllName(_T("ConEmuHk.dll"));
 				if (!conEmu) {
-					conEmu = SysInfo::getDllName(_T("ConEmuHk64.dll"));
+					conEmu = sys_info::getDllName(_T("ConEmuHk64.dll"));
 				}
 				if (conEmu) {
 					pWait = tpWait::pWait_Wait;
@@ -626,7 +626,7 @@ namespace p_apps {
 		if (!ok) {
 			abend(boost::_tformat(_T("Cann't execute %1%: %2%")) % cmdName % lastErrorMsg(), 1);
 		}
-		SetPriorityClass(processInfo.hProcess, SysInfo::GetProcessPriorityClass());
+		SetPriorityClass(processInfo.hProcess, sys_info::GetProcessPriorityClass());
 
 		boost::optional<std::tstring> execError;
 		if (ResumeThread(processInfo.hThread) != static_cast<DWORD>(-1)) {

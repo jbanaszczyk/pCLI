@@ -233,7 +233,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[]) {
 #ifdef _DEBUG
 #ifdef _MSC_VER
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	// _CrtSetBreakAlloc(926);
+	// _CrtSetBreakAlloc(522);
 #endif
 #endif
 
@@ -524,7 +524,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[]) {
 	*	32-bit? 64-bit?
 	*******************************************************/
 
-	auto runX64 = !yesNoOption(launcherIni.getValue(_SECTION_STARTUP, _INI_NAME_FORCE32)) && (p_apps::SysInfo::isWow64());
+	auto runX64 = !yesNoOption(launcherIni.getValue(_SECTION_STARTUP, _INI_NAME_FORCE32)) && (sys_info::isWow64());
 	runX64 &= exists(pAppsDir.get() / PORTABLE_APPS_APP_LE_64 / TCC_EXE_LE_64);
 	boost::filesystem::path appDir;
 	boost::filesystem::path exeName;

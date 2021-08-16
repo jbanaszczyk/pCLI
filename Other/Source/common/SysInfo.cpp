@@ -8,138 +8,129 @@
 #include "stdafx.h"
 #include "./SysInfo.h"
 
-namespace p_apps {
+namespace sys_info {
 
-	auto SysInfo::findProcessInfo(PROCESSENTRY32& procEntry, const DWORD aPid) const -> bool {
-		HANDLE snapShot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-		if (snapShot == INVALID_HANDLE_VALUE) {
-			return false;
-		}
-		auto result = false;
-		procEntry.dwSize = sizeof PROCESSENTRY32;
-		if (Process32First(snapShot, &procEntry)) {
-			do {
-				if (aPid == procEntry.th32ProcessID) {
-					result = true;
-					break;
-				}
-			} while (Process32Next(snapShot, &procEntry));
-		}
-		CloseHandle(snapShot);
-		return result;
-	}
+	class SmartHandle {
+		HANDLE handle;
+	public:
+		SmartHandle(std::nullptr_t = nullptr) : handle(nullptr) {}
+		SmartHandle(HANDLE value) : handle(value == INVALID_HANDLE_VALUE ? nullptr : value) {}
 
-	 auto SysInfo::getExeName()  -> boost::optional<boost::filesystem::path> {
-		TCHAR moduleName[MAX_PATH];
-		auto isValid = false;
-		auto hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, GetCurrentProcessId());
-		if (hProcess == nullptr) {
+		explicit operator bool() const { return handle != nullptr; }
+		operator HANDLE() const { return handle; }
+
+		friend bool operator ==(SmartHandle l, SmartHandle r) { return l.handle == r.handle; }
+		friend bool operator !=(SmartHandle l, SmartHandle r) { return !(l == r); }
+
+		struct Deleter {
+			typedef SmartHandle pointer;
+			void operator()(SmartHandle handle) const {
+				CloseHandle(handle);
+			}
+		};
+	};
+
+	inline bool operator ==(HANDLE l, SmartHandle r) { return SmartHandle(l) == r; }
+	inline bool operator !=(HANDLE l, SmartHandle r) { return !(l == r); }
+	inline bool operator ==(SmartHandle l, HANDLE r) { return l == SmartHandle(r); }
+	inline bool operator !=(SmartHandle l, HANDLE r) { return !(l == r); }
+
+	using SmartHandlePtr = std::unique_ptr<SmartHandle, SmartHandle::Deleter>;
+
+	template< typename T >
+	class ArrayDeleter {
+		void operator ()(T const* p) {
+			delete[] p;
+		}
+	};
+
+	auto getExeName()  -> boost::optional<boost::filesystem::path> {
+		const int moduleNameSize = MAX_PATH;
+		std::unique_ptr<TCHAR[]> moduleName(new (std::nothrow) TCHAR[moduleNameSize]);
+		if (!moduleName) {
 			return boost::none;
 		}
+
+		SmartHandlePtr hProcess(OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, GetCurrentProcessId()));
+		if (!hProcess) {
+			return boost::none;
+		}
+
 		HMODULE hMod;
 		DWORD cbNeeded = 0;
-		auto Ok = EnumProcessModules(hProcess, &hMod, sizeof hMod, &cbNeeded);
-		isValid = false;
-		if (!Ok && ERROR_PARTIAL_COPY == GetLastError()) {
-			// http://winprogger.com/getmodulefilenameex-enumprocessmodulesex-failures-in-wow64
-			if (GetProcessImageFileName(hProcess, moduleName, _countof(moduleName))) {
-
-				// convert something like "\Device\HarddiskVolume2"	to "C:"
-				TCHAR devPath[MAX_PATH];
-				TCHAR devName[MAX_PATH] = _T("_:");
-				for (auto aDrive = _T('A'); _T('Z') > aDrive; ++aDrive) {
-					devName[0] = aDrive;
-					if (QueryDosDevice(devName, devPath, _countof(devPath))) {
-						auto len = _tcslen(devPath);
-						if (MAX_PATH - 2 > len) {
-							devPath[len] = _T('\\');
-							devPath[len + 1] = _T('\0');
-							if (boost::istarts_with(moduleName, devPath)) {
-								wcscat_s(devName, moduleName + len);
-								wcscpy_s(moduleName, devName);
-								break;
-							}
-						}
-					}
-				}
-
-				isValid = true;
+		if (EnumProcessModules(hProcess.get(), &hMod, sizeof hMod, &cbNeeded)) {
+			if (GetModuleFileNameEx(hProcess.get(), hMod, moduleName.get(), moduleNameSize)) {
+				return boost::optional<boost::filesystem::path>(moduleName.get());
 			}
 		}
-		if (Ok) {
-			if (GetModuleFileNameEx(hProcess, hMod, moduleName, _countof(moduleName))) {
-				isValid = true;
-			}
-		}
-		CloseHandle(hProcess);
-		return isValid
-			? boost::optional<boost::filesystem::path>(moduleName)
-			: boost::none;
+
+		return  boost::none;
 	}
 
-	auto SysInfo::getDllName(const std::tstring dllName)  -> boost::optional<boost::filesystem::path> {
-		auto hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, GetCurrentProcessId());
-		if (hProcess == nullptr) {
+	auto getDllName(const std::tstring dllName)  -> boost::optional<boost::filesystem::path> {
+		const int processNameSize = MAX_PATH;
+		std::unique_ptr<TCHAR[]> processName(new (std::nothrow) TCHAR[processNameSize]);
+		if (!processName) {
+			return boost::none;
+		}
+
+		SmartHandlePtr hProcess(OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, GetCurrentProcessId()));
+		if (!hProcess) {
 			return boost::none;
 		}
 		boost::optional<boost::filesystem::path> result = boost::none;
 		DWORD cbNeeded = 0;
-		if (EnumProcessModules(hProcess, nullptr, 0, &cbNeeded)) {
+		if (EnumProcessModules(hProcess.get(), nullptr, 0, &cbNeeded)) {
 			DWORD nEntries = cbNeeded / sizeof(HMODULE);
 			std::unique_ptr<HMODULE[]> hMod(new(std::nothrow) HMODULE[nEntries]);
-
-			if (hMod) {
-				if (EnumProcessModules(hProcess, hMod.get(), nEntries * sizeof(hMod[0]), &cbNeeded)) {
-					// probably nEntries * sizeof( *hMod ) == cbNeeded, but ...
-					for (DWORD idx = 0; nEntries > idx; ++idx) {
-						TCHAR processName[MAX_PATH];
-						if (GetModuleFileNameEx(hProcess, hMod[idx], processName, _countof(processName))) {
-							boost::filesystem::path dll(processName);
-							if (boost::iequals(dll.filename().c_str(), dllName)) {
-								result = dll;
-								break;
-							}
+			if (!hMod) {
+				return boost::none;
+			}
+			if (EnumProcessModules(hProcess.get(), hMod.get(), nEntries * sizeof(hMod[0]), &cbNeeded)) {
+				// probably nEntries * sizeof( *hMod ) == cbNeeded, but ...
+				for (decltype(nEntries) idx = 0; idx < nEntries; ++idx) {
+					if (GetModuleFileNameEx(hProcess.get(), hMod[idx], processName.get(), processNameSize)) {
+						boost::filesystem::path dll(processName.get());
+						if (boost::iequals(dll.filename().c_str(), dllName)) {
+							return boost::optional<boost::filesystem::path>(dll);
 						}
 					}
 				}
 			}
 		}
-
-		CloseHandle(hProcess);
-		return result;
+		return boost::none;
 	}
 
-	auto SysInfo::isWow64()  -> bool {
+	auto isWow64()  -> bool {
 #ifdef _WIN64
 		return true;
 #else
-		auto hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, GetCurrentProcessId());
-		if (hProcess == nullptr) {
+		SmartHandlePtr hProcess(OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, GetCurrentProcessId()));
+		if (!hProcess) {
 			return false;
 		}
 		auto Wow64Process = FALSE;
-		if (!IsWow64Process(hProcess, &Wow64Process)) {
-			Wow64Process = FALSE;
+		if (IsWow64Process(hProcess.get(), &Wow64Process) != 0) {
+			return Wow64Process != FALSE;
 		}
-		CloseHandle(hProcess);
-		return Wow64Process == TRUE;
+
+		return false;
 #endif
 	}
 
-	auto SysInfo::GetProcessPriorityClass()  -> DWORD {
-		auto hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, GetCurrentProcessId());
-		if (hProcess == nullptr) {
+	auto GetProcessPriorityClass()  -> DWORD {
+		SmartHandlePtr hProcess(OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, GetCurrentProcessId()));
+		if (!hProcess) {
 			return NORMAL_PRIORITY_CLASS;
 		}
-		auto result = GetPriorityClass(hProcess);
-		CloseHandle(hProcess);
+		auto result = GetPriorityClass(hProcess.get());
 		if (!result) {
 			result = NORMAL_PRIORITY_CLASS;
 		}
 		return result;
 	}
 
-	auto SysInfo::ownsConsole()  -> bool {
+	auto ownsConsole()  -> bool {
 		auto consoleWnd = GetConsoleWindow();
 		DWORD dwProcessId;
 		GetWindowThreadProcessId(consoleWnd, &dwProcessId);
@@ -152,6 +143,4 @@ namespace p_apps {
 		}
 		return true;
 	}
-
-
 }
