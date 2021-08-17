@@ -1,9 +1,7 @@
-/******************************************************************************
- *
- * Copyright 2011 jacek.banaszczyk@gmail.com
- * Part of pCli project: https://github.com/jbanaszczyk/pCli
- *
- *****************************************************************************/
+// *************************************************************
+// * Copyright 2011 jacek.banaszczyk@gmail.com                 *
+// * Part of pCli project: https://github.com/jbanaszczyk/pCli *
+// *************************************************************
 
 #pragma once
 
@@ -19,7 +17,7 @@ namespace SysInfo {
 	 *     but in some cases it returns \Device\Partition notation
 	 *
 	 *****************************************************************************/
-	auto getExeName() -> boost::optional<boost::filesystem::path>;
+	boost::optional<boost::filesystem::path> getExeName();
 
 	/******************************************************************************
 	 *
@@ -30,7 +28,7 @@ namespace SysInfo {
 	 *       especially ConEmu (conEmuHk.dll)
 	 *
 	 *****************************************************************************/
-	auto getDllName(const std::tstring& dllName) -> boost::optional<boost::filesystem::path>;
+	boost::optional<boost::filesystem::path> getDllName(const std::tstring& dllName);
 
 	/******************************************************************************
 	 *
@@ -39,16 +37,16 @@ namespace SysInfo {
 	 *     BTW: 64-bit processes running on 64-bit platform ar not using Wow64
 	 *
 	 *****************************************************************************/
-	auto isWow64() -> bool;
+	bool isWow64();
 
 	/******************************************************************************
 	 *
 	 * Methods:
 	 *   GetProcessPriorityClass()
-	 *     Open current process and retrieves its PriorytyClass
+	 *     Open current process and retrieves its PriorityClass
 	 *
 	 *****************************************************************************/
-	auto getProcessPriorityClass() -> DWORD;
+	DWORD getProcessPriorityClass();
 
 	/******************************************************************************
 	 *
@@ -58,5 +56,5 @@ namespace SysInfo {
 	 *       and console was created by current process
 	 *
 	 *****************************************************************************/
-	auto ownsConsole() -> bool;
+	bool ownsConsole();
 }
