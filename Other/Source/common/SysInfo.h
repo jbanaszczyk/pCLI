@@ -9,7 +9,7 @@
 
 #include "./common.h"
 
-namespace sys_info {
+namespace SysInfo {
 
 	/******************************************************************************
 	 *
@@ -19,7 +19,7 @@ namespace sys_info {
 	 *     but in some cases it returns \Device\Partition notation
 	 *
 	 *****************************************************************************/
-	auto getExeName()->boost::optional<boost::filesystem::path>;
+	auto getExeName() -> boost::optional<boost::filesystem::path>;
 
 	/******************************************************************************
 	 *
@@ -30,7 +30,7 @@ namespace sys_info {
 	 *       especially ConEmu (conEmuHk.dll)
 	 *
 	 *****************************************************************************/
-	auto getDllName(std::tstring dllName)->boost::optional<boost::filesystem::path>;
+	auto getDllName(const std::tstring& dllName) -> boost::optional<boost::filesystem::path>;
 
 	/******************************************************************************
 	 *
@@ -48,7 +48,7 @@ namespace sys_info {
 	 *     Open current process and retrieves its PriorytyClass
 	 *
 	 *****************************************************************************/
-	auto GetProcessPriorityClass()->DWORD;
+	auto getProcessPriorityClass() -> DWORD;
 
 	/******************************************************************************
 	 *

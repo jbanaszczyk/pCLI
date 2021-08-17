@@ -147,7 +147,7 @@ namespace p_apps {
 		else
 #endif
 		{
-			auto myName = sys_info::getExeName();
+			auto myName = SysInfo::getExeName();
 			if (myName) {
 				argv0 = myName.get();
 			}
@@ -181,8 +181,6 @@ namespace p_apps {
 		for (size_t idx = 0; _countof(LOCATIONS) > idx; ++idx) {
 			boost::system::error_code errCode;
 			if (exists(pAppsDir / LOCATIONS[idx] / exePath, errCode)) {
-				mEnv.set(L"ABC1", pAppsDir.wstring());
-				mEnv.set(L"ABC2", LOCATIONS[idx].wstring());
 				pAppsDir /= LOCATIONS[idx];
 				pAppsDirValid = true;
 				break;
@@ -512,7 +510,7 @@ namespace p_apps {
 	auto abend(const boost::_tformat msg, int errCode) -> void {
 		if (GetConsoleWindow()) {
 			std::_tcerr << msg << std::endl;
-			if (sys_info::ownsConsole()) {
+			if (SysInfo::ownsConsole()) {
 				std::_tcerr << _T("Press [ENTER] key to exit.") << std::endl;
 				std::_tcin.get();
 			}
@@ -564,13 +562,13 @@ namespace p_apps {
 	*****************************************************************************/
 	auto launch(tpWait pWait, const std::tstring& cmdName, const std::vector<std::tstring>& cmdLine, const Environment& cmdEnvironment, boost::filesystem::path cwd) -> boost::optional<DWORD> {
 		if (tpWait::pWait_Auto == pWait) {
-			if (!sys_info::ownsConsole()) {
+			if (!SysInfo::ownsConsole()) {
 				pWait = tpWait::pWait_Wait;
 			}
 			if (tpWait::pWait_Auto == pWait) {
-				auto conEmu = sys_info::getDllName(_T("ConEmuHk.dll"));
+				auto conEmu = SysInfo::getDllName(_T("ConEmuHk.dll"));
 				if (!conEmu) {
-					conEmu = sys_info::getDllName(_T("ConEmuHk64.dll"));
+					conEmu = SysInfo::getDllName(_T("ConEmuHk64.dll"));
 				}
 				if (conEmu) {
 					pWait = tpWait::pWait_Wait;
@@ -626,15 +624,10 @@ namespace p_apps {
 		if (!ok) {
 			abend(boost::_tformat(_T("Cann't execute %1%: %2%")) % cmdName % lastErrorMsg(), 1);
 		}
-		SetPriorityClass(processInfo.hProcess, sys_info::GetProcessPriorityClass());
+		SetPriorityClass(processInfo.hProcess, SysInfo::getProcessPriorityClass());
 
-		boost::optional<std::tstring> execError;
-		if (ResumeThread(processInfo.hThread) != static_cast<DWORD>(-1)) {
-			execError = lastErrorMsg();
-		}
-
-		if (execError) {
-			abend(boost::_tformat(_T("Cann't execute %1%: %2%")) % cmdName % execError.get(), 1);
+		if (ResumeThread(processInfo.hThread) == static_cast<DWORD>(-1)) {
+			abend(boost::_tformat(_T("Cann't execute %1%: %2%")) % cmdName % lastErrorMsg(), 1);
 		}
 
 		if (tpWait::pWait_Wait == pWait && processInfo.hProcess != nullptr) {

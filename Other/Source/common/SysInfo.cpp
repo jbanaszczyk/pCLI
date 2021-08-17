@@ -8,73 +8,106 @@
 #include "stdafx.h"
 #include "./SysInfo.h"
 
-namespace sys_info {
+namespace SysInfo {
 
 	class SmartHandle {
 		HANDLE handle;
 	public:
-		SmartHandle(std::nullptr_t = nullptr) : handle(nullptr) {}
-		SmartHandle(HANDLE value) : handle(value == INVALID_HANDLE_VALUE ? nullptr : value) {}
+		explicit SmartHandle(std::nullptr_t = nullptr)
+			: handle(nullptr) {
+		}
 
-		explicit operator bool() const { return handle != nullptr; }
-		operator HANDLE() const { return handle; }
+		SmartHandle(HANDLE value)
+			: handle(value == INVALID_HANDLE_VALUE
+				         ? nullptr
+				         : value) {
+		}
 
-		friend bool operator ==(SmartHandle l, SmartHandle r) { return l.handle == r.handle; }
-		friend bool operator !=(SmartHandle l, SmartHandle r) { return !(l == r); }
+		explicit operator bool() const {
+			return handle != nullptr;
+		}
+
+		operator HANDLE() const {
+			return handle;
+		}
+
+		friend bool operator ==(SmartHandle lha, SmartHandle rha) {
+			return lha.handle == rha.handle;
+		}
+
+		friend bool operator !=(SmartHandle lha, SmartHandle rha) {
+			return !(lha == rha);
+		}
 
 		struct Deleter {
-			typedef SmartHandle pointer;
-			void operator()(SmartHandle handle) const {
-				CloseHandle(handle);
+			using pointer = SmartHandle;
+
+			void operator()(const SmartHandle closingHandle) const {
+				CloseHandle(closingHandle);
 			}
 		};
 	};
 
-	inline bool operator ==(HANDLE l, SmartHandle r) { return SmartHandle(l) == r; }
-	inline bool operator !=(HANDLE l, SmartHandle r) { return !(l == r); }
-	inline bool operator ==(SmartHandle l, HANDLE r) { return l == SmartHandle(r); }
-	inline bool operator !=(SmartHandle l, HANDLE r) { return !(l == r); }
+	inline bool operator ==(const HANDLE lha, const SmartHandle rha) {
+		return SmartHandle(lha) == rha;
+	}
+
+	inline bool operator !=(const HANDLE lha, const SmartHandle rha) {
+		return !(lha == rha);
+	}
+
+	inline bool operator ==(SmartHandle lha, HANDLE rha) {
+		return lha == SmartHandle(rha);
+	}
+
+	inline bool operator !=(SmartHandle lha, HANDLE rha) {
+		return !(lha == rha);
+	}
 
 	using SmartHandlePtr = std::unique_ptr<SmartHandle, SmartHandle::Deleter>;
 
-	template< typename T >
+	template <typename T>
 	class ArrayDeleter {
-		void operator ()(T const* p) {
+		void operator ()(const T* p) {
 			delete[] p;
 		}
 	};
 
-	auto getExeName()  -> boost::optional<boost::filesystem::path> {
+	static auto OpenMyProcessForQuery() {
+		return OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, GetCurrentProcessId());
+	}
+
+	boost::optional<boost::filesystem::path> getExeName() {
 		const int moduleNameSize = MAX_PATH;
-		std::unique_ptr<TCHAR[]> moduleName(new (std::nothrow) TCHAR[moduleNameSize]);
+		const std::unique_ptr<TCHAR[]> moduleName(new(std::nothrow) TCHAR[moduleNameSize]);
 		if (!moduleName) {
 			return boost::none;
 		}
 
-		SmartHandlePtr hProcess(OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, GetCurrentProcessId()));
+		const SmartHandlePtr hProcess(OpenMyProcessForQuery());
 		if (!hProcess) {
 			return boost::none;
 		}
 
 		HMODULE hMod;
 		DWORD cbNeeded = 0;
-		if (EnumProcessModules(hProcess.get(), &hMod, sizeof hMod, &cbNeeded)) {
+		if (EnumProcessModules(hProcess.get(), &hMod, sizeof (hMod), &cbNeeded)) {
 			if (GetModuleFileNameEx(hProcess.get(), hMod, moduleName.get(), moduleNameSize)) {
 				return boost::optional<boost::filesystem::path>(moduleName.get());
 			}
 		}
 
-		return  boost::none;
+		return boost::none;
 	}
 
-	auto getDllName(const std::tstring dllName)  -> boost::optional<boost::filesystem::path> {
+	boost::optional<boost::filesystem::path> getDllName(const std::tstring& dllName) {
 		const int processNameSize = MAX_PATH;
-		std::unique_ptr<TCHAR[]> processName(new (std::nothrow) TCHAR[processNameSize]);
+		const std::unique_ptr<TCHAR[]> processName(new(std::nothrow) TCHAR[processNameSize]);
 		if (!processName) {
 			return boost::none;
 		}
 
-		SmartHandlePtr hProcess(OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, GetCurrentProcessId()));
+		const SmartHandlePtr hProcess(OpenMyProcessForQuery());
 		if (!hProcess) {
 			return boost::none;
 		}
@@ -101,11 +134,11 @@ namespace sys_info {
 		return boost::none;
 	}
 
-	auto isWow64()  -> bool {
+	bool isWow64() {
 #ifdef _WIN64
 		return true;
 #else
-		SmartHandlePtr hProcess(OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, GetCurrentProcessId()));
+		SmartHandlePtr hProcess(OpenMyProcessForQuery());
 		if (!hProcess) {
 			return false;
 		}
@@ -118,8 +151,8 @@ namespace sys_info {
 #endif
 	}
 
-	auto GetProcessPriorityClass()  -> DWORD {
-		SmartHandlePtr hProcess(OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, GetCurrentProcessId()));
+	DWORD getProcessPriorityClass() {
+		const SmartHandlePtr hProcess(OpenMyProcessForQuery());
 		if (!hProcess) {
 			return NORMAL_PRIORITY_CLASS;
 		}
@@ -130,10 +163,10 @@ namespace sys_info {
 		return result;
 	}
 
-	auto ownsConsole()  -> bool {
-		auto consoleWnd = GetConsoleWindow();
+	bool ownsConsole() {
+		const auto consoleWindow = GetConsoleWindow();
 		DWORD dwProcessId;
-		GetWindowThreadProcessId(consoleWnd, &dwProcessId);
+		GetWindowThreadProcessId(consoleWindow, &dwProcessId);
 		if (GetCurrentProcessId() != dwProcessId) {
 			return false;
 		}

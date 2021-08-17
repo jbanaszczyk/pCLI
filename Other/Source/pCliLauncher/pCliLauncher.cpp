@@ -249,7 +249,6 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[]) {
 	/*******************************************************
 	*	Identify startup directory
 	*******************************************************/
-	auto myPid = GetCurrentProcessId();
 	auto argv0 = getArgv0(argv, mEnv);
 	auto pAppsDir = findPAppsDir(PORTABLE_APPS_APP_LE_32 / TCC_EXE_LE_32, argv0, mEnv);
 
@@ -524,7 +523,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[]) {
 	*	32-bit? 64-bit?
 	*******************************************************/
 
-	auto runX64 = !yesNoOption(launcherIni.getValue(_SECTION_STARTUP, _INI_NAME_FORCE32)) && (sys_info::isWow64());
+	auto runX64 = !yesNoOption(launcherIni.getValue(_SECTION_STARTUP, _INI_NAME_FORCE32)) && (SysInfo::isWow64());
 	runX64 &= exists(pAppsDir.get() / PORTABLE_APPS_APP_LE_64 / TCC_EXE_LE_64);
 	boost::filesystem::path appDir;
 	boost::filesystem::path exeName;
