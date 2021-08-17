@@ -1,9 +1,7 @@
-/******************************************************************************
-*
-* Copyright 2011-2021 jacek.banaszczyk@gmail.com
-* Part of pCli project: https://github.com/jbanaszczyk/pCli
-*
-*****************************************************************************/
+// *************************************************************
+// * Copyright 2011 jacek.banaszczyk@gmail.com                 *
+// * Part of pCli project: https://github.com/jbanaszczyk/pCli *
+// *************************************************************
 
 #pragma once
 
@@ -29,7 +27,8 @@ namespace p_apps {
 		 * \param add required by SetConsoleCtrlHandler
 		 * \return passes return value from SetConsoleCtrlHandler
 		 */
-		virtual auto WINAPI vSetConsoleCtrlHandler(const PHANDLER_ROUTINE handlerRoutine, const BOOL add) -> BOOL { // NOLINT(misc-misplaced-const)
+		virtual BOOL WINAPI vSetConsoleCtrlHandler(const PHANDLER_ROUTINE handlerRoutine, const BOOL add) {
+			// NOLINT(misc-misplaced-const)
 			return SetConsoleCtrlHandler(handlerRoutine, add);
 		}
 
@@ -37,57 +36,57 @@ namespace p_apps {
 		 * \brief Handler used by OS
 		 * \return always TRUE
 		 */
-		static auto WINAPI myCtrlHandler(DWORD /*ctrlType*/) -> BOOL {
-			if (debugBeep){
+		static BOOL WINAPI myCtrlHandler(DWORD /*ctrlType*/) {
+			if (debugBeep) {
 				Beep(750, 300);
 			}
 			return TRUE;
 		}
 
-		public:
-			CtrlHandlerManager(const CtrlHandlerManager&) = delete;
-			CtrlHandlerManager(const CtrlHandlerManager&&) = delete;
-			auto operator=(const CtrlHandlerManager&) -> CtrlHandlerManager& = delete;
-			auto operator=(const CtrlHandlerManager&&) -> CtrlHandlerManager&& = delete;
-			/**
-			 * \brief ctor - activate Ctrl handler
-			 */
-			CtrlHandlerManager()
-				: isActive(FALSE) {
+	public:
+		CtrlHandlerManager(const CtrlHandlerManager&) = delete;
+		CtrlHandlerManager(const CtrlHandlerManager&&) = delete;
+		CtrlHandlerManager& operator=(const CtrlHandlerManager&) = delete;
+		CtrlHandlerManager&& operator=(const CtrlHandlerManager&&) = delete;
+		/**
+		 * \brief ctor - activate Ctrl handler
+		 */
+		CtrlHandlerManager()
+			: isActive(FALSE) {
 #if defined _DEBUG
-				debugBeep = true,
+			debugBeep = true,
 #else
 				debugBeep = false,
 #endif
-					activate(TRUE);
-			}
+				activate(TRUE);
+		}
 
-			/**
-			 * \brief destructor - deactivate Ctrl handler
-			 */
-			virtual ~CtrlHandlerManager() {
-				debugBeep = false;
-				activate(FALSE);
-			}
+		/**
+		 * \brief destructor - deactivate Ctrl handler
+		 */
+		virtual ~CtrlHandlerManager() {
+			debugBeep = false;
+			activate(FALSE);
+		}
 
-			/**
-			 * \brief activate/deactivate Ctrl beep
-			 * \param value desired value of debugBeep
-			 */
-			static auto setDebugBeep(const bool value = true) -> void {
-				debugBeep = value;
-			}
+		/**
+		 * \brief activate/deactivate Ctrl beep
+		 * \param value desired value of debugBeep
+		 */
+		static void setDebugBeep(const bool value = true) {
+			debugBeep = value;
+		}
 
-			/**
-			 * \brief activate/deactivate Ctrl handler
-			 * \param newState desired value of isActive
-			 */
-			auto activate(const BOOL newState) -> void {
-				if (isActive != newState){
-					if (vSetConsoleCtrlHandler(myCtrlHandler, newState)){
-						isActive = newState;
-					}
+		/**
+		 * \brief activate/deactivate Ctrl handler
+		 * \param newState desired value of isActive
+		 */
+		void activate(const BOOL newState) {
+			if (isActive != newState) {
+				if (vSetConsoleCtrlHandler(myCtrlHandler, newState)) {
+					isActive = newState;
 				}
 			}
+		}
 	};
 }
