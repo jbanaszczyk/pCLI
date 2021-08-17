@@ -35,14 +35,14 @@
  * writeIniFile
  *   put changed settings back to *.INI,
  *   performed in destructor.
- *   writeIniFile changes defaults: current values become default ones.
+ *   writeIniFile changes defaults: current keyValues become default ones.
  * setValue
  *   modify settings
  * getValue
  *   as expected
  * getDefault
  *   as expected
- *   warning: default values are modified using
+ *   warning: default keyValues are modified using
  *     setDefaults (as expected) and writeIniFile
  * getValueNonEmpty
  *   returns getValue, but if it empty, return default value.

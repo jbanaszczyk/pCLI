@@ -539,15 +539,9 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[]) {
 	/*******************************************************
 	*	Wait for tcc to finish
 	*******************************************************/
-	iniValueOpt = launcherIni.getValue(_SECTION_STARTUP, _INI_NAME_WAIT);
-
-	auto pWait = p_apps::tpWait::pWait_Auto;
-	if (yesNoOption(iniValueOpt, true) == yesNoOption(iniValueOpt, false)) {
-		// value is well defined and equals to "true" or "false" (doesn't fall into default)
-		pWait = yesNoOption(iniValueOpt, true)
-			        ? p_apps::tpWait::pWait_Wait
-			        : p_apps::tpWait::pWait_NoWait;
-	}
+	auto pWait = yesNoOption(launcherIni.getValue(_SECTION_STARTUP, _INI_NAME_WAIT))
+		             ? p_apps::tpWait::pWait_Wait
+		             : p_apps::tpWait::pWait_NoWait;
 
 	/*******************************************************
 	*	Language
