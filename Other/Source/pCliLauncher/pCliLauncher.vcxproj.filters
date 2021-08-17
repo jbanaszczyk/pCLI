@@ -27,7 +27,7 @@
     <ClInclude Include="pApps.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pAppsUtils.h">
+    <ClInclude Include="pAppsUtils2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\common\common.h">
@@ -51,6 +51,9 @@
     <ClInclude Include="..\common\YesNoOption.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\common\pAppsUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -68,7 +71,10 @@
     <ClCompile Include="pApps.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="pAppsUtils.cpp">
+    <ClCompile Include="pAppsUtils2.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\common\pAppsUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

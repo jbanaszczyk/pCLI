@@ -231,10 +231,8 @@ void appendContainer(T& dst, const T& src) {
 
 int _tmain(int argc, TCHAR* argv[], TCHAR* envp[]) {
 #ifdef _DEBUG
-#ifdef _MSC_VER
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	// _CrtSetBreakAlloc(522);
-#endif
 #endif
 
 	boost::system::error_code errCode;
@@ -568,7 +566,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[]) {
 	*	Copy content of [4NT]
 	*	Don't set undocumented entries
 	*******************************************************/
-	p_apps::iniFile::namesSet names4NT;
+	p_apps::SetInsensitiveTchar names4NT;
 	launcherIni.enumNames(_SECTION_4NT, names4NT);
 
 	for (const auto& it : names4NT) {
@@ -583,7 +581,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[]) {
 	/*******************************************************
 	*	additional environment variables [Environment]
 	*******************************************************/
-	p_apps::iniFile::namesSet namesEnv;
+	p_apps::SetInsensitiveTchar namesEnv;
 	launcherIni.enumNames(_SECTION_ENVIRONMENT, namesEnv);
 
 	for (const auto& it : namesEnv) {

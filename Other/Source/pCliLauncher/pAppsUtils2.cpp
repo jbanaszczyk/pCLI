@@ -5,11 +5,9 @@
  *
  *****************************************************************************/
 
-#pragma once
+#include "stdafx.h"
 
-#include "../common/common.h"
-
-// Some strings
+#include "pAppsUtils2.h"
 
 namespace p_apps {
 

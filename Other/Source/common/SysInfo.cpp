@@ -29,12 +29,12 @@ namespace SysInfo {
 			return handle;
 		}
 
-		friend bool operator ==(SmartHandle lha, SmartHandle rha) {
-			return lha.handle == rha.handle;
+		friend bool operator ==(SmartHandle lhs, SmartHandle rhs) {
+			return lhs.handle == rhs.handle;
 		}
 
-		friend bool operator !=(SmartHandle lha, SmartHandle rha) {
-			return !(lha == rha);
+		friend bool operator !=(SmartHandle lhs, SmartHandle rhs) {
+			return !(lhs == rhs);
 		}
 
 		struct Deleter {

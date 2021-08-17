@@ -143,4 +143,6 @@ const size_t heapMaxReqReal = _HEAP_MAXREQ;
 #define STATUS_SUCCESS	((NTSTATUS)0x00000000L)  // from of NtStatus.h
 #endif
 
+#include "pAppsUtils.h"
+
 /***************************************************************************************/

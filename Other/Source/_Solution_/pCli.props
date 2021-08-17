@@ -13,7 +13,6 @@
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_SCL_SECURE_NO_WARNINGS=1;VER_TARGETNAME_STR=$(TargetFileName);%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalOptions>/std:c++14%(AdditionalOptions)</AdditionalOptions>       
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

@@ -48,10 +48,10 @@
  *   returns getValue, but if it empty, return default value.
  *   be sure, that defaults are well-defined
  * enumSections *   returns set of known [sections]
- *     namesSet: simple, case insensitive
+ *     SetInsensitiveTchar: simple, case insensitive
  * enumNames
  *   returns set of known names within a section
- *     namesSet: simple, case insensitive
+ *     SetInsensitiveTchar: simple, case insensitive
  *
  *****************************************************************************/
 
@@ -101,16 +101,9 @@ namespace p_apps {
 					};
 			};
 
-			template <typename T>
-			struct fuPairLess: std::binary_function<T, T, bool> {
-				auto operator()(const std::pair<T, T>& s1, const std::pair<T, T>& s2) const -> bool {
-					return boost::ilexicographical_compare(s1.first, s2.first) || (boost::iequals(s1.first, s2.first) && boost::ilexicographical_compare(s1.second, s2.second));
-				}
-			};
-
 			using iniKey = std::pair<std::tstring, std::tstring>;
 
-			std::map<iniKey, iniValue, fuPairLess<std::tstring>> values;
+			std::map<iniKey, iniValue, CaseInsensitivePairFirst<std::tstring>::Comparator> values;
 
 			boost::filesystem::path iniName_;
 			bool saveOnExit_;
@@ -213,15 +206,6 @@ namespace p_apps {
 			}
 
 
-		public:
-			template <typename T>
-			struct fuLess: std::binary_function<T, T, bool> {
-				auto operator()(const T& s1, const T& s2) const -> bool {
-					return boost::ilexicographical_compare(s1, s2);
-				}
-			};
-
-			using namesSet = std::set<std::tstring, fuLess<std::tstring>>;
 
 		public:
 			iniFile()
@@ -328,13 +312,13 @@ namespace p_apps {
 				return result;
 			}
 
-			auto enumSections(namesSet& result) const -> void {
+			auto enumSections(SetInsensitiveTchar& result) const -> void {
 				for (auto it = begin(values); end(values) != it; ++it){
 					result.insert(it->first.first);
 				}
 			}
 
-			auto enumNames(const std::tstring section, namesSet& result) const -> void {
+			auto enumNames(const std::tstring section, SetInsensitiveTchar& result) const -> void {
 				for (auto it = begin(values); end(values) != it; ++it){
 					if (boost::iequals(section, it->first.first)){
 						result.insert(it->first.second);

@@ -411,10 +411,16 @@ namespace p_apps {
 		if (buf) {
 			if (GetUserNameEx(NameSamCompatible, buf.get(), &bufSize)) {
 				std::tstring result = buf.get();
-				boost::trim_if(result, std::bind2nd(std::equal_to<TCHAR>(), _T('\\'))); // domain version can add trailing backslashes
+
+				// FIXME review boost iterators to make it prettier
+				
+				if ('\\' == result.back()) {
+					result.pop_back();
+				}
+				
 				if (boost::find_first(result, _T("\\"))) {
 					return result;
-				}
+				}				
 			}
 		}
 		return getComputerName() + _T("\\user");

@@ -24,17 +24,8 @@
 
 namespace p_apps {
 	class Environment {
-		private:
-			template <typename T>
-			struct fuLess: std::binary_function<T, T, bool> {
-				auto operator()(const T& s1, const T& s2) const -> bool {
-					return boost::ilexicographical_compare(s1, s2);
-				}
-			};
-
-			using IMap = std::map<std::tstring, std::tstring, fuLess<std::tstring>>;
-
-			IMap mEnv;
+				
+			std::map<std::tstring, std::tstring, CaseInsensitiveMap<std::tstring>::Comparator> mEnv;
 
 		public:
 			Environment() = delete;

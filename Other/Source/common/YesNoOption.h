@@ -16,25 +16,21 @@
 *
 *****************************************************************************/
 #include "./common.h"
+#include "pAppsUtils.h"
 
 namespace p_apps {
 
 	class YesNoOption {
-		template <typename T>
-		struct fuLess : std::binary_function<T, T, bool> {
-			bool operator()(const T& s1, const T& s2) const {
-				return boost::ilexicographical_compare(s1, s2);
-			}
-		};
 
-		std::map<std::tstring, bool, fuLess<std::tstring>> keyValues;
+		std::map<std::tstring, bool, CaseInsensitiveMap<std::tstring>::Comparator> keyValues;
+
 		bool defaultValue;
 
 		bool getOption(const std::tstring& key) const {
 			const auto itValues = keyValues.find(key);
 			return itValues == keyValues.end()
-				       ? defaultValue
-				       : itValues->second;
+				? defaultValue
+				: itValues->second;
 		}
 
 	public:
@@ -46,11 +42,19 @@ namespace p_apps {
 				{_T("no"), false},
 				{_T("false"), false},
 				{_T("0"), false}
-			})
+				})
 			, defaultValue(defaultValue) {
 		}
 
-		~YesNoOption() = default;
+		~YesNoOption() = default; // FIXME check memory leaks
+
+		YesNoOption(const YesNoOption& other) = delete;
+
+		YesNoOption(YesNoOption&& other) noexcept = delete;
+
+		YesNoOption& operator=(const YesNoOption& other) = delete;
+
+		YesNoOption& operator=(YesNoOption&& other) noexcept = delete;
 
 		bool operator()(const std::tstring& key) const {
 			return getOption(key);
@@ -58,8 +62,8 @@ namespace p_apps {
 
 		bool operator()(const boost::optional<std::tstring>& key) const {
 			return key
-				       ? getOption(key.get())
-				       : defaultValue;
+				? getOption(key.get())
+				: defaultValue;
 		}
 
 	};
