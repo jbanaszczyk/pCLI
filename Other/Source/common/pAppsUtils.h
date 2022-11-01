@@ -4,6 +4,7 @@
 // *************************************************************
 
 #pragma once
+#include "common.h"
 
 namespace p_apps {
 
@@ -26,4 +27,26 @@ namespace p_apps {
 	};
 
 	using SetInsensitiveTchar = std::set<std::tstring, CaseInsensitiveMap<std::tstring>::Comparator>; // FIXME move somewhere near usage
+
+	/******************************************************************************
+	*	Merge two STL containers
+	*	used to merge vectors
+	*****************************************************************************/
+	template <typename T>
+	void appendContainer(T& destination, const T& source) {
+		// FIXME try to simplify
+		if (!source.empty()) {
+			destination.reserve(destination.size() + source.size());
+			destination.insert(destination.end(), source.begin(), source.end());
+		}
+	}
+
+	/******************************************************************************
+	*
+	* imbueIO
+	*   made stdin/stdout/stderr locale-aware
+	*
+	*****************************************************************************/
+	void imbueIO();
+
 }

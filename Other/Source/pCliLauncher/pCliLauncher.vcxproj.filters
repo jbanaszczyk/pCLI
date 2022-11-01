@@ -27,9 +27,6 @@
     <ClInclude Include="pApps.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="pAppsUtils2.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\common\common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -69,9 +66,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="pApps.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="pAppsUtils2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\common\pAppsUtils.cpp">

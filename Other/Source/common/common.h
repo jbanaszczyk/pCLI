@@ -1,9 +1,7 @@
-/******************************************************************************
- *
- * Copyright 2011 jacek.banaszczyk@gmail.com
- * Part of pCli project: https://github.com/jbanaszczyk/pCli
- *
- *****************************************************************************/
+// *************************************************************
+// * Copyright 2011 jacek.banaszczyk@gmail.com                 *
+// * Part of pCli project: https://github.com/jbanaszczyk/pCli *
+// *************************************************************
 
 #pragma once
 
@@ -142,7 +140,5 @@ const size_t heapMaxReqReal = _HEAP_MAXREQ;
 #ifndef STATUS_SUCCESS
 #define STATUS_SUCCESS	((NTSTATUS)0x00000000L)  // from of NtStatus.h
 #endif
-
-#include "pAppsUtils.h"
 
 /***************************************************************************************/

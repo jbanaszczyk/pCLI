@@ -70,7 +70,7 @@ namespace p_apps {
 	extern const boost::filesystem::path PORTABLE_APPS_INI;
 	extern const boost::filesystem::path PORTABLE_APPS_OTHER_LOCALE;
 	extern const boost::filesystem::path PORTABLE_APPS_DOCUMENTS;
-	extern const boost::filesystem::path LOCATIONS[ 3 ];
+	
 
 	/******************************************************************************
 	 *
@@ -90,44 +90,6 @@ namespace p_apps {
 	 *****************************************************************************/
 	auto tstring2string(const std::tstring& sou) -> std::string;
 	auto string2tstring(const std::string& sou) -> std::tstring;
-
-	/******************************************************************************
-	 *
-	 * getArgv0
-	 *   Retrive argv[0] for the currebt process:
-	 *   order:
-	 *     #ifdef _DEBUG  Env. variable ARGV0_....   (see note above)
-	 *     real process executable name (from process snapshoot)
-	 *     argv[0]
-	 *
-	 *****************************************************************************/
-	auto getArgv0(const TCHAR* const argv[ ], Environment& mEnv) -> boost::filesystem::path;
-
-	/******************************************************************************
-	 *
-	 * findPAppsDir
-	 *   Find standard launcher' directory (where launcher ini exist)
-	 *   You will get something like <ROOT>\PortableApps\pCli
-	 *
-	 *   Launcher executable can be executed from any of
-	 *     <ROOT>
-	 *     <ROOT>\PortableApps
-	 *     <ROOT>\PortableApps\pCli
-	 *     <ROOT>\PortableApps\pCli\Other
-	 *   In all cases findPAppsDir will point to <ROOT>\PortableApps\pCli
-	 *
-	 *****************************************************************************/
-	auto findPAppsDir(const boost::filesystem::path& exePath, const boost::filesystem::path& argv0, Environment& mEnv) -> boost::optional<boost::filesystem::path>;
-
-	/******************************************************************************
-	*
-	* env_PAppsC
-	*   setup environment as PortableApps paltform would set
-	*   PortableApps paltform, if running sets up many env vars named PortableApps.com*
-	*   env_PAppsC tries to setup them even if PortableApps paltform was not started
-	*
-	*****************************************************************************/
-	auto env_PAppsC(const boost::optional<boost::filesystem::path>& exePath, Environment& mEnv) -> void;
 
 	/******************************************************************************
 	 *
@@ -195,13 +157,6 @@ namespace p_apps {
 	 *****************************************************************************/
 	auto makeDirWriteable(boost::filesystem::path dir) -> bool;
 
-	/******************************************************************************
-	*
-	* imbueIO
-	*   made stdin/stdout/stderr locale-aware
-	*
-	*****************************************************************************/
-	auto imbueIO() -> void;
 
 	/******************************************************************************
 	 *
@@ -236,7 +191,7 @@ namespace p_apps {
 
 	/******************************************************************************
 	 *
-	 * launch
+	 * execute
 	 *   like _texecve, but ComEmu / parent cmd aware
 	 * returns:
 	 *   boost::undef
@@ -248,6 +203,6 @@ namespace p_apps {
 		pWait_NoWait
 	};
 
-	auto launch(tpWait pWait, const std::tstring& cmdName, const std::vector<std::tstring>& cmdLine, const Environment& cmdEnvironment, boost::filesystem::path cwd) -> boost::optional<DWORD>;
+	auto execute(tpWait pWait, const std::tstring& cmdName, const std::vector<std::tstring>& cmdLine, const Environment& cmdEnvironment, boost::filesystem::path cwd) -> boost::optional<DWORD>;
 
 }

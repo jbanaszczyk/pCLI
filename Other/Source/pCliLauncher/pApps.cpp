@@ -68,24 +68,9 @@ namespace p_apps {
 
 	const boost::filesystem::path PORTABLE_APPS_DOCUMENTS = _T("Documents");
 
-	const boost::filesystem::path LOCATIONS[] = {
-		PORTABLE_APPS / _T(VER_PRODUCTNAME_STR),
-		_T(VER_PRODUCTNAME_STR),
-		_T(""),
-	};
 
 
-	static const boost::filesystem::path PORTABLE_APPS_OTHER_LOCALE = _T("Other\\Locale");
 
-	/******************************************************************************
-	 *
-	 * If compiled with _DEBUG
-	 *   you can your own value of argv0
-	 *
-	 *****************************************************************************/
-#ifdef _DEBUG
-	const std::tstring envArgv0Name = _T("ARGV0_") _T(VER_PRODUCTNAME_STR);
-#endif
 
 	/******************************************************************************
 	 *
@@ -127,160 +112,6 @@ namespace p_apps {
 #endif
 	}
 
-	/******************************************************************************
-	 *
-	 * getArgv0
-	 *   Retrieve argv[0] for the current process:
-	 *   order:
-	 *     #ifdef _DEBUG  Env. variable ARGV0_....   (see note above)
-	 *     real process executable name (from process snapshoot)
-	 *     argv[0]
-	 *
-	 *****************************************************************************/
-	auto getArgv0(const TCHAR* const argv[], Environment& mEnv) -> boost::filesystem::path {
-		boost::filesystem::path argv0;
-#ifdef _DEBUG
-		if (mEnv.exists(envArgv0Name)) {
-			argv0 = mEnv.get(envArgv0Name);
-			mEnv.erase(envArgv0Name);
-		}
-		else
-#endif
-		{
-			auto myName = SysInfo::getExeName();
-			if (myName) {
-				argv0 = myName.get();
-			}
-			else {
-				argv0 = argv[0];
-			}
-		}
-		return absolute(argv0);
-	}
-
-	/******************************************************************************
-	 *
-	 * findPAppsDir
-	 *   Find standard launcher' directory (where launcher ini exist)
-	 *   You will get something like <ROOT>\pCli
-	 *
-	 *   Launcher executable can be executed from any of
-	 *     <ROOT>
-	 *     <ROOT>\PortableApps
-	 *     <ROOT>\PortableApps\pCli
-	 *     <ROOT>\PortableApps\pCli\Other
-	 *   In all cases findPAppsDir will point to <ROOT>\PortableApps\pCli
-	 *
-	 *****************************************************************************/
-	auto findPAppsDir(const boost::filesystem::path& exePath, const boost::filesystem::path& argv0, Environment& mEnv) -> boost::optional<boost::filesystem::path> {
-		auto pAppsDir(argv0);
-		if (pAppsDir.has_filename()) {
-			pAppsDir = pAppsDir.parent_path();
-		} // strip filename
-		auto pAppsDirValid = false;
-		for (size_t idx = 0; _countof(LOCATIONS) > idx; ++idx) {
-			boost::system::error_code errCode;
-			if (exists(pAppsDir / LOCATIONS[idx] / exePath, errCode)) {
-				pAppsDir /= LOCATIONS[idx];
-				pAppsDirValid = true;
-				break;
-			}
-		}
-		if (!pAppsDirValid) {
-			return boost::none;
-		}
-		boost::system::error_code errCode;
-		pAppsDir = absolute(pAppsDir);
-		current_path(pAppsDir, errCode);
-		boost::filesystem::initial_path(errCode);
-		return pAppsDir;
-	}
-
-	/******************************************************************************
-	*
-	* env_PAppsC
-	*   setup environment as PortableApps paltform would set
-	*   PortableApps paltform, if running sets up many env vars named PortableApps.com*
-	*   env_PAppsC tries to setup them even if PortableApps paltform was not started
-	*
-	*****************************************************************************/
-	auto env_PAppsC(const boost::optional<boost::filesystem::path>& exePath, Environment& mEnv) -> void {
-		if (mEnv.exists(_T("PortableApps.comLanguageName")) || mEnv.exists(_T("PortableApps.comLanguageName_INTERNAL"))) {
-			return; // executed from pApps platform, nothing to do
-		}
-		if (!exePath) {
-			return;
-		}
-
-		auto platformIni = exePath.get() / _T("..\\PortableApps.com\\Data\\PortableAppsMenu.ini");
-		boost::system::error_code errCode;
-		if (!exists(platformIni, errCode)) {
-			return;
-		}
-
-		// executed standalone, but PortableApps platform can be found in specific location, let's read and implement environment variables
-
-		boost::optional<std::tstring> iniValue;
-
-		iniValue = iniFile::iniRead(platformIni, _T("DisplayOptions"), _T("DisableSplashScreens"));
-		if (iniValue) {
-			mEnv.set(_T("PortableApps.comDisableSplash"), iniValue.get());
-		}
-
-		iniValue = iniFile::iniRead(platformIni, _T("Localization"), _T("DisableAppLanguageSwitching"));
-		if (!iniValue || boost::iequals(iniValue.get(), "true")) {
-			return;
-		}
-
-		auto lang = iniFile::iniRead(platformIni, _T("DisplayOptions"), _T("Language"));
-		if (!lang) {
-			return;
-		}
-
-		auto languageIni = exePath.get() / (_T("..\\PortableApps.com\\App\\Locale\\") + lang.get() + _T(".locale"));
-		if (!exists(languageIni, errCode)) {
-			return;
-		}
-
-		//---------------------------------------------------------------------------------------------------------------------- englishGB: EnglishGB
-		mEnv.set(_T("PortableApps.comLanguageName"), lang.get());
-		//---------------------------------------------------------------------------------------------------------------------- englishGB: LANG_ENGLISHGB
-		auto langName = std::tstring(_T("LANG_")) + lang.get();
-		std::transform(langName.begin(), langName.end(), langName.begin(), toupper);
-		mEnv.set(_T("PortableApps.comLanguageNSIS"), langName);
-		mEnv.set(_T("PortableApps.comLocaleWinName"), langName);
-		//---------------------------------------------------------------------------------------------------------------------- englishGB: en_GB
-		iniValue = iniFile::iniRead(languageIni, _T("PortableApps.comLocaleDetails"), _T("Localeglibc"));
-		if (iniValue) {
-			mEnv.set(_T("PortableApps.comLanguageGlibc"), iniValue.get());
-			mEnv.set(_T("PortableApps.comLocaleglibc"), iniValue.get());
-			mEnv.set(_T("LC_CTYPE"), iniValue.get());
-		}
-		//---------------------------------------------------------------------------------------------------------------------- englishGB: en-gb
-		iniValue = iniFile::iniRead(languageIni, _T("PortableApps.comLocaleDetails"), _T("LanguageCode"));
-		if (iniValue) {
-			mEnv.set(_T("PortableApps.comLanguageCode"), iniValue.get());
-			mEnv.set(_T("PortableApps.comLocaleCode"), iniValue.get());
-		}
-		//---------------------------------------------------------------------------------------------------------------------- englishGB: en
-		iniValue = iniFile::iniRead(languageIni, _T("PortableApps.comLocaleDetails"), _T("LocaleCode2"));
-		if (iniValue) {
-			mEnv.set(_T("PortableApps.comLanguageCode2"), iniValue.get());
-			mEnv.set(_T("PortableApps.comLocaleCode2"), iniValue.get());
-		}
-		//---------------------------------------------------------------------------------------------------------------------- englishGB: eng
-		iniValue = iniFile::iniRead(languageIni, _T("PortableApps.comLocaleDetails"), _T("LocaleCode3"));
-		if (iniValue) {
-			mEnv.set(_T("PortableApps.comLanguageCode3"), iniValue.get());
-			mEnv.set(_T("PortableApps.comLocaleCode3"), iniValue.get());
-		}
-		//---------------------------------------------------------------------------------------------------------------------- englishGB: 2057
-		iniValue = iniFile::iniRead(languageIni, _T("PortableApps.comLocaleDetails"), _T("LocaleID"));
-		if (iniValue) {
-			mEnv.set(_T("PortableApps.comLanguageLCID"), iniValue.get());
-			mEnv.set(_T("PortableApps.comLocaleID"), iniValue.get());
-		}
-	}
 
 	/******************************************************************************
 	 *
@@ -413,14 +244,14 @@ namespace p_apps {
 				std::tstring result = buf.get();
 
 				// FIXME review boost iterators to make it prettier
-				
+
 				if ('\\' == result.back()) {
 					result.pop_back();
 				}
-				
+
 				if (boost::find_first(result, _T("\\"))) {
 					return result;
-				}				
+				}
 			}
 		}
 		return getComputerName() + _T("\\user");
@@ -484,22 +315,6 @@ namespace p_apps {
 		return result;
 	}
 
-	/******************************************************************************
-	*
-	* imbueIO
-	*   made stdin/stdout/stderr locale-aware
-	*
-	*****************************************************************************/
-	auto imbueIO() -> void {
-		std::cout.imbue(std::locale());
-		std::cerr.imbue(std::locale());
-		std::cin.imbue(std::locale());
-#ifdef _UNICODE
-		(void)_setmode(_fileno(stdout), _O_WTEXT);
-		(void)_setmode(_fileno(stdin), _O_WTEXT);
-		(void)_setmode(_fileno(stderr), _O_WTEXT);
-#endif
-	}
 
 	/******************************************************************************
 	 *
@@ -566,7 +381,7 @@ namespace p_apps {
 	/*****************************************************************************
 	* like _texecve, but ComEmu / parent cmd aware. And more.
 	*****************************************************************************/
-	auto launch(tpWait pWait, const std::tstring& cmdName, const std::vector<std::tstring>& cmdLine, const Environment& cmdEnvironment, boost::filesystem::path cwd) -> boost::optional<DWORD> {
+	auto execute(tpWait pWait, const std::tstring& cmdName, const std::vector<std::tstring>& cmdLine, const Environment& cmdEnvironment, boost::filesystem::path cwd) -> boost::optional<DWORD> {
 		if (tpWait::pWait_Auto == pWait) {
 			if (!SysInfo::ownsConsole()) {
 				pWait = tpWait::pWait_Wait;
@@ -610,7 +425,7 @@ namespace p_apps {
 		//-------------------------------------------- lpCurrentDirectory
 		//-------------------------------------------- lpStartupInfo
 		STARTUPINFO startupInfo;
-		ZeroMemory(&startupInfo, sizeof startupInfo);
+		ZeroMemory(&startupInfo, sizeof startupInfo); // SecureZeroMemory(&si, sizeof(STARTUPINFO)); ?
 		STARTUPINFO myStartupInfoPtr;
 		GetStartupInfo(&myStartupInfoPtr);
 		CopyMemory(&startupInfo, &myStartupInfoPtr, sizeof startupInfo);
@@ -624,9 +439,11 @@ namespace p_apps {
 		processInfo.hProcess = nullptr;
 		processInfo.hThread = nullptr;
 		//-------------------------------------------- go
+
 		auto ok = CreateProcess(cmdName.c_str(), commandLine.get(), nullptr, nullptr, FALSE, creationFlags, env.get(), cwd.c_str(), &startupInfo, &processInfo);
-		env.reset();
-		commandLine.reset();
+
+		// env.reset();
+		// commandLine.reset();
 		if (!ok) {
 			abend(boost::_tformat(_T("Cann't execute %1%: %2%")) % cmdName % lastErrorMsg(), 1);
 		}
