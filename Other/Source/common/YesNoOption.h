@@ -24,9 +24,9 @@ namespace p_apps {
 
 		std::map<std::tstring, bool, CaseInsensitiveMap<std::tstring>::Comparator> keyValues;
 
-		bool defaultValue;
+		const bool defaultValue = true;
 
-		bool getOption(const std::tstring& key) const {
+		[[nodiscard]] bool getOption(const std::tstring& key) const {
 			const auto itValues = keyValues.find(key);
 			return itValues == keyValues.end()
 				? defaultValue
@@ -34,7 +34,7 @@ namespace p_apps {
 		}
 
 	public:
-		YesNoOption(const bool defaultValue = true)
+		YesNoOption()
 			: keyValues({
 				{_T("yes"), true},
 				{_T("true"), true},
@@ -43,10 +43,10 @@ namespace p_apps {
 				{_T("false"), false},
 				{_T("0"), false}
 				})
-			, defaultValue(defaultValue) {
+		{
 		}
 
-		~YesNoOption() = default; // FIXME check memory leaks
+		~YesNoOption() = default;
 
 		YesNoOption(const YesNoOption& other) = delete;
 
@@ -63,6 +63,12 @@ namespace p_apps {
 		bool operator()(const boost::optional<std::tstring>& key) const {
 			return key
 				? getOption(key.get())
+				: defaultValue;
+		}
+
+		bool operator()(const std::optional<std::tstring>& key) const {
+			return key
+				? getOption(key.value())
 				: defaultValue;
 		}
 

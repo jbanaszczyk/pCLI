@@ -12,7 +12,7 @@
 
 using namespace testing;
 
-class YesNo: public testing::TestWithParam<std::tuple<bool, std::tstring>> {
+class YesNo : public testing::TestWithParam<std::tuple<bool, std::tstring>> {
 };
 
 TEST_P(YesNo, Insensitive) {
@@ -41,62 +41,84 @@ INSTANTIATE_TEST_SUITE_P(
 	));
 
 
-TEST(YesNoOptional, optionalTrue) {
+TEST(YesNoOptional, boostOptionalTrue) {
 	const p_apps::YesNoOption yesNoOption;
 	ASSERT_EQ(true, yesNoOption(boost::optional<std::tstring>(_T("True"))));
+}
+
+TEST(YesNoOptional, boostOptionalFalse) {
+	const p_apps::YesNoOption yesNoOption;
+	ASSERT_EQ(false, yesNoOption(boost::optional<std::tstring>(_T("False"))));
+}
+
+TEST(YesNoOptional, boostOptionalSomething) {
+	const p_apps::YesNoOption yesNoOption;
+	ASSERT_EQ(true, yesNoOption(boost::optional<std::tstring>(_T("What"))));
+}
+
+TEST(YesNoOptional, boostOptionalNone) {
+	const p_apps::YesNoOption yesNoOption;
+	ASSERT_EQ(true, yesNoOption(boost::none));
+}
+
+TEST(YesNoOptional, boostOptionalTrueWithDefaultTrue) {
+	const p_apps::YesNoOption yesNoOption;
+	ASSERT_EQ(true, yesNoOption(boost::optional<std::tstring>(_T("True"))));
+}
+
+TEST(YesNoOptional, boostOptionalFalseWithDefaultTrue) {
+	const p_apps::YesNoOption yesNoOption;
+	ASSERT_EQ(false, yesNoOption(boost::optional<std::tstring>(_T("False"))));
+}
+
+TEST(YesNoOptional, boostOptionalSomethingWithDefaultTrue) {
+	const p_apps::YesNoOption yesNoOption;
+	ASSERT_EQ(true, yesNoOption(boost::optional<std::tstring>(_T("What"))));
+}
+
+TEST(YesNoOptional, boostOptionalNoneWithDefaultTrue) {
+	const p_apps::YesNoOption yesNoOption;
+	ASSERT_EQ(true, yesNoOption(boost::none));
+}
+
+////////////////////////////
+
+TEST(YesNoOptional, optionalTrue) {
+	const p_apps::YesNoOption yesNoOption;
+	ASSERT_EQ(true, yesNoOption(std::optional<std::tstring>(_T("True"))));
 }
 
 TEST(YesNoOptional, optionalFalse) {
 	const p_apps::YesNoOption yesNoOption;
-	ASSERT_EQ(false, yesNoOption(boost::optional<std::tstring>(_T("False"))));
+	ASSERT_EQ(false, yesNoOption(std::optional<std::tstring>(_T("False"))));
 }
 
 TEST(YesNoOptional, optionalSomething) {
 	const p_apps::YesNoOption yesNoOption;
-	ASSERT_EQ(true, yesNoOption(boost::optional<std::tstring>(_T("What"))));
+	ASSERT_EQ(true, yesNoOption(std::optional<std::tstring>(_T("What"))));
 }
 
 TEST(YesNoOptional, optionalNone) {
 	const p_apps::YesNoOption yesNoOption;
-	ASSERT_EQ(true, yesNoOption(boost::none));
+	ASSERT_EQ(true, yesNoOption(std::nullopt));
 }
 
 TEST(YesNoOptional, optionalTrueWithDefaultTrue) {
-	const p_apps::YesNoOption yesNoOption(true);
-	ASSERT_EQ(true, yesNoOption(boost::optional<std::tstring>(_T("True"))));
+	const p_apps::YesNoOption yesNoOption;
+	ASSERT_EQ(true, yesNoOption(std::optional<std::tstring>(_T("True"))));
 }
 
 TEST(YesNoOptional, optionalFalseWithDefaultTrue) {
-	const p_apps::YesNoOption yesNoOption(true);
-	ASSERT_EQ(false, yesNoOption(boost::optional<std::tstring>(_T("False"))));
+	const p_apps::YesNoOption yesNoOption;
+	ASSERT_EQ(false, yesNoOption(std::optional<std::tstring>(_T("False"))));
 }
 
 TEST(YesNoOptional, optionalSomethingWithDefaultTrue) {
-	const p_apps::YesNoOption yesNoOption(true);
-	ASSERT_EQ(true, yesNoOption(boost::optional<std::tstring>(_T("What"))));
+	const p_apps::YesNoOption yesNoOption;
+	ASSERT_EQ(true, yesNoOption(std::optional<std::tstring>(_T("What"))));
 }
 
 TEST(YesNoOptional, optionalNoneWithDefaultTrue) {
-	const p_apps::YesNoOption yesNoOption(true);
-	ASSERT_EQ(true, yesNoOption(boost::none));
-}
-
-TEST(YesNoOptional, optionalTrueWithDefaultFalse) {
-	const p_apps::YesNoOption yesNoOption(false);
-	ASSERT_EQ(true, yesNoOption(boost::optional<std::tstring>(_T("True"))));
-}
-
-TEST(YesNoOptional, optionalFalseWithDefaultFalse) {
-	const p_apps::YesNoOption yesNoOption(false);
-	ASSERT_EQ(false, yesNoOption(boost::optional<std::tstring>(_T("False"))));
-}
-
-TEST(YesNoOptional, optionalSomethingWithDefaultFalse) {
-	const p_apps::YesNoOption yesNoOption(false);
-	ASSERT_EQ(false, yesNoOption(boost::optional<std::tstring>(_T("What"))));
-}
-
-TEST(YesNoOptional, optionalNoneWithDefaultFalse) {
-	const p_apps::YesNoOption yesNoOption(false);
-	ASSERT_EQ(false, yesNoOption(boost::none));
+	const p_apps::YesNoOption yesNoOption;
+	ASSERT_EQ(true, yesNoOption(std::nullopt));
 }

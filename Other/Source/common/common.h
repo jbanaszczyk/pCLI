@@ -43,10 +43,7 @@
 
 #pragma comment(lib,"Secur32.lib")	// GetUserNameExW
 #pragma comment(lib,"mpr.lib")	    // WNetGetUniversalNameW
-
-/** Mandatory #include *****************************************************************/
-
-//#include "LauncherVersion.h"
+#pragma comment( lib, "winmm.lib")  // timeGetTime 
 
 /** Common headers *********************************************************************/
 
@@ -69,26 +66,39 @@
 #include <process.h>
 #include <Winnetwk.h>
 #include <tchar.h>
+#include <timeapi.h>
 
-#include <boost/optional.hpp>
+#pragma comment( lib, "winmm.lib")   
+
+#include <boost/optional.hpp> // FIXME: To be migrated to std::optional
+#include <optional>
+
+#include <boost/filesystem.hpp> // FIXME: To be migrated to std::filesystem
+
 #include <boost/locale.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/join.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 
-using namespace std::string_literals;
+using namespace std::string_literals;  // NOLINT(clang-diagnostic-header-hygiene)
+
+#if defined _DEBUG
+constexpr bool C_DEBUG = true;
+#else
+constexpr bool C_DEBUG = false;
+#endif
 
 #ifdef _INC_TCHAR
 namespace std {
 	using tstring = std::basic_string<TCHAR>;
-	using tifstream = std::basic_ifstream<TCHAR>;
+//	using tifstream = std::basic_ifstream<TCHAR>;
 }
 
 #ifndef _UNICODE
 		#define _tcout cout
 		#define _tcerr cerr
 		#define _tcin  cin
+		#define _tclog  cin
 		#define _tformat format			// to be used with boost:: format
 		#define _tstring string			// to be used with boost:: filesystem
 		#define _texecve _execve
@@ -97,6 +107,7 @@ namespace std {
 #define _tcout wcout
 #define _tcerr wcerr
 #define _tcin  wcin
+#define _tclog  wclog
 #define _tformat wformat		// to be used with boost:: format
 #define _tstring wstring		// to be used with boost:: filesystem
 #define _texecve _wexecve
@@ -110,12 +121,12 @@ namespace std {
 #endif
 
 #ifdef _HEAP_MAXREQ
-// real maximum allocation size is a bit les, than _HEAP_MAXREQ
+// real maximum allocation size is a bit less, than _HEAP_MAXREQ
 #ifdef _DEBUG
 #ifdef _WIN64
 const size_t heapMaxReqReal = _HEAP_MAXREQ - 52;
 #else
-			const size_t heapMaxReqReal = _HEAP_MAXREQ - 36;
+const size_t heapMaxReqReal = _HEAP_MAXREQ - 36;
 #endif
 #else
 const size_t heapMaxReqReal = _HEAP_MAXREQ;

@@ -11,8 +11,7 @@ namespace p_apps {
 	class CtrlHandlerManager {
 
 		/**
-		 * \brief Has to be static, because is referenced by static method.
-		 *        If true pressing CtrlC should beep
+		 * \brief If true pressing CtrlC should beep
 		 */
 		static bool debugBeep;
 
@@ -38,7 +37,7 @@ namespace p_apps {
 		 */
 		static BOOL WINAPI myCtrlHandler(DWORD /*ctrlType*/) {
 			if (debugBeep) {
-				Beep(750, 300);
+				Beep(500, 200);
 			}
 			return TRUE;
 		}
@@ -51,14 +50,9 @@ namespace p_apps {
 		/**
 		 * \brief ctor - activate Ctrl handler
 		 */
-		CtrlHandlerManager()
-			: isActive(FALSE) {
-#if defined _DEBUG
-			debugBeep = true,
-#else
-				debugBeep = false,
-#endif
-				activate(TRUE);
+		CtrlHandlerManager() : isActive(FALSE) {
+			debugBeep = C_DEBUG;
+			activate(TRUE);
 		}
 
 		/**
@@ -67,14 +61,6 @@ namespace p_apps {
 		virtual ~CtrlHandlerManager() {
 			debugBeep = false;
 			activate(FALSE);
-		}
-
-		/**
-		 * \brief activate/deactivate Ctrl beep
-		 * \param value desired value of debugBeep
-		 */
-		static void setDebugBeep(const bool value = true) {
-			debugBeep = value;
 		}
 
 		/**

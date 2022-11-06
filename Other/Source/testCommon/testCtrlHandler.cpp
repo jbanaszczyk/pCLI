@@ -4,7 +4,7 @@
 // *************************************************************
 
 #include "stdafx.h"
-#include "../common/CtrlHandler.cpp"
+#include "../common/CtrlHandler.cpp"  // NOLINT(bugprone-suspicious-include)
 
 static volatile unsigned int ctrlCCounter = 0;
 const DWORD sleepTime = 3;

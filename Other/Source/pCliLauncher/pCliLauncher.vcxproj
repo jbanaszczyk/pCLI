@@ -69,6 +69,7 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="CommonSheets">
+    <Import Project="$(SolutionDir)\common.props" />
     <Import Project="$(SolutionDir)\$(SolutionName).props" />
     <Import Project="$(SolutionDir)\$(SolutionName)_console.props" />
     <Import Project="$(SolutionDir)\$(SolutionName)_boost.props" />
@@ -87,9 +88,6 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile />
-    <ClCompile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-    </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile />
@@ -108,6 +106,7 @@
     <ClInclude Include="..\common\CtrlHandler.h" />
     <ClInclude Include="..\common\Environment.h" />
     <ClInclude Include="..\common\IniFile.h" />
+    <ClInclude Include="..\common\Logger.h" />
     <ClInclude Include="..\common\pAppsUtils.h" />
     <ClInclude Include="..\common\stdafx.h" />
     <ClInclude Include="..\common\SysInfo.h" />
@@ -118,6 +117,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\common\CtrlHandler.cpp" />
+    <ClCompile Include="..\common\Logger.cpp" />
     <ClCompile Include="..\common\pAppsUtils.cpp" />
     <ClCompile Include="..\common\SysInfo.cpp" />
     <ClCompile Include="pApps.cpp" />
@@ -125,6 +125,9 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="pCliLauncher.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="appicon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

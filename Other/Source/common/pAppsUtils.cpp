@@ -12,10 +12,12 @@ namespace p_apps {
 		std::cout.imbue(std::locale());
 		std::cerr.imbue(std::locale());
 		std::cin.imbue(std::locale());
+		//std::clog.imbue(std::locale());
 #ifdef _UNICODE
 		(void)_setmode(_fileno(stdout), _O_WTEXT);
 		(void)_setmode(_fileno(stdin), _O_WTEXT);
 		(void)_setmode(_fileno(stderr), _O_WTEXT);
+
 #endif
 	}
 

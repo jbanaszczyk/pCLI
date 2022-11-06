@@ -48,10 +48,10 @@
  *   returns getValue, but if it empty, return default value.
  *   be sure, that defaults are well-defined
  * enumSections *   returns set of known [sections]
- *     SetInsensitiveTchar: simple, case insensitive
+ *     SetInsensitiveTChar: simple, case insensitive
  * enumNames
  *   returns set of known names within a section
- *     SetInsensitiveTchar: simple, case insensitive
+ *     SetInsensitiveTChar: simple, case insensitive
  *
  *****************************************************************************/
 
@@ -312,13 +312,13 @@ namespace p_apps {
 				return result;
 			}
 
-			auto enumSections(SetInsensitiveTchar& result) const -> void {
+			auto enumSections(SetInsensitiveTChar& result) const -> void {
 				for (auto it = begin(values); end(values) != it; ++it){
 					result.insert(it->first.first);
 				}
 			}
 
-			auto enumNames(const std::tstring section, SetInsensitiveTchar& result) const -> void {
+			auto enumNames(const std::tstring section, SetInsensitiveTChar& result) const -> void {
 				for (auto it = begin(values); end(values) != it; ++it){
 					if (boost::iequals(section, it->first.first)){
 						result.insert(it->first.second);
