@@ -78,35 +78,35 @@ static const std::tstring _INI_NAME_PROFILE_HOME_PATH = _T("HOMEPATH");
 static const std::tstring _INI_NAME_PROFILE_HOME_SHARE = _T("HOMESHARE");
 
 static const p_apps::iniFile::iniDefaults defaults[] = {
-	{_SECTION_LAUNCHER, _INI_NAME_SETTINGS_DIRECTORY, _T("settings")},
-	{_SECTION_LAUNCHER, _INI_NAME_INI_FILE, _INI_VALUE_TCC_INI},
-	{_SECTION_LAUNCHER, _INI_NAME_TEMP_DIRECTORY, _ENV_TEMP},
-	{_SECTION_LAUNCHER, _INI_NAME_PROFILE_DIRECTORY, _INI_VALUE_PROFILE_DIRECTORY},
-	{_SECTION_LAUNCHER, _INI_NAME_DIRDRIVES_FILE, _T("DirDrives.dat")},
-	{_SECTION_LAUNCHER, _INI_NAME_DIRHISTORY_FILE, _T("DirHistory.dat")},
-	{_SECTION_LAUNCHER, _INI_NAME_HISTORY_FILE, _T("History.dat")},
-	{_SECTION_LAUNCHER, _INI_NAME_LOGS_DIRECTORY, _T("logs")},
-	{_SECTION_LAUNCHER, _INI_NAME_COMMANDLOG_FILE, _T("command.log")},
-	{_SECTION_LAUNCHER, _INI_NAME_ERROSLOG_FILE, _T("errors.log")},
-	{_SECTION_LAUNCHER, _INI_NAME_HISTORYLOG_FILE, _T("history.log")},
-	{_SECTION_STARTUP, _INI_NAME_FORCE32, _T("false")},
-	{_SECTION_COMMAND, _INI_NAME_PARAMETERS, _T("/D /Q")},
-	{_SECTION_PROFILE, _INI_NAME_WIN_PROFILE, _T("true")},
-	{_SECTION_PROFILE, _INI_NAME_PROFILE_USER, _T("_thisUser_")},
-	{_SECTION_PROFILE, _INI_NAME_PROFILE_ROAMING, _T("_Roaming_")},
-	{_SECTION_PROFILE, _INI_NAME_PROFILE_LOCAL, _T("_Local_")},
-	{_SECTION_PROFILE, _INI_NAME_PROFILE_ALLUSERS, _T("_AllUsers_")},
-	{_SECTION_PROFILE, _INI_NAME_PROFILE_PUBLIC, _T("_Public_")},
-};
+		{_SECTION_LAUNCHER, _INI_NAME_SETTINGS_DIRECTORY, _T("settings")},
+		{_SECTION_LAUNCHER, _INI_NAME_INI_FILE, _INI_VALUE_TCC_INI},
+		{_SECTION_LAUNCHER, _INI_NAME_TEMP_DIRECTORY, _ENV_TEMP},
+		{_SECTION_LAUNCHER, _INI_NAME_PROFILE_DIRECTORY, _INI_VALUE_PROFILE_DIRECTORY},
+		{_SECTION_LAUNCHER, _INI_NAME_DIRDRIVES_FILE, _T("DirDrives.dat")},
+		{_SECTION_LAUNCHER, _INI_NAME_DIRHISTORY_FILE, _T("DirHistory.dat")},
+		{_SECTION_LAUNCHER, _INI_NAME_HISTORY_FILE, _T("History.dat")},
+		{_SECTION_LAUNCHER, _INI_NAME_LOGS_DIRECTORY, _T("logs")},
+		{_SECTION_LAUNCHER, _INI_NAME_COMMANDLOG_FILE, _T("command.log")},
+		{_SECTION_LAUNCHER, _INI_NAME_ERROSLOG_FILE, _T("errors.log")},
+		{_SECTION_LAUNCHER, _INI_NAME_HISTORYLOG_FILE, _T("history.log")},
+		{_SECTION_STARTUP, _INI_NAME_FORCE32, _T("false")},
+		{_SECTION_COMMAND, _INI_NAME_PARAMETERS, _T("/D /Q")},
+		{_SECTION_PROFILE, _INI_NAME_WIN_PROFILE, _T("true")},
+		{_SECTION_PROFILE, _INI_NAME_PROFILE_USER, _T("_thisUser_")},
+		{_SECTION_PROFILE, _INI_NAME_PROFILE_ROAMING, _T("_Roaming_")},
+		{_SECTION_PROFILE, _INI_NAME_PROFILE_LOCAL, _T("_Local_")},
+		{_SECTION_PROFILE, _INI_NAME_PROFILE_ALLUSERS, _T("_AllUsers_")},
+		{_SECTION_PROFILE, _INI_NAME_PROFILE_PUBLIC, _T("_Public_")},
+	};
 
 static const std::tstring knownEditors[] = {
-	_T("UltraEdit Portable\\UltraEditPortable.exe"),
-	_T("AkelPadPortable\\AkelPadPortable.exe"),
-	_T("GeanyPortable\\GeanyPortable.exe"),
-	_T("Notepad++Portable\\Notepad++Portable.exe"),
-	_T("Notepad2Portable\\Notepad2Portable.exe"),
-	_T("Notepad2-modPortable\\Notepad2-modPortable.exe")
-};
+		_T("UltraEdit Portable\\UltraEditPortable.exe"),
+		_T("AkelPadPortable\\AkelPadPortable.exe"),
+		_T("GeanyPortable\\GeanyPortable.exe"),
+		_T("Notepad++Portable\\Notepad++Portable.exe"),
+		_T("Notepad2Portable\\Notepad2Portable.exe"),
+		_T("Notepad2-modPortable\\Notepad2-modPortable.exe")
+	};
 
 /******************************************************************************
 *	startup options are:
@@ -117,77 +117,63 @@ static const std::tstring knownEditors[] = {
 *	[/C | /K] command to execute
 *****************************************************************************/
 void parseCmdLine(const int argc, const TCHAR* const argv[], boost::optional<std::tstring>& comspec,
-	boost::optional<std::tstring>& inifile, std::vector<std::tstring>& directives,
-	std::vector<std::tstring>& options,
-	std::vector<std::tstring>& command) {
+                  boost::optional<std::tstring>& inifile, std::vector<std::tstring>& directives,
+                  std::vector<std::tstring>& arguments,
+                  std::vector<std::tstring>& commands) {
 	++argv; // skip argv[0]
 
 	comspec = boost::none;
 	inifile = boost::none;
-	enum {
-		mode_unknown,
-		mode_directive,
-		mode_option,
-		mode_command
-	} kMode = mode_unknown;
+	bool mode_command = false;
 
-	for (auto idx = 1; argc > idx; ++idx, ++argv) {
-		std::tstring option(*argv);
+	for (auto argumentIndex = 1; argumentIndex < argc; ++argumentIndex, ++argv) {
+		std::tstring argument(*argv);
 
-		if (mode_command != kMode && (boost::istarts_with(option, _T("/c")) || boost::istarts_with(option, _T("/k")))) {
-			kMode = mode_command;
-		}
-
-		if (mode_command == kMode) {
-			// everyting after /C or /K is command
-			command.push_back(p_apps::quote(option));
+		if (mode_command) {
+			// everything after /C or /K is a command
+			commands.push_back(p_apps::quote(argument));
 			continue;
 		}
 
-		if (!inifile && boost::starts_with(option, _T("/@"))) {
-			inifile = p_apps::unquote(std::tstring(option.begin() + 2, option.end()));
+		if (boost::istarts_with(argument, _T("/c")) || boost::istarts_with(argument, _T("/k"))) {
+			mode_command = true;
 			continue;
 		}
 
-		if (!inifile && boost::starts_with(option, _T("@"))) {
-			inifile = p_apps::unquote(std::tstring(option.begin() + 1, option.end()));
+		if (!inifile && boost::starts_with(argument, _T("/@"))) {
+			inifile = p_apps::unquote(std::tstring(argument.begin() + 2, argument.end()));
 			continue;
 		}
 
-		if (boost::starts_with(option, _T("//"))) {
-			kMode = mode_directive;
-		}
-		else if (boost::starts_with(option, _T("/"))) {
-			kMode = mode_option;
+		if (!inifile && boost::starts_with(argument, _T("@"))) {
+			inifile = p_apps::unquote(std::tstring(argument.begin() + 1, argument.end()));
+			continue;
 		}
 
-		switch (kMode) {
-		case mode_directive: {
-			const auto pos = option.find(_T("="));
+		if (boost::starts_with(argument, _T("//"))) {
+			const auto equalSignPosition = argument.find(_T("="));
 
-			if (std::string::npos != pos) {
-				option = option.substr(0, pos + 1) + p_apps::quote(option.substr(pos + 1, std::string::npos));
+			if (equalSignPosition != std::string::npos) {
+				argument = argument.substr(0, equalSignPosition + 1) + p_apps::quote(argument.substr(equalSignPosition + 1, std::string::npos));
 			}
 
-			directives.push_back(option);
-			break;
+			directives.push_back(argument);
+			continue;
 		}
 
-		case mode_option:
-			options.push_back(option);
-			break;
-
-		default:
-			if (!comspec && boost::filesystem::is_directory(p_apps::unquote(option))) {
-				comspec = option;
-				break;
-			}
-
-			kMode = mode_command;
-			command.push_back(_T("/K"));
-			command.push_back(p_apps::quote(option));
-			break;
+		if (boost::starts_with(argument, _T("/"))) {
+			arguments.push_back(argument);
+			continue;
 		}
+
+		if (!comspec && boost::filesystem::is_directory(p_apps::unquote(argument))) {
+			comspec = argument;
+			continue;
+		}
+
+		mode_command = true;
+		commands.push_back(_T("/K"));
+		commands.push_back(p_apps::quote(argument));
 	}
 };
 
@@ -196,19 +182,20 @@ void parseCmdLine(const int argc, const TCHAR* const argv[], boost::optional<std
 *	added in free form from ini file
 *****************************************************************************/
 
-void parseCmdLine(const std::tstring& cmdLine, boost::optional<std::tstring>& comspec,
-	boost::optional<std::tstring>& inifile, std::vector<std::tstring>& directives,
-	std::vector<std::tstring>& options,
-	std::vector<std::tstring>& command) {
+void parseCmdLineArgumentsFromIniFile(const std::tstring& cmdLine, boost::optional<std::tstring>& comspec,
+                                      boost::optional<std::tstring>& inifile, std::vector<std::tstring>& directives,
+                                      std::vector<std::tstring>& options,
+                                      std::vector<std::tstring>& commands) {
+
 	int argc;
-	LPWSTR* argv = CommandLineToArgvW((_T("dummy.exe ") + cmdLine).c_str(), &argc);
+	const auto argv = CommandLineToArgvW((_T("dummy.exe ") + cmdLine).c_str(), &argc);
 	// there is a difference in parsing argv0 and the rest
 
 	if (argv == nullptr) {
 		return;
 	}
 
-	parseCmdLine(argc, argv, comspec, inifile, directives, options, command);
+	parseCmdLine(argc, argv, comspec, inifile, directives, options, commands);
 	LocalFree(argv);
 };
 
@@ -221,7 +208,7 @@ public:
 	p_apps::Environment environment{};
 	boost::filesystem::path argv0{};
 	boost::filesystem::path pAppsDir{};
-	boost::filesystem::path iniFileName{ _T(VER_PRODUCTNAME_STR) _T(".ini") };
+	boost::filesystem::path iniFileName{_T(VER_PRODUCTNAME_STR) _T(".ini")};
 
 	Launcher(const Launcher& other) = delete;
 	Launcher(Launcher&& other) noexcept = delete;
@@ -257,10 +244,15 @@ public:
 	 *****************************************************************************/
 	virtual void findHomeDirectory() {
 	}
-
 };
 
 class TccLauncher final : public Launcher {
+	boost::optional<std::tstring> commandComspec;
+	boost::optional<std::tstring> commandInifile;
+	std::vector<std::tstring> commandDirectives;
+	std::vector<std::tstring> commandOptions;
+	std::vector<std::tstring> commandCommand;
+
 public:
 	TccLauncher(const TccLauncher& other) = delete;
 	TccLauncher(TccLauncher&& other) noexcept = delete;
@@ -271,74 +263,86 @@ public:
 
 	void launch() override;
 	void findHomeDirectory() override;
+	std::optional<boost::filesystem::path> locateTccExe(const boost::filesystem::path& argv0, const boost::filesystem::path& tccExePath) const;
 };
 
-Launcher::Launcher(int argc, TCHAR** argv, TCHAR** envp) : argc(argc), argv(argv), envp(envp) {
+Launcher::Launcher(int argc, TCHAR** argv, TCHAR** envp)
+	: argc(argc)
+  , argv(argv)
+  , envp(envp) {
 
-	// made stdin / stdout / stderr locale-aware
+	// make stdin / stdout / stderr locale-aware
 	p_apps::imbueIO();
 }
 
 void Launcher::getArgv0() {
 	auto executableName = SysInfo::getExeName();
 	argv0 = absolute(executableName
-		? executableName.get()
-		: argv[0]);
+		                 ? executableName.get()
+		                 : argv[0]);
 }
 
 TccLauncher::TccLauncher(int argc, TCHAR** argv, TCHAR** envp) // NOLINT(clang-diagnostic-shadow-field)
 	: Launcher(argc, argv, envp) {
 }
 
+std::optional<boost::filesystem::path> TccLauncher::locateTccExe(const boost::filesystem::path& argv0, const boost::filesystem::path& tccExePath) const {
+	// NOLINT(clang-diagnostic-shadow-field)
+
+	boost::filesystem::path possibleExeLocations[] = {
+			p_apps::PORTABLE_APPS / argv0.stem(),
+			_T(".\\"),
+			_T("..\\"),
+			_T("..\\..\\..\\..\\..\\..\\..\\..\\")
+		};
+
+	auto parentDirectory = argv0.parent_path();
+
+	for (const auto& possibleExeLocation : possibleExeLocations) {
+		if (exists(parentDirectory / possibleExeLocation / tccExePath)) {
+			return parentDirectory /= possibleExeLocation;
+		}
+	}
+	return std::nullopt;
+}
+
 void TccLauncher::findHomeDirectory() {
-
-	boost::filesystem::path locations[] = {
-		_T(""),
-		_T(".\\"),
-		_T("..\\..\\..\\..\\..\\..\\..\\..\\"),
-	};
-
-	locations[0] = p_apps::PORTABLE_APPS / argv0.stem();
-
-	const boost::filesystem::path tccExePath{ "App\\TCCLE32\\tcc.exe" };
 
 	pAppsDir = argv0.parent_path();
 
-	auto pAppsDirValid = false;
-	for (const auto& idx : locations) {
-		if (exists(pAppsDir / idx / tccExePath)) {
-			pAppsDir /= idx;
-			pAppsDirValid = true;
-			break;
+	static const boost::filesystem::path exePaths[] = {
+			p_apps::PORTABLE_APPS_APP / _T("TCCLE32") / TCC_EXE_LE_32,
+			p_apps::PORTABLE_APPS_APP / _T("TCCLE64") / TCC_EXE_LE_64
+		};
+
+	for (const auto& exePath : exePaths) {
+		auto tccExe = locateTccExe(argv0, exePath);
+		if (tccExe) {
+			pAppsDir = absolute(canonical(tccExe.value()));
+			return;
 		}
 	}
-	if (!pAppsDirValid) {
-		p_apps::abend(boost::_tformat(_T("Unable to find application: %s")) % tccExePath._tstring(), 1);
-	}
 
-	pAppsDir = absolute(canonical(pAppsDir));
+	fail(_T("Unable to find application: %s from %s"), argv0.parent_path());
 }
 
 void TccLauncher::launch() {
 	logger::trace(_T("Start"));
 
 	environment.setUp(envp);
+	logger::trace(_T("Environment: %d variables"), environment.size());
 
 	getArgv0();
+	logger::trace(_T("argv0: %s"), argv0);
 
 	findHomeDirectory();
+	logger::trace(_T("pApps directory: %s"), pAppsDir);
 
 	/*******************************************************
 	*	Retrieve command-line
 	*	parsing command line have to be done prior to reading INI file
-	*	because there can /@IniFileName arg forcing
-	*	location of INI file
+	*	because there can /@IniFileName arg forcing location of INI file
 	*******************************************************/
-	boost::optional<std::tstring> commandComspec;
-	boost::optional<std::tstring> commandInifile;
-	std::vector<std::tstring> commandDirectives;
-	std::vector<std::tstring> commandOptions;
-	std::vector<std::tstring> commandCommand;
 	parseCmdLine(argc, argv, commandComspec, commandInifile, commandDirectives, commandOptions, commandCommand);
 	/*******************************************************
 	*	Get configuration
@@ -390,7 +394,7 @@ void TccLauncher::launch() {
 	if (iniValueOpt) {
 		boost::optional<std::tstring> dummyComspec; // ignored
 		boost::optional<std::tstring> dummyInifile; // ignored - there is no way to change ini file now
-		parseCmdLine(iniValueOpt.get(), dummyComspec, dummyInifile, commandDirectives, commandOptions, commandCommand);
+		parseCmdLineArgumentsFromIniFile(iniValueOpt.get(), dummyComspec, dummyInifile, commandDirectives, commandOptions, commandCommand);
 	}
 
 	/*******************************************************
@@ -400,18 +404,18 @@ void TccLauncher::launch() {
 	p_apps::YesNoOption yesNoOption;
 	if (yesNoOption(launcherIni.getValue(_SECTION_PROFILE, _INI_NAME_WIN_PROFILE))) {
 		for (const auto& it : std::array<std::pair<const std::tstring, boost::filesystem::path>, 5>{
-			std::make_pair(_INI_NAME_PROFILE_USER, profileDirectory),
-				std::make_pair(_INI_NAME_PROFILE_ROAMING, profileRoamingDirectory),
-				std::make_pair(_INI_NAME_PROFILE_LOCAL, profileLocalDirectory),
-				std::make_pair(_INI_NAME_PROFILE_ALLUSERS, profileDirectory),
-				std::make_pair(_INI_NAME_PROFILE_PUBLIC, profileDirectory)
-		}) {
+			     std::make_pair(_INI_NAME_PROFILE_USER, profileDirectory),
+			     std::make_pair(_INI_NAME_PROFILE_ROAMING, profileRoamingDirectory),
+			     std::make_pair(_INI_NAME_PROFILE_LOCAL, profileLocalDirectory),
+			     std::make_pair(_INI_NAME_PROFILE_ALLUSERS, profileDirectory),
+			     std::make_pair(_INI_NAME_PROFILE_PUBLIC, profileDirectory)
+		     }) {
 			auto thisVar = it.first;
 			auto thisDir = it.second;
 
 			auto thisValue = p_apps::Environment::expandEnv(environment.get(thisVar));
 			thisDir = absolute(p_apps::Environment::expandEnv(launcherIni.getValueNonEmpty(_SECTION_PROFILE, thisVar)),
-				thisDir);
+			                   thisDir);
 
 			if (!p_apps::makeDirWriteable(thisDir)) {
 				p_apps::abend(boost::_tformat(_T("Cann't write profile directory: %s")) % thisDir._tstring(), 1);
@@ -422,12 +426,12 @@ void TccLauncher::launch() {
 
 			if (thisVar == _INI_NAME_PROFILE_USER) {
 				environment.set(_INI_NAME_PROFILE_HOME_PATH,
-					(thisDir.root_directory() / thisDir.relative_path())._tstring(),
-					_ENV_BACKUP_PREFIX + _INI_NAME_PROFILE_HOME_PATH);
+				                (thisDir.root_directory() / thisDir.relative_path())._tstring(),
+				                _ENV_BACKUP_PREFIX + _INI_NAME_PROFILE_HOME_PATH);
 				environment.set(_INI_NAME_PROFILE_HOME_DRIVE, thisDir.root_name()._tstring(),
-					_ENV_BACKUP_PREFIX + _INI_NAME_PROFILE_HOME_DRIVE);
+				                _ENV_BACKUP_PREFIX + _INI_NAME_PROFILE_HOME_DRIVE);
 				environment.set(_INI_NAME_PROFILE_HOME_SHARE, p_apps::pathToUnc(thisDir.root_name()._tstring()),
-					_ENV_BACKUP_PREFIX + _INI_NAME_PROFILE_HOME_SHARE);
+				                _ENV_BACKUP_PREFIX + _INI_NAME_PROFILE_HOME_SHARE);
 			}
 		}
 	}
@@ -451,14 +455,14 @@ void TccLauncher::launch() {
 
 	// iniFileName can be passed as an argument or retrieved from pCli.ini
 	auto tccIniFilename = commandInifile
-		? commandInifile.get()
-		: absolute(p_apps::Environment::expandEnv(
-			launcherIni.getValueNonEmpty(_SECTION_LAUNCHER, _INI_NAME_INI_FILE)),
-			settingsDirectory);
+		                      ? commandInifile.get()
+		                      : absolute(p_apps::Environment::expandEnv(
+			                                 launcherIni.getValueNonEmpty(_SECTION_LAUNCHER, _INI_NAME_INI_FILE)),
+		                                 settingsDirectory);
 
 	if (!exists(tccIniFilename, errCode)) {
 		p_apps::copyCopy(absolute(p_apps::PORTABLE_APPS_DEFAULT / _INI_VALUE_TCC_INI, pAppsDir), tccIniFilename,
-			errCode);
+		                 errCode);
 	}
 
 	/*******************************************************
@@ -479,9 +483,8 @@ void TccLauncher::launch() {
 		iniValueOpt = launcherIni.getValue(_SECTION_LAUNCHER, _INI_NAME_TEMP_DIRECTORY);
 		if (iniValueOpt) {
 			tempPath = absolute(boost::filesystem::path(p_apps::Environment::expandEnv(iniValueOpt.get())),
-				pAppsDir / p_apps::PORTABLE_APPS_DATA);
-		}
-		else {
+			                    pAppsDir / p_apps::PORTABLE_APPS_DATA);
+		} else {
 			tempPath = environment.get(_ENV_TEMP);
 		}
 	}
@@ -510,9 +513,8 @@ void TccLauncher::launch() {
 
 		if (isLocal) {
 			tccIni.setValue(_SECTION_4NT, _INI_NAME_HISTORY_FILE,
-				p_apps::quote(p_apps::normalize(profileLocalDirectory / iniValueStr)));
-		}
-		else {
+			                p_apps::quote(p_apps::normalize(profileLocalDirectory / iniValueStr)));
+		} else {
 			tccIni.setValue(_SECTION_4NT, _INI_NAME_HISTORY_FILE, _T(""));
 			environment.set(_ENV_HIST_FILE, p_apps::quote(p_apps::normalize(profileLocalDirectory / iniValueStr)));
 		}
@@ -530,9 +532,8 @@ void TccLauncher::launch() {
 		}
 		if (isLocal) {
 			tccIni.setValue(_SECTION_4NT, _INI_NAME_DIRHISTORY_FILE,
-				p_apps::quote(p_apps::normalize(profileLocalDirectory / iniValueStr)));
-		}
-		else {
+			                p_apps::quote(p_apps::normalize(profileLocalDirectory / iniValueStr)));
+		} else {
 			tccIni.setValue(_SECTION_4NT, _INI_NAME_DIRHISTORY_FILE, _T(""));
 			environment.set(_ENV_DIRHIST_FILE, p_apps::quote(p_apps::normalize(profileLocalDirectory / iniValueStr)));
 		}
@@ -563,15 +564,15 @@ void TccLauncher::launch() {
 	iniValueStr = p_apps::Environment::expandEnv(
 		launcherIni.getValueNonEmpty(_SECTION_LAUNCHER, _INI_NAME_COMMANDLOG_FILE));
 	tccIni.setValue(_SECTION_4NT, _INI_NAME_COMMANDLOG_FILE,
-		p_apps::quote(p_apps::normalize(logsDirectory / iniValueStr)));
+	                p_apps::quote(p_apps::normalize(logsDirectory / iniValueStr)));
 	iniValueStr = p_apps::Environment::expandEnv(
 		launcherIni.getValueNonEmpty(_SECTION_LAUNCHER, _INI_NAME_ERROSLOG_FILE));
 	tccIni.setValue(_SECTION_4NT, _INI_NAME_ERROSLOG_FILE,
-		p_apps::quote(p_apps::normalize(logsDirectory / iniValueStr)));
+	                p_apps::quote(p_apps::normalize(logsDirectory / iniValueStr)));
 	iniValueStr = p_apps::Environment::expandEnv(
 		launcherIni.getValueNonEmpty(_SECTION_LAUNCHER, _INI_NAME_HISTORYLOG_FILE));
 	tccIni.setValue(_SECTION_4NT, _INI_NAME_HISTORYLOG_FILE,
-		p_apps::quote(p_apps::normalize(logsDirectory / iniValueStr)));
+	                p_apps::quote(p_apps::normalize(logsDirectory / iniValueStr)));
 	/*******************************************************
 	*	Editor
 	*******************************************************/
@@ -598,19 +599,19 @@ void TccLauncher::launch() {
 	boost::filesystem::path exeName;
 
 	appDir = absolute(runX64
-		? PORTABLE_APPS_APP_LE_64
-		: PORTABLE_APPS_APP_LE_32,
-		pAppsDir);
+		                  ? PORTABLE_APPS_APP_LE_64
+		                  : PORTABLE_APPS_APP_LE_32,
+	                  pAppsDir);
 	exeName = runX64
-		? TCC_EXE_LE_64
-		: TCC_EXE_LE_32;
+		          ? TCC_EXE_LE_64
+		          : TCC_EXE_LE_32;
 
 	/*******************************************************
 	*	Wait for tcc to finish
 	*******************************************************/
 	auto pWait = yesNoOption(launcherIni.getValue(_SECTION_STARTUP, _INI_NAME_WAIT))
-		? p_apps::tpWait::pWait_Wait
-		: p_apps::tpWait::pWait_NoWait;
+		             ? p_apps::tpWait::pWait_Wait
+		             : p_apps::tpWait::pWait_NoWait;
 
 	/*******************************************************
 	*	Language
@@ -645,7 +646,7 @@ void TccLauncher::launch() {
 
 		if (iniValueOpt) {
 			tccIni.setValue(_SECTION_4NT, p_apps::Environment::expandEnv(it),
-				p_apps::Environment::expandEnv(iniValueOpt.get()));
+			                p_apps::Environment::expandEnv(iniValueOpt.get()));
 		}
 	}
 
@@ -697,7 +698,7 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[]) {
 
 	logger::init();
 
-	TccLauncher tccLauncher{ argc, argv, envp };
+	TccLauncher tccLauncher{argc, argv, envp};
 	tccLauncher.launch();
 	return 0;
 }

@@ -9,7 +9,7 @@ enum loggerSeverityLevel {
 	warning,
 	error,
 	fatal,
-	fail
+	fail_
 };
 
 namespace logger {
@@ -19,8 +19,8 @@ namespace logger {
 
 		extern std::wostream* logStream;
 
-		boost::basic_format<wchar_t> formatElapsedTime();
-		const TCHAR* formatSeverityLevel(loggerSeverityLevel severityLevel);
+		const std::wstring formatElapsedTime();
+		const std::wstring formatSeverityLevel(loggerSeverityLevel severityLevel);
 
 		inline std::wstring logHelper(const boost::_tformat& tf) {
 			return boost::str(tf);
@@ -41,6 +41,11 @@ namespace logger {
 		if (severityLevel >= internal::currentSeverityLevel) {
 			boost::_tformat tf{ fmt };
 			auto message = internal::logHelper(tf, std::forward<Arguments>(args)...);
+
+			auto z1 = internal::formatElapsedTime();
+			auto z2 = internal::formatSeverityLevel(severityLevel);
+			auto z3 = str(boost::_tformat(_T("%s %s %s")) % internal::formatElapsedTime() % internal::formatSeverityLevel(severityLevel) % message);
+
 			*internal::logStream << boost::_tformat(_T("%s %s %s")) % internal::formatElapsedTime() % internal::formatSeverityLevel(severityLevel) % message << std::endl;
 			return message;
 		}
@@ -77,18 +82,19 @@ namespace logger {
 		log(loggerSeverityLevel::fatal, fmt, std::forward<Arguments>(args)...);
 	}
 
-	template<typename... Arguments>
-	void fail(const TCHAR* fmt, Arguments&&... args) {
-		auto message = log(loggerSeverityLevel::fail, fmt, std::forward<Arguments>(args)...);
-		if (message.has_value()) {
-			if (SysInfo::ownsConsole()) {
-				*internal::logStream << _T("Press [ENTER] to exit.") << std::endl;
-				std::_tcin.get();
-			}
-			else {
-				MessageBox(nullptr, message.value().c_str(), (boost::_tformat(_T("Can't continue."))).str().c_str(), MB_OK | MB_ICONERROR);
-			}
+}
+
+template<typename... Arguments>
+void fail(const TCHAR* fmt, Arguments&&... args) {
+	auto message = logger::log(loggerSeverityLevel::fail_, fmt, std::forward<Arguments>(args)...);
+	if (message.has_value()) {
+		if (SysInfo::ownsConsole()) {
+			*logger::internal::logStream << _T("Press [ENTER] to exit.") << std::endl;
+			std::_tcin.get();
 		}
-		exit(1);
+		else {
+			MessageBox(nullptr, message.value().c_str(), (boost::_tformat(_T("Can't continue."))).str().c_str(), MB_OK | MB_ICONERROR);
+		}
 	}
+	exit(1);
 }

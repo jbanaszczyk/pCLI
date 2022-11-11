@@ -58,6 +58,7 @@
 #include <functional>
 #include <utility>
 #include <io.h>
+#include <iomanip>
 #include <fcntl.h>
 #include <errno.h>
 #include <winternl.h>

@@ -12,9 +12,9 @@ namespace logger {
 
 		DWORD startTime = timeGetTime();
 
-		boost::basic_format<wchar_t> formatElapsedTime() {
+		const std::wstring formatElapsedTime() {
 			const auto elapsedTime = timeGetTime() - startTime;
-			return  boost::_tformat(_T("[%10lu]")) % elapsedTime;
+			return str(boost::_tformat(_T("[%10lu]")) % elapsedTime);
 		}
 
 		static const TCHAR* severityLevelNames[] = {
@@ -27,7 +27,7 @@ namespace logger {
 			_T("[fail]   ")
 		};
 
-		const TCHAR* formatSeverityLevel(loggerSeverityLevel severityLevel) {
+		const std::wstring formatSeverityLevel(loggerSeverityLevel severityLevel) {
 			return severityLevelNames[severityLevel];
 		}
 	}
@@ -37,11 +37,14 @@ namespace logger {
 	}
 
 	void init() {
-		internal::logStream = &std::_tclog;
-		setSeverityLevel(loggerSeverityLevel::trace);
+		logger::init(C_DEBUG
+			? loggerSeverityLevel::trace
+			: loggerSeverityLevel::warning
+		);
 	}
 
 	void init(const loggerSeverityLevel initialSeverityLevel) {
+		internal::logStream = &std::_tclog;
 		setSeverityLevel(initialSeverityLevel);
 	}
 

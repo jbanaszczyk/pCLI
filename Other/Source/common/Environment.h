@@ -22,6 +22,7 @@
 
 #include "common.h"
 #include "pAppsUtils.h"
+#include "Logger.h"
 
 namespace p_apps {
 	class Environment {
@@ -29,34 +30,31 @@ namespace p_apps {
 		std::map<std::tstring, std::tstring, CaseInsensitiveMap<std::tstring>::Comparator> mEnv;
 
 	public:
-		Environment() {};
-		Environment(const TCHAR* const envp[]) {
+		Environment() = default;
+
+		explicit Environment(const TCHAR* const envp[]) {
 			setUp(envp);
 		}
 
 		Environment(const Environment&) = delete;
 		Environment(const Environment&&) = delete;
-		auto Environment::operator=(const Environment&)->Environment & = delete;
-		auto Environment::operator=(const Environment&&)->Environment && = delete;
+		auto operator=(const Environment&)->Environment & = delete;
+		auto operator=(const Environment&&)->Environment && = delete;
+		~Environment() = default;
 
+		typedef DWORD(WINAPI* ExpandEnvironmentStrings_t)(LPCTSTR, LPWSTR, DWORD);
 
-		using ExpandEnvironmentStrings_t = DWORD(WINAPI*)(LPCTSTR, LPWSTR, DWORD);
+		static std::tstring expandEnv(const std::tstring& variableName, ExpandEnvironmentStrings_t ExpandEnvironmentStrings_f = ExpandEnvironmentStrings) {
+			const auto bufferSize = ExpandEnvironmentStrings_f(variableName.c_str(), nullptr, 0);
 
-		static auto expandEnv(const std::tstring& str,
-			ExpandEnvironmentStrings_t ExpandEnvironmentStrings_f = ExpandEnvironmentStrings) -> std::tstring {
-			auto bufSize = ExpandEnvironmentStrings_f(str.c_str(), nullptr, 0);
-
-			// FIXME: Error: unique_ptr releases buf, but get() holds its value
-			// TODO: review other uses of unique_ptr
-			
-			std::unique_ptr<TCHAR[]> buf(new(std::nothrow) TCHAR[bufSize]); 
-			if (bufSize == 0 || buf.get() == nullptr) {
-				return str;
+			const std::unique_ptr<TCHAR[]> buffer(new(std::nothrow) TCHAR[bufferSize]);
+			if (bufferSize == 0 || buffer == nullptr) {
+				return variableName;
 			}
-			if (ExpandEnvironmentStrings_f(str.c_str(), buf.get(), bufSize) != bufSize) {
-				return str;
+			if (ExpandEnvironmentStrings_f(variableName.c_str(), buffer.get(), bufferSize) != bufferSize) {
+				return variableName;
 			}
-			return buf.get();
+			return buffer.get();
 		}
 
 		auto setUp(const TCHAR* const envp[]) -> void {
@@ -66,43 +64,46 @@ namespace p_apps {
 			for (auto* ref = envp; (*ref != nullptr) && (**ref != _T('\0')); ++ref) {
 				auto* sep = _tcschr(*ref, _T('='));
 				if (sep == nullptr) {
-					break; // garbage
+					logger::warning(_T("Environment: garbage, missing '=' in %s"), *ref);
+					break;
 				}
 				const size_t len = sep - *ref;
 				if (len == 0) {
-					continue; // malformed
+					logger::warning(_T("Environment: malformed, missing variable name in %s"), *ref);
+					continue;
 				}
 				++sep;
 				if (*sep == _T('\0')) {
-					continue; // malformed
+					logger::warning(_T("Environment: malformed, missing variable value in %s"), *ref);
+					continue;
 				}
-				mEnv.insert(std::pair<std::tstring, std::tstring>(std::tstring{ *ref, len }, std::tstring{ sep }));
+				mEnv.insert(std::pair(std::tstring{ *ref, len }, std::tstring{ sep }));
 			}
 		}
 
-		auto size(void) const -> size_t {
+		[[nodiscard]] size_t size() const {
 			return mEnv.size();
 		}
 
-		auto exists(const std::tstring& name) const -> bool {
+		[[nodiscard]] bool exists(const std::tstring& name) const {
 			if (name.empty()) {
 				return false;
 			}
 			return mEnv.end() != mEnv.find(name);
 		}
 
-		auto erase(const std::tstring& name) -> void {
+		void erase(const std::tstring& name) {
 			mEnv.erase(name);
 		}
 
-		auto get(const std::tstring& name) -> std::tstring {
+		std::tstring get(const std::tstring& name) {
 			if (!exists(name)) {
 				return std::tstring{};
 			}
 			return mEnv[name];
 		}
 
-		auto set(const std::tstring& name, const std::tstring& value, const std::tstring& nameBackup = std::tstring{}) -> void {
+		void set(const std::tstring& name, const std::tstring& value, const std::tstring& nameBackup = std::tstring{}) {
 			if (!nameBackup.empty()) {
 				set(nameBackup, get(name));
 			}
@@ -116,7 +117,7 @@ namespace p_apps {
 			}
 		}
 
-		auto dump(std::unique_ptr<TCHAR[]>& result) const -> void {
+		void dump(std::unique_ptr<TCHAR[]>& result) const {
 			auto len = 2 * mEnv.size() + 1; // equal signs, zeros after every string, extra zero
 			for (const auto& it : mEnv) {
 				len += it.first.length() + it.second.length();
@@ -144,45 +145,6 @@ namespace p_apps {
 				--len;
 			}
 			*ref = _T('\0');
-			--len;
-			assert(!len);
 		}
 	};
 }
-
-/*
-PAL:_IgnoreLanguage=false
-PortableApps.comApps=strPortableAppsPath
-PortableApps.comDisableSplash=true
-PortableApps.comDocuments=X:\\Documents
-PortableApps.comHighContrast=false
-PortableApps.comLanguageCode=pl
-PortableApps.comLanguageCode2=pl
-PortableApps.comLanguageCode2_INTERNAL=pl
-PortableApps.comLanguageCode3=pol
-PortableApps.comLanguageCode3_INTERNAL=pol
-PortableApps.comLanguageCode_INTERNAL=pl
-PortableApps.comLanguageGlibc=pl
-PortableApps.comLanguageGlibc_INTERNAL=pl
-PortableApps.comLanguageLCID=1045
-PortableApps.comLanguageLCID_INTERNAL=1045
-PortableApps.comLanguageName=Polish
-PortableApps.comLanguageName_INTERNAL=Polish
-PortableApps.comLanguageNSIS=LANG_POLISH
-PortableApps.comLanguageNSIS_INTERNAL=LANG_POLISH
-PortableApps.comLocaleCode2=pl
-PortableApps.comLocaleCode2_INTERNAL=pl
-PortableApps.comLocaleCode3=pol
-PortableApps.comLocaleCode3_INTERNAL=pol
-PortableApps.comLocaleglibc=pl
-PortableApps.comLocaleglibc_INTERNAL=pl
-PortableApps.comLocaleID=1045
-PortableApps.comLocaleID_INTERNAL=1045
-PortableApps.comLocaleWinName=LANG_POLISH
-PortableApps.comLocaleWinName_INTERNAL=LANG_POLISH
-PortableApps.comMusic=X:\\Documents\Music
-PortableApps.comPictures=X:\\Documents\Pictures
-PortableApps.comPlatformVersion=21.0.0.0
-PortableApps.comRoot=strPortableAppsRootPath
-PortableApps.comVideos=X:\\Documents\Videos
- */

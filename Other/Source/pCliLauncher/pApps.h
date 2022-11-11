@@ -1,9 +1,10 @@
-/******************************************************************************
+/*************************************************************************/ /**
+ * \file      pApps.cpp
+ * \brief     Some commonly used functions
  *
- * Copyright 2011 jacek.banaszczyk@gmail.com
- * Part of pCli project: https://github.com/jbanaszczyk/pCli
- *
- *****************************************************************************/
+ * \copyright (c) 2011 jacek.banaszczyk@gmail.com
+ * \short     Part of pCli project: https://github.com/jbanaszczyk/pCli
+ ****************************************************************************/
 
 #pragma once
 
@@ -14,12 +15,9 @@
 #include "../common/CtrlHandler.h"
 
 namespace p_apps {
-	/******************************************************************************
-	 *
-	 * Required: VER_PRODUCTNAME_STR
-	 *   is defined in version.h
-	 *
-	 *****************************************************************************/
+	/*****************************************************************************
+	 * \details Required: VER_PRODUCTNAME_STR is defined in version.h
+	 ****************************************************************************/
 
 	/******************************************************************************
 	 *
@@ -29,22 +27,16 @@ namespace p_apps {
 	 *   Name of launcher INI file
 	 *
 	 * PORTABLE_APPS
-	 *   Directory, where PortableApps paltform is expected
+	 *   Directory, where PortableApps platform is expected
 	 *
 	 * PORTABLE_APPS_APP
 	 *   Legacy name of application directory ( ie. "App" )
 	 *
 	 * PORTABLE_APPS_APP_LE_32
-	 *   Not legacy name of application 32-bit directory ( ie. "App\\32" ) TCC/LE
+	 *   Not legacy name of application 32-bit directory ( ie. "App\\32" )
 	 *
 	 * PORTABLE_APPS_APP_LE_64
-	 *   Not legacy name of application 64-bit directory ( ie. "App\\64" ) TCC/LE
-	 *
-	 * PORTABLE_APPS_APP_FULL_32
-	 *   Not legacy name of application 32-bit directory ( ie. "App\\32" ) TCC
-	 *
-	 * PORTABLE_APPS_APP_FULL_64
-	 *   Not legacy name of application 64-bit directory ( ie. "App\\64" ) TCC
+	 *   Not legacy name of application 64-bit directory ( ie. "App\\64" )
 	 *
 	 * PORTABLE_APPS_DATA
 	 *   Legacy name of data directory ( ie. "Data" )
@@ -52,44 +44,12 @@ namespace p_apps {
 	 * PORTABLE_APPS_DEFAULT
 	 *   Legacy name of defaults directory ( ie. "App\\DefaultData" )
 	 *
-	 * PORTABLE_APPS_INI
-	 *   Name (relative to PORTABLE_APPS)
-	 *
-	 * PORTABLE_APPS_OTHER_LOCALE
-	 *   Location of launcher' locale files
-	 *
-	 * LOCATIONS[]
-	 *   where proper launcher' directory should be located relative to this exe
-	 *
 	 *****************************************************************************/
 	extern const boost::filesystem::path LAUNCHER_INI;
 	extern const boost::filesystem::path PORTABLE_APPS;
 	extern const boost::filesystem::path PORTABLE_APPS_APP;
 	extern const boost::filesystem::path PORTABLE_APPS_DATA;
 	extern const boost::filesystem::path PORTABLE_APPS_DEFAULT;
-	extern const boost::filesystem::path PORTABLE_APPS_INI;
-	extern const boost::filesystem::path PORTABLE_APPS_OTHER_LOCALE;
-	extern const boost::filesystem::path PORTABLE_APPS_DOCUMENTS;
-	
-
-	/******************************************************************************
-	 *
-	 * If compiled with _DEBUG
-	 *   you can your own value of argv0
-	 *
-	 *****************************************************************************/
-
-	// extern const std::tstring envArgv0Name;
-
-	/******************************************************************************
-	 *
-	 * tstring2string
-	 * string2tstring
-	 *   Simple conversions tstring / string
-	 *
-	 *****************************************************************************/
-	auto tstring2string(const std::tstring& sou) -> std::string;
-	auto string2tstring(const std::string& sou) -> std::tstring;
 
 	/******************************************************************************
 	 *
@@ -97,25 +57,59 @@ namespace p_apps {
 	 *   like boost::filesystem::copy, but if source is directory - copies whole tree
 	 *
 	 *****************************************************************************/
-	auto copyCopy(const boost::filesystem::path& source, const boost::filesystem::path& destination, boost::system::error_code& ec) -> bool;
+	bool copyCopy(const boost::filesystem::path& source, const boost::filesystem::path& destination,
+	              boost::system::error_code& ec);
 
-	/******************************************************************************
+	/****************************************************************************
+	 * \brief  check if string is already quoted
 	 *
-	 * unquote
-	 *   remove existing quotes from the string (probably path)
-	 *
-	 *****************************************************************************/
-	auto unquote(const std::tstring& str) -> std::tstring;
+	 * \param  str string to be checked
+	 * \return true if string is surrounded with ""
+	 ***************************************************************************/
+	static bool isQuoted(const std::tstring& str);
 
-	/******************************************************************************
+	/****************************************************************************
+	 * \brief  check if string is already quoted
 	 *
-	 * quote
-	 *   quote path containing spaces
+	 * \param  str string to be checked
+	 * \return true if string is surrounded with ""
+	 ***************************************************************************/
+	static bool needsQuotation(const std::tstring& str);
+
+	/****************************************************************************
+	 * \brief  remove quotation marks
 	 *
-	 *****************************************************************************/
-	auto quote(std::tstring str) -> std::tstring;
-	auto quote(const boost::filesystem::path& str) -> std::tstring;
-	auto normalize(const boost::filesystem::path& str) -> std::tstring;
+	 * \param  str string to be unquoted
+	 * \return unquoted string
+	 * \detail escape character is '^' - tcc escape char
+	 ***************************************************************************/
+	std::tstring unquote(const std::tstring& str);
+
+	/****************************************************************************
+	 * \brief  quote string if it contains spaces
+	 *
+	 * \param  str string to be quoted
+	 * \return string surrounded with "" if it is required else the same string
+	 ***************************************************************************/
+	std::tstring quote(const std::tstring& str);
+
+	/****************************************************************************
+	 * \brief  quote filename if it contains spaces
+	 *
+	 * \param  fileName string to be quoted
+	 * \return string surrounded with "" if it is required else the same string
+	 * \detail please note, that `"` in filename is illegal using windows
+	 ***************************************************************************/
+	std::tstring quote(const boost::filesystem::path& fileName);
+
+	/****************************************************************************
+	 * \brief  "normalize" filesystem path - sanitize, resolve links, canonical
+	 *
+	 * \param  fileName filesystem path to be cleaned
+	 * \param  quoted add quotation marks if needed
+	 * \return clean filesystem path
+	 ***************************************************************************/
+	std::tstring normalize(const boost::filesystem::path& fileName, bool quoted = true);
 
 	/******************************************************************************
 	 *
@@ -123,7 +117,7 @@ namespace p_apps {
 	 *   retrieve NetBIOS computer name
 	 *
 	 *****************************************************************************/
-	auto getComputerName() -> std::tstring;
+	std::tstring getComputerName();
 
 	/******************************************************************************
 	 *
@@ -131,7 +125,7 @@ namespace p_apps {
 	 *   retrieve SamCompatible user name. Something like Engineering\JSmith
 	 *
 	 *****************************************************************************/
-	auto getUserName() -> std::tstring;
+	std::tstring getUserName();
 
 	/******************************************************************************
 	*
@@ -139,7 +133,7 @@ namespace p_apps {
 	*   compatible with getUserName
 	*
 	*****************************************************************************/
-	auto getDomainName() -> std::tstring;
+	std::tstring getDomainName();
 
 	/******************************************************************************
 	*
@@ -147,7 +141,7 @@ namespace p_apps {
 	*   Convert path to UNC
 	*
 	*****************************************************************************/
-	auto pathToUnc(boost::filesystem::path netPath) -> std::tstring;
+	std::tstring pathToUnc(boost::filesystem::path netPath);
 
 	/******************************************************************************
 	 *
@@ -155,8 +149,7 @@ namespace p_apps {
 	 *   creates (if required) and check, if directory is writeable
 	 *
 	 *****************************************************************************/
-	auto makeDirWriteable(boost::filesystem::path dir) -> bool;
-
+	bool makeDirWriteable(boost::filesystem::path dir);
 
 	/******************************************************************************
 	 *
@@ -169,7 +162,7 @@ namespace p_apps {
 	 *       _T( "Cann't to continue." )
 	 *
 	 *****************************************************************************/
-	auto abend(boost::_tformat msg, int errCode) -> void;
+	void abend(boost::_tformat msg, int errCode);
 
 	/******************************************************************************
 	 *
@@ -178,7 +171,7 @@ namespace p_apps {
 	 *   clears errno
 	 *
 	 *****************************************************************************/
-	auto errnoMsg() -> std::tstring;
+	std::tstring errnoMsg();
 
 	/******************************************************************************
 	 *
@@ -187,7 +180,7 @@ namespace p_apps {
 	 *   clears LastError
 	 *
 	 *****************************************************************************/
-	auto lastErrorMsg() -> std::tstring;
+	std::tstring lastErrorMsg();
 
 	/******************************************************************************
 	 *
@@ -203,6 +196,7 @@ namespace p_apps {
 		pWait_NoWait
 	};
 
-	auto execute(tpWait pWait, const std::tstring& cmdName, const std::vector<std::tstring>& cmdLine, const Environment& cmdEnvironment, boost::filesystem::path cwd) -> boost::optional<DWORD>;
+	boost::optional<DWORD> execute(tpWait pWait, const std::tstring& cmdName, const std::vector<std::tstring>& cmdLine,
+	                               const Environment& cmdEnvironment, boost::filesystem::path cwd);
 
 }
