@@ -75,7 +75,7 @@ namespace SysInfo {
 		return OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, GetCurrentProcessId());
 	}
 
-	boost::optional<boost::filesystem::path> getExeName() {
+	boost::optional<std::filesystem::path> getExeName() {
 		const int moduleNameSize = MAX_PATH;
 		const std::unique_ptr<TCHAR[]> moduleName(new(std::nothrow) TCHAR[moduleNameSize]);
 		if (!moduleName) {
@@ -91,14 +91,14 @@ namespace SysInfo {
 		DWORD cbNeeded = 0;
 		if (EnumProcessModules(hProcess.get(), &hMod, sizeof (hMod), &cbNeeded)) {
 			if (GetModuleFileNameEx(hProcess.get(), hMod, moduleName.get(), moduleNameSize)) {
-				return boost::optional<boost::filesystem::path>(moduleName.get());
+				return boost::optional<std::filesystem::path>(moduleName.get());
 			}
 		}
 
 		return boost::none;
 	}
 
-	boost::optional<boost::filesystem::path> getDllName(const std::tstring& dllName) {
+	boost::optional<std::filesystem::path> getDllName(const std::tstring& dllName) {
 		const int processNameSize = MAX_PATH;
 		const std::unique_ptr<TCHAR[]> processName(new(std::nothrow) TCHAR[processNameSize]);
 		if (!processName) {
@@ -109,7 +109,7 @@ namespace SysInfo {
 		if (!hProcess) {
 			return boost::none;
 		}
-		boost::optional<boost::filesystem::path> result = boost::none;
+		boost::optional<std::filesystem::path> result = boost::none;
 		DWORD cbNeeded = 0;
 		if (EnumProcessModules(hProcess.get(), nullptr, 0, &cbNeeded)) {
 			DWORD nEntries = cbNeeded / sizeof(HMODULE);
@@ -121,9 +121,9 @@ namespace SysInfo {
 				// probably nEntries * sizeof( *hMod ) == cbNeeded, but ...
 				for (decltype(nEntries) idx = 0; idx < nEntries; ++idx) {
 					if (GetModuleFileNameEx(hProcess.get(), hMod[idx], processName.get(), processNameSize)) {
-						boost::filesystem::path dll(processName.get());
+						std::filesystem::path dll(processName.get());
 						if (boost::iequals(dll.filename().c_str(), dllName)) {
-							return boost::optional<boost::filesystem::path>(dll);
+							return boost::optional<std::filesystem::path>(dll);
 						}
 					}
 				}

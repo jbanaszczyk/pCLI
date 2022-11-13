@@ -57,8 +57,9 @@ namespace p_apps {
 			return buffer.get();
 		}
 
-		auto setUp(const TCHAR* const envp[]) -> void {
+		auto setUp(const TCHAR* const envp[]) -> void {			
 			if (envp == nullptr) {
+				logger::warning(_T("%s: null constructor argument"), _T(__FUNCTION__));
 				return;
 			}
 			for (auto* ref = envp; (*ref != nullptr) && (**ref != _T('\0')); ++ref) {
@@ -79,6 +80,8 @@ namespace p_apps {
 				}
 				mEnv.insert(std::pair(std::tstring{ *ref, len }, std::tstring{ sep }));
 			}
+
+			logger::trace(_T("[%s] %d variables"), _T(__FUNCTION__), size());
 		}
 
 		[[nodiscard]] size_t size() const {

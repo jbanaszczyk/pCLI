@@ -32,8 +32,8 @@ namespace p_apps {
 	*	Merge two STL containers
 	*	used to merge vectors
 	*****************************************************************************/
-	template <typename T>
-	void appendContainer(T& destination, const T& source) {
+	template <typename T, typename U>
+	void appendContainer(T& destination, const U& source) {
 		// FIXME try to simplify
 		if (!source.empty()) {
 			destination.reserve(destination.size() + source.size());

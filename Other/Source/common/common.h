@@ -68,20 +68,24 @@
 #include <Winnetwk.h>
 #include <tchar.h>
 #include <timeapi.h>
+#include <locale>
+#include <codecvt>
+#include  <cstdlib>
 
-#pragma comment( lib, "winmm.lib")   
+#pragma comment( lib, "winmm.lib")
 
 #include <boost/optional.hpp> // FIXME: To be migrated to std::optional
 #include <optional>
 
-#include <boost/filesystem.hpp> // FIXME: To be migrated to std::filesystem
+#include <filesystem>
 
 #include <boost/locale.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/format.hpp>
+#include <boost/tokenizer.hpp>
 
-using namespace std::string_literals;  // NOLINT(clang-diagnostic-header-hygiene)
+using namespace std::string_literals; // NOLINT(clang-diagnostic-header-hygiene)
 
 #if defined _DEBUG
 constexpr bool C_DEBUG = true;
@@ -92,7 +96,6 @@ constexpr bool C_DEBUG = false;
 #ifdef _INC_TCHAR
 namespace std {
 	using tstring = std::basic_string<TCHAR>;
-//	using tifstream = std::basic_ifstream<TCHAR>;
 }
 
 #ifndef _UNICODE
@@ -125,9 +128,9 @@ namespace std {
 // real maximum allocation size is a bit less, than _HEAP_MAXREQ
 #ifdef _DEBUG
 #ifdef _WIN64
-const size_t heapMaxReqReal = _HEAP_MAXREQ - 52;
+constexpr size_t heapMaxReqReal = _HEAP_MAXREQ - 52;
 #else
-const size_t heapMaxReqReal = _HEAP_MAXREQ - 36;
+constexpr size_t heapMaxReqReal = _HEAP_MAXREQ - 36;
 #endif
 #else
 const size_t heapMaxReqReal = _HEAP_MAXREQ;
@@ -136,7 +139,7 @@ const size_t heapMaxReqReal = _HEAP_MAXREQ;
 #ifdef _WIN64
 #define GWL_WNDPROC_6432 GWLP_WNDPROC
 #else
-		#define GWL_WNDPROC_6432 GWL_WNDPROC
+#define GWL_WNDPROC_6432 GWL_WNDPROC
 #endif
 
 #endif

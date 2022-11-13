@@ -45,20 +45,17 @@ namespace p_apps {
 	 *   Legacy name of defaults directory ( ie. "App\\DefaultData" )
 	 *
 	 *****************************************************************************/
-	extern const boost::filesystem::path LAUNCHER_INI;
-	extern const boost::filesystem::path PORTABLE_APPS;
-	extern const boost::filesystem::path PORTABLE_APPS_APP;
-	extern const boost::filesystem::path PORTABLE_APPS_DATA;
-	extern const boost::filesystem::path PORTABLE_APPS_DEFAULT;
+	extern const std::filesystem::path LAUNCHER_INI;
+	extern const std::filesystem::path PORTABLE_APPS;
+	extern const std::filesystem::path PORTABLE_APPS_APP;
+	extern const std::filesystem::path PORTABLE_APPS_DATA;
+	extern const std::filesystem::path PORTABLE_APPS_DEFAULT_DATA;
 
-	/******************************************************************************
-	 *
-	 * copyCopy
-	 *   like boost::filesystem::copy, but if source is directory - copies whole tree
-	 *
-	 *****************************************************************************/
-	bool copyCopy(const boost::filesystem::path& source, const boost::filesystem::path& destination,
-	              boost::system::error_code& ec);
+	std::filesystem::path canonical(const std::filesystem::path& p, const std::filesystem::path& base);
+
+	std::wstring string2wstring(const std::string& str);
+
+	std::vector<std::tstring> tokenize(const std::tstring& str);
 
 	/****************************************************************************
 	 * \brief  check if string is already quoted
@@ -100,7 +97,7 @@ namespace p_apps {
 	 * \return string surrounded with "" if it is required else the same string
 	 * \detail please note, that `"` in filename is illegal using windows
 	 ***************************************************************************/
-	std::tstring quote(const boost::filesystem::path& fileName);
+	std::tstring quote(const std::filesystem::path& fileName);
 
 	/****************************************************************************
 	 * \brief  "normalize" filesystem path - sanitize, resolve links, canonical
@@ -109,7 +106,7 @@ namespace p_apps {
 	 * \param  quoted add quotation marks if needed
 	 * \return clean filesystem path
 	 ***************************************************************************/
-	std::tstring normalize(const boost::filesystem::path& fileName, bool quoted = true);
+	std::tstring normalize(const std::filesystem::path& fileName, bool quoted = true);
 
 	/******************************************************************************
 	 *
@@ -141,15 +138,14 @@ namespace p_apps {
 	*   Convert path to UNC
 	*
 	*****************************************************************************/
-	std::tstring pathToUnc(boost::filesystem::path netPath);
+	std::tstring pathToUnc(const std::filesystem::path& netPath);
 
-	/******************************************************************************
+	/****************************************************************************
+	 * \brief  create directory if doesn't exists, check if is writeable
 	 *
-	 * makeDirWriteable
-	 *   creates (if required) and check, if directory is writeable
-	 *
-	 *****************************************************************************/
-	bool makeDirWriteable(boost::filesystem::path dir);
+	 * \param  directory to be created
+	 ***************************************************************************/
+	void makeDirWriteable(const std::filesystem::path& directory);
 
 	/******************************************************************************
 	 *
@@ -162,7 +158,7 @@ namespace p_apps {
 	 *       _T( "Cann't to continue." )
 	 *
 	 *****************************************************************************/
-	void abend(boost::_tformat msg, int errCode);
+	void abend(const boost::_tformat& msg, int errCode);
 
 	/******************************************************************************
 	 *
@@ -197,6 +193,7 @@ namespace p_apps {
 	};
 
 	boost::optional<DWORD> execute(tpWait pWait, const std::tstring& cmdName, const std::vector<std::tstring>& cmdLine,
-	                               const Environment& cmdEnvironment, boost::filesystem::path cwd);
+	                               const Environment& cmdEnvironment, const std::filesystem::path& cwd);
+
 
 }

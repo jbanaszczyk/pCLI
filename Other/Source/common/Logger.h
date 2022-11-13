@@ -85,7 +85,7 @@ namespace logger {
 }
 
 template<typename... Arguments>
-void fail(const TCHAR* fmt, Arguments&&... args) {
+[[noreturn]] void fail(const TCHAR* fmt, Arguments&&... args) {
 	auto message = logger::log(loggerSeverityLevel::fail_, fmt, std::forward<Arguments>(args)...);
 	if (message.has_value()) {
 		if (SysInfo::ownsConsole()) {

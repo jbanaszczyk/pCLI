@@ -9,46 +9,44 @@
 #include "stdafx.h"
 #include "./pApps.h"
 #include "../common/SysInfo.h"
-#include "../common/IniFile.h"
 
 #include <windows.h>
+#include <random>
 
 namespace p_apps {
 
-	const boost::filesystem::path LAUNCHER_INI(_T(VER_PRODUCTNAME_STR) _T(".ini"));
+	const std::filesystem::path LAUNCHER_INI(_T(VER_PRODUCTNAME_STR) _T(".ini"));
 
-	const boost::filesystem::path PORTABLE_APPS = _T("PortableApps");
+	const std::filesystem::path PORTABLE_APPS = _T("PortableApps");
 
-	const boost::filesystem::path PORTABLE_APPS_APP = _T("App");
+	const std::filesystem::path PORTABLE_APPS_APP = _T("App");
 
-	const boost::filesystem::path PORTABLE_APPS_DATA = _T("Data");
+	const std::filesystem::path PORTABLE_APPS_DATA = _T("Data");
 
-	const boost::filesystem::path PORTABLE_APPS_DEFAULT = _T("App\\DefaultData");
+	const std::filesystem::path PORTABLE_APPS_DEFAULT_DATA = _T("App\\DefaultData");
 
-	/******************************************************************************
-	 *
-	 * copyCopy
-	 *   like boost::filesystem::copy, but if source is directory - copies whole tree
-	 *
-	 *****************************************************************************/
-	bool copyCopy(const boost::filesystem::path& source, const boost::filesystem::path& destination, boost::system::error_code& ec) {
-		ec.clear();
-		const auto statSource = status(source);
-		const auto statDestination = status(destination);
-		if (statSource != statDestination) {
-			copy(source, destination, ec);
+	std::filesystem::path canonical(const std::filesystem::path& p, const std::filesystem::path& base) {
+		auto absolutePath = p.is_absolute()
+			                    ? absolute(p)
+			                    : absolute(base / p);
+
+		std::error_code ec;
+		auto result = canonical(absolutePath, ec);
+
+		return !ec
+			       ? result
+			       : absolutePath;
+	}
+		
+	std::vector<std::tstring> tokenize(const std::tstring& str) {
+		std::vector<std::tstring> result;
+		boost::escaped_list_separator<wchar_t> Separator(_T('^'), _T(' '), _T('\"'));
+		boost::tokenizer<boost::escaped_list_separator<wchar_t>, std::wstring::const_iterator, std::wstring> tok(str, Separator);
+		for (auto it = tok.begin(); it != tok.end(); ++it) {
+			result.push_back(*it);
 		}
-		if (boost::system::errc::success != ec.value()) {
-			return false;
-		}
-		if (statSource.type() == boost::filesystem::directory_file) {
-			for (boost::filesystem::directory_iterator file(source); file != boost::filesystem::directory_iterator(); ++file) {
-				if (!copyCopy(source / file->path().filename(), destination / file->path().filename(), ec)) {
-					return false;
-				}
-			}
-		}
-		return true;
+
+		return result;
 	}
 
 	/****************************************************************************
@@ -110,7 +108,7 @@ namespace p_apps {
 	 * \return string surrounded with "" if it is required else the same string
 	 * \detail please note, that `"` in filename is illegal using windows
 	 ***************************************************************************/
-	std::tstring quote(const boost::filesystem::path& fileName) {
+	std::tstring quote(const std::filesystem::path& fileName) {
 		return quote(fileName._tstring());
 	}
 
@@ -121,7 +119,7 @@ namespace p_apps {
 	 * \param  quoted add quotation marks if needed
 	 * \return clean filesystem path 
 	 ***************************************************************************/
-	std::tstring normalize(const boost::filesystem::path& fileName, const bool quoted) {
+	std::tstring normalize(const std::filesystem::path& fileName, const bool quoted) {
 		auto result = unquote(fileName._tstring());
 		boost::erase_all(result, _T("\"")); // double quotes are not allowed at all
 
@@ -131,12 +129,12 @@ namespace p_apps {
 			result.erase(found);
 		}
 
-		boost::system::error_code errCode;
-		const auto currentPath = boost::filesystem::current_path();
-		const auto absolutePath = absolute(boost::filesystem::path(result), currentPath, errCode);
-		if (errCode.value() == boost::system::errc::success) {
-			const auto canonicalPath = canonical(absolutePath, currentPath, errCode);
-			if (errCode.value() == boost::system::errc::success) {
+		std::error_code errCode;
+		const auto currentPath = std::filesystem::current_path();
+		const auto absolutePath = absolute(std::filesystem::path(result), errCode);
+		if (!errCode) {
+			const auto canonicalPath = canonical(absolutePath, errCode);
+			if (!errCode) {
 				result = canonicalPath._tstring();
 			}
 		}
@@ -213,7 +211,7 @@ namespace p_apps {
 	*
 	*****************************************************************************/
 
-	std::tstring pathToUnc(const boost::filesystem::path netPath) {
+	std::tstring pathToUnc(const std::filesystem::path& netPath) {
 		DWORD bufSize = 0;
 		UNIVERSAL_NAME_INFO* nothing = nullptr;
 		if (ERROR_MORE_DATA == WNetGetUniversalName(netPath._tstring().c_str(), UNIVERSAL_NAME_INFO_LEVEL, &nothing, &bufSize)) {
@@ -228,29 +226,53 @@ namespace p_apps {
 		return _T("");
 	}
 
-	/******************************************************************************
-	 *
-	 * makeDirWriteable
-	 *   creates (if required) and check, if directory is writeable
-	 *
-	 *****************************************************************************/
-	bool makeDirWriteable(const boost::filesystem::path dir) {
-		auto result = false;
-		boost::system::error_code errCode;
-		auto testDir = dir / boost::filesystem::unique_path(_T("%%%%-%%%%-%%%%-%%%%"));
-		if (boost::system::errc::success != errCode.value()) {
-			testDir = dir / _T("test_dir");
-		}
-		if (exists(testDir, errCode)) {
-			// unlikely
-			boost::filesystem::remove(testDir, errCode);
-		}
-		create_directories(testDir, errCode);
-		if (boost::system::errc::success == errCode.value()) {
-			boost::filesystem::remove(testDir); // remove only the top one
-			result = true;
-		}
+	std::tstring generateRandomAlphanumericString(std::size_t len) {
+		std::tstring str(_T("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"));
+		std::random_device rd;
+		std::mt19937 generator(rd());
+		std::shuffle(str.begin(), str.end(), generator);
+		return str.substr(0, len);
+	}
+
+	std::wstring string2wstring(const std::string& str) {
+		size_t cchRequired = 0;
+		errno_t ret = ::mbstowcs_s(&cchRequired, nullptr, 0, str.c_str(), 0); // w/ null terminator
+		std::wstring result(cchRequired, L'\0');
+		size_t cchActual = cchRequired;
+		ret = ::mbstowcs_s(&cchRequired, &result[0], cchActual, str.c_str(), cchActual);
 		return result;
+	}
+
+	/****************************************************************************
+	 * \brief  create directory if doesn't exists, check if is writeable
+	 * 
+	 * \param  directory to be created
+
+	 ***************************************************************************/
+	void makeDirWriteable(const std::filesystem::path& directory) {
+		std::error_code errCode;
+
+		create_directories(directory, errCode);
+		if (errCode) {
+			fail(_T("[%s] Cann't create directory: %s\nReason: %s"), _T(__FUNCTION__), directory._tstring(), string2wstring(errCode.message()));
+		}
+
+		constexpr auto maxTry = 8;
+		for (auto counter = 0; counter < maxTry; counter++) {
+			auto testPath = directory / generateRandomAlphanumericString(8);
+
+			FILE* stream;
+			_wfopen_s(&stream, testPath.c_str(), _T("wx"));
+
+			if (stream) {
+				[[maybe_unused]] auto ignored = fclose(stream);
+				std::error_code ignoredErrorCode;
+				std::filesystem::remove(testPath, ignoredErrorCode);
+				return;
+			}
+		}
+
+		fail(_T("[%s] Cann't create files in directory: %s"), _T(__FUNCTION__), directory._tstring());		
 	}
 
 
@@ -258,7 +280,7 @@ namespace p_apps {
 	 *
 	 * abend
 	 *   abnormal end of the thread
-	 *     shows message (can be translated) vi cerr or message box
+	 *     shows message (can be translated) via std::wcerr or message box
 	 *     and exits.
 	 *	   adds to the pool of boost::locale::translate'd strings:
 	 *       _T( "Press [ENTER] key to exit." )
@@ -266,13 +288,12 @@ namespace p_apps {
 	 *
 	 *****************************************************************************/
 
-	void abend(const boost::_tformat msg, int errCode) {
-		if (GetConsoleWindow()) {
-			std::_tcerr << msg << std::endl;
-			if (SysInfo::ownsConsole()) {
-				std::_tcerr << _T("Press [ENTER] key to exit.") << std::endl;
-				std::_tcin.get();
-			}
+	void abend(const boost::_tformat& msg, int errCode) {
+		std::_tcerr << msg << std::endl;
+		if (SysInfo::ownsConsole()) {
+			std::_tcerr << _T("Press [ENTER] key to exit.") << std::endl;
+			std::_tcin.get();
+
 		} else {
 			MessageBox(nullptr, msg.str().c_str(), (boost::_tformat(_T("Cann't continue."))).str().c_str(), MB_OK | MB_ICONERROR);
 		}
@@ -321,7 +342,7 @@ namespace p_apps {
 	* like _texecve, but ComEmu / parent cmd aware. And more.
 	*****************************************************************************/
 	boost::optional<DWORD> execute(tpWait pWait, const std::tstring& cmdName, const std::vector<std::tstring>& cmdLine,
-	                               const Environment& cmdEnvironment, boost::filesystem::path cwd) {
+	                               const Environment& cmdEnvironment, const std::filesystem::path& cwd) {
 		if (tpWait::pWait_Auto == pWait) {
 			if (!SysInfo::ownsConsole()) {
 				pWait = tpWait::pWait_Wait;

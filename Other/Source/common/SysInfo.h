@@ -17,7 +17,7 @@ namespace SysInfo {
 	 *     but in some cases it returns \Device\Partition notation
 	 *
 	 *****************************************************************************/
-	boost::optional<boost::filesystem::path> getExeName();
+	boost::optional<std::filesystem::path> getExeName();
 
 	/******************************************************************************
 	 *
@@ -28,7 +28,7 @@ namespace SysInfo {
 	 *       especially ConEmu (conEmuHk.dll)
 	 *
 	 *****************************************************************************/
-	boost::optional<boost::filesystem::path> getDllName(const std::tstring& dllName);
+	boost::optional<std::filesystem::path> getDllName(const std::tstring& dllName);
 
 	/******************************************************************************
 	 *
