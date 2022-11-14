@@ -73,6 +73,13 @@ namespace p_apps {
 		return result;
 	}
 
+	std::tstring quote(const boost::optional<std::tstring>& str) {
+		if (str) {
+			return quote(str.value());
+		}
+		return _T("");
+	}
+
 	/****************************************************************************
 	 * \brief  quote string if it contains spaces
 	 * 
@@ -329,28 +336,7 @@ namespace p_apps {
 	/*****************************************************************************
 	* like _texecve, but ComEmu / parent cmd aware. And more.
 	*****************************************************************************/
-	boost::optional<DWORD> execute(tpWait pWait, const std::tstring& cmdName, const std::vector<std::tstring>& cmdLine,
-	                               const Environment& cmdEnvironment, const std::filesystem::path& cwd) {
-		if (tpWait::pWait_Auto == pWait) {
-			if (!SysInfo::ownsConsole()) {
-				pWait = tpWait::pWait_Wait;
-			}
-			if (tpWait::pWait_Auto == pWait) {
-				auto conEmu = SysInfo::getDllName(_T("ConEmuHk.dll"));
-				if (!conEmu) {
-					conEmu = SysInfo::getDllName(_T("ConEmuHk64.dll"));
-				}
-				if (conEmu) {
-					pWait = tpWait::pWait_Wait;
-				}
-			}
-			if (tpWait::pWait_Auto == pWait) {
-				pWait = tpWait::pWait_NoWait;
-			}
-		}
-
-		// pWait jest nie ustawione ok????
-		pWait = tpWait::pWait_Wait;
+	boost::optional<DWORD> execute(bool pWait, const std::tstring& cmdName, const std::vector<std::tstring>& cmdLine, const Environment& cmdEnvironment, const std::filesystem::path& cwd) {
 
 		//-------------------------------------------- lpApplicationName
 		//-------------------------------------------- lpCommandLine
@@ -393,16 +379,16 @@ namespace p_apps {
 
 		// env.reset();
 		// commandLine.reset();
-		if (!ok) {
-			abend(boost::_tformat(_T("Cann't execute %1%: %2%")) % cmdName % lastErrorMsg(), 1);
+		if (! ok) {
+			fail(_T("Cann't execute %s: %s"), cmdName, lastErrorMsg());
 		}
 		SetPriorityClass(processInfo.hProcess, SysInfo::getProcessPriorityClass());
 
-		if (ResumeThread(processInfo.hThread) == static_cast<DWORD>(-1)) {
+		if (ResumeThread(processInfo.hThread) == static_cast<DWORD>(- 1)) {
 			abend(boost::_tformat(_T("Cann't execute %1%: %2%")) % cmdName % lastErrorMsg(), 1);
 		}
 
-		if (tpWait::pWait_Wait == pWait && processInfo.hProcess != nullptr) {
+		if (pWait && processInfo.hProcess != nullptr) {
 			WaitForSingleObject(processInfo.hProcess, INFINITE);
 		}
 
@@ -417,4 +403,5 @@ namespace p_apps {
 
 		return boost::none;
 	}
+
 }

@@ -74,6 +74,8 @@ namespace p_apps {
 	 ***************************************************************************/
 	std::tstring unquote(const std::tstring& str);
 
+	std::tstring quote(const boost::optional<std::tstring>& str);
+
 	/****************************************************************************
 	 * \brief  quote string if it contains spaces
 	 *
@@ -170,6 +172,12 @@ namespace p_apps {
 	 *****************************************************************************/
 	std::tstring lastErrorMsg();
 
+	enum class tpWait {
+		AUTO,
+		WAIT,
+		NO_WAIT
+	};
+
 	/******************************************************************************
 	 *
 	 * execute
@@ -178,13 +186,8 @@ namespace p_apps {
 	 *   boost::undef
 	 *
 	 *****************************************************************************/
-	enum class tpWait {
-		pWait_Auto,
-		pWait_Wait,
-		pWait_NoWait
-	};
 
-	boost::optional<DWORD> execute(tpWait pWait, const std::tstring& cmdName, const std::vector<std::tstring>& cmdLine,
+	boost::optional<DWORD> execute(bool pWait, const std::tstring& cmdName, const std::vector<std::tstring>& cmdLine,
 	                               const Environment& cmdEnvironment, const std::filesystem::path& cwd);
 
 
