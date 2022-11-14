@@ -175,12 +175,13 @@ namespace p_apps {
 			}
 		}
 
+		 // FIXME - remove save file
 		void readIniFile(const std::filesystem::path& iniName, const bool saveOnExit) {
 			std::error_code errCode;
 			if (!exists(iniName, errCode)) {
 				return;
 			}
-			logger::trace(_T("[%s] reading INI file: %s"), _T(__FUNCTION__), iniName);
+			logger::trace(_T("[%s] reading INI file: %s"), _T(__FUNCTION__), iniName.c_str());
 
 			iniName_ = iniName;
 			saveOnExit_ = saveOnExit;

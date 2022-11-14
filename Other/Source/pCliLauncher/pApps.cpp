@@ -37,7 +37,7 @@ namespace p_apps {
 			       ? result
 			       : absolutePath;
 	}
-		
+
 	std::vector<std::tstring> tokenize(const std::tstring& str) {
 		std::vector<std::tstring> result;
 		boost::escaped_list_separator<wchar_t> Separator(_T('^'), _T(' '), _T('\"'));
@@ -47,16 +47,6 @@ namespace p_apps {
 		}
 
 		return result;
-	}
-
-	/****************************************************************************
-	 * \brief  check if string is already quoted
-	 * 
-	 * \param  str string to be checked
-	 * \return true if string is surrounded with ""
-	 ***************************************************************************/
-	static bool isQuoted(const std::tstring& str) {
-		return boost::starts_with(str, _T("\"")) && boost::ends_with(str, _T("\""));
 	}
 
 	/****************************************************************************
@@ -77,9 +67,6 @@ namespace p_apps {
 	 * \detail escape character is '^' - tcc escape char
 	 ***************************************************************************/
 	std::tstring unquote(const std::tstring& str) {
-		if (!isQuoted(str)) {
-			return str;
-		}
 		std::wstring result;
 		std::wistringstream ss(str);
 		ss >> std::quoted(result, _T('\"'), _T('^'));
@@ -93,7 +80,8 @@ namespace p_apps {
 	 * \return string surrounded with "" if it is required else the same string
 	 ***************************************************************************/
 	std::tstring quote(const std::tstring& str) {
-		if (isQuoted(str) || !needsQuotation(str)) {
+		auto unquoted = unquote(str);
+		if (!needsQuotation(str)) {
 			return str;
 		}
 		std::wostringstream oss;
@@ -272,7 +260,7 @@ namespace p_apps {
 			}
 		}
 
-		fail(_T("[%s] Cann't create files in directory: %s"), _T(__FUNCTION__), directory._tstring());		
+		fail(_T("[%s] Cann't create files in directory: %s"), _T(__FUNCTION__), directory._tstring());
 	}
 
 

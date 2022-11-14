@@ -7,18 +7,18 @@
 
 #pragma once
 
- /******************************************************************************
-  *
-  * expandEnv
-  *   Expand environment variable strings
-  *
-  * class pApps::Environment represents set of environment variables
-  *   pApps::Environment is a simple, case insensitive map of tstrings
-  *   pApps::Environment should be initialized from envp[] array
-  *     manipulated using get/set/erase
-  *     then dumped to another envp[] array and passed to launched program
-  *
-  *****************************************************************************/
+/******************************************************************************
+ *
+ * expandEnv
+ *   Expand environment variable strings
+ *
+ * class pApps::Environment represents set of environment variables
+ *   pApps::Environment is a simple, case insensitive map of tstrings
+ *   pApps::Environment should be initialized from envp[] array
+ *     manipulated using get/set/erase
+ *     then dumped to another envp[] array and passed to launched program
+ *
+ *****************************************************************************/
 
 #include "common.h"
 #include "pAppsUtils.h"
@@ -28,6 +28,7 @@ namespace p_apps {
 	class Environment {
 
 		std::map<std::tstring, std::tstring, CaseInsensitiveMap<std::tstring>::Comparator> mEnv;
+		std::tstring backupPrefix = std::tstring{};
 
 	public:
 		Environment() = default;
@@ -38,11 +39,11 @@ namespace p_apps {
 
 		Environment(const Environment&) = delete;
 		Environment(const Environment&&) = delete;
-		auto operator=(const Environment&)->Environment & = delete;
-		auto operator=(const Environment&&)->Environment && = delete;
+		auto operator=(const Environment&) -> Environment& = delete;
+		auto operator=(const Environment&&) -> Environment&& = delete;
 		~Environment() = default;
 
-		typedef DWORD(WINAPI* ExpandEnvironmentStrings_t)(LPCTSTR, LPWSTR, DWORD);
+		typedef DWORD (WINAPI* ExpandEnvironmentStrings_t)(LPCTSTR, LPWSTR, DWORD);
 
 		static std::tstring expandEnv(const std::tstring& variableName, ExpandEnvironmentStrings_t ExpandEnvironmentStrings_f = ExpandEnvironmentStrings) {
 			const auto bufferSize = ExpandEnvironmentStrings_f(variableName.c_str(), nullptr, 0);
@@ -57,7 +58,7 @@ namespace p_apps {
 			return buffer.get();
 		}
 
-		auto setUp(const TCHAR* const envp[]) -> void {			
+		auto setUp(const TCHAR* const envp[]) -> void {
 			if (envp == nullptr) {
 				logger::warning(_T("%s: null constructor argument"), _T(__FUNCTION__));
 				return;
@@ -78,10 +79,14 @@ namespace p_apps {
 					logger::warning(_T("Environment: malformed, missing variable value in %s"), *ref);
 					continue;
 				}
-				mEnv.insert(std::pair(std::tstring{ *ref, len }, std::tstring{ sep }));
+				mEnv.insert(std::pair(std::tstring{*ref, len}, std::tstring{sep}));
 			}
 
 			logger::trace(_T("[%s] %d variables"), _T(__FUNCTION__), size());
+		}
+
+		void setNameBackup(const std::tstring& prefix) {
+			backupPrefix = prefix;
 		}
 
 		[[nodiscard]] size_t size() const {
@@ -106,15 +111,14 @@ namespace p_apps {
 			return mEnv[name];
 		}
 
-		void set(const std::tstring& name, const std::tstring& value, const std::tstring& nameBackup = std::tstring{}) {
-			if (!nameBackup.empty()) {
-				set(nameBackup, get(name));
+		void set(const std::tstring& name, const std::tstring& value, bool withBackup = false) {
+			if (withBackup) {
+				set(backupPrefix + name, get(name));
 			}
 			if (!name.empty()) {
 				if (value.empty()) {
 					erase(name);
-				}
-				else {
+				} else {
 					mEnv[name] = value;
 				}
 			}

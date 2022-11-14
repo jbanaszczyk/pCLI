@@ -63,14 +63,6 @@ namespace p_apps {
 	 * \param  str string to be checked
 	 * \return true if string is surrounded with ""
 	 ***************************************************************************/
-	static bool isQuoted(const std::tstring& str);
-
-	/****************************************************************************
-	 * \brief  check if string is already quoted
-	 *
-	 * \param  str string to be checked
-	 * \return true if string is surrounded with ""
-	 ***************************************************************************/
 	static bool needsQuotation(const std::tstring& str);
 
 	/****************************************************************************
