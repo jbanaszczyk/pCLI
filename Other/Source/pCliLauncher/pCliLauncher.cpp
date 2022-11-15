@@ -20,11 +20,44 @@
 
 p_apps::YesNoOption yesNoOption;
 
-static const std::filesystem::path PORTABLE_APPS_APP_LE_32 = p_apps::PORTABLE_APPS_APP / _T("TCCLE32");
-static const std::filesystem::path PORTABLE_APPS_APP_LE_64 = p_apps::PORTABLE_APPS_APP / _T("TCCLE64");
+/******************************************************************************
+ *
+ * Some handy strings
+ *
+ * LAUNCHER_INI
+ *   Name of launcher INI file
+ *
+ * PORTABLE_APPS
+ *   Directory, where PortableApps platform is expected
+ *
+ * PORTABLE_APPS_APP
+ *   Legacy name of application directory ( ie. "App" )
+ *
+ * PORTABLE_APPS_APP_LE_32
+ *   Not legacy name of application 32-bit directory ( ie. "App\\32" )
+ *
+ * PORTABLE_APPS_APP_LE_64
+ *   Not legacy name of application 64-bit directory ( ie. "App\\64" )
+ *
+ * PORTABLE_APPS_DATA
+ *   Legacy name of data directory ( ie. "Data" )
+ *
+ * PORTABLE_APPS_DEFAULT
+ *   Legacy name of defaults directory ( ie. "App\\DefaultData" )
+ *
+ *****************************************************************************/
 
-const std::filesystem::path TCC_EXE_LE_32 = _T("tcc.exe");
-const std::filesystem::path TCC_EXE_LE_64 = _T("tcc.exe");
+static const std::filesystem::path LAUNCHER_INI(_T(VER_PRODUCTNAME_STR) _T(".ini"));
+static const std::filesystem::path PORTABLE_APPS = _T("PortableApps");
+static const std::filesystem::path PORTABLE_APPS_APP = _T("App");
+static const std::filesystem::path PORTABLE_APPS_DATA = _T("Data");
+static const std::filesystem::path PORTABLE_APPS_DEFAULT_DATA = _T("App\\DefaultData");
+
+static const std::filesystem::path PORTABLE_APPS_APP_LE_32 = PORTABLE_APPS_APP / _T("TCCLE32");
+static const std::filesystem::path PORTABLE_APPS_APP_LE_64 = PORTABLE_APPS_APP / _T("TCCLE64");
+
+static const std::filesystem::path TCC_EXE_LE_32 = _T("tcc.exe");
+static const std::filesystem::path TCC_EXE_LE_64 = _T("tcc.exe");
 
 static const std::tstring _SECTION_COMMAND = _T("Command");
 static const std::tstring _SECTION_ENVIRONMENT = _T("Environment");
@@ -263,6 +296,7 @@ bool Options::exists(const std::wstring& option) {
 // ReSharper restore CppInconsistentNaming
 
 class TccLauncher final : public Launcher {
+	std::filesystem::path currentPath;
 	boost::optional<std::tstring> comspec = boost::none;
 	boost::optional<std::tstring> tccIniFilename = boost::none;
 	boost::optional<std::tstring> pCliIniFilename = boost::none;
@@ -313,6 +347,7 @@ public:
 	void copyMoreDirectives();
 	void copyMoreEnvironment();
 	[[nodiscard]] bool ifWaitForTccToFinish() const;
+	void captureCurrentPath();
 	void launch() override;
 
 	void readProfileIniFiles();
@@ -335,6 +370,10 @@ Launcher::Launcher(int argc, TCHAR** argv, TCHAR** envp)
 	p_apps::imbueIO();
 }
 
+void TccLauncher::captureCurrentPath() {
+	currentPath = std::filesystem::current_path();
+}
+
 void Launcher::getArgv0() {
 	auto executableName = SysInfo::getExeName();
 	argv0 = absolute(executableName
@@ -352,7 +391,7 @@ std::optional<std::filesystem::path> TccLauncher::locateTccExe(const std::filesy
 	// NOLINT(clang-diagnostic-shadow-field)
 
 	std::filesystem::path possibleExeLocations[] = {
-			p_apps::PORTABLE_APPS / argv0.stem(),
+			PORTABLE_APPS / argv0.stem(),
 			_T(".\\"),
 			_T("..\\"),
 			_T("..\\..\\..\\..\\..\\..\\..\\..\\")
@@ -471,7 +510,7 @@ void TccLauncher::readPCliInifile() {
 	pCliInifile.setDefaults(defaults, _countof(defaults));
 
 	if (! pCliIniFilename) {
-		pCliIniFilename = pAppsDir / p_apps::LAUNCHER_INI;
+		pCliIniFilename = pAppsDir / LAUNCHER_INI;
 	}
 	logger::trace(_T("[%s] using INI file: %s"), _T(__FUNCTION__), pCliIniFilename.value().c_str());
 
@@ -481,7 +520,7 @@ void TccLauncher::readPCliInifile() {
 void TccLauncher::setupProfileDirectories() {
 	// FIXME another profile should be supported by tcstart.btm
 	profileDirectory = p_apps::canonical(std::filesystem::path(p_apps::Environment::expandEnv(pCliInifile.getValueNonEmpty(_SECTION_LAUNCHER, _INI_NAME_PROFILE_DIRECTORY))),
-	                                     pAppsDir / p_apps::PORTABLE_APPS_DATA);
+	                                     pAppsDir / PORTABLE_APPS_DATA);
 	profileDomainDirectory = profileDirectory / p_apps::getDomainName();
 	profileRoamingDirectory = profileDirectory / p_apps::getUserName();
 	profileLocalDirectory = profileRoamingDirectory / p_apps::getComputerName();
@@ -496,7 +535,7 @@ void TccLauncher::readProfileIniFiles() {
 
 	for (const auto& iniLocation : moreIniLocations) {
 		p_apps::makeDirWriteable(iniLocation);
-		pCliInifile.readIniFile(iniLocation / p_apps::LAUNCHER_INI, false);
+		pCliInifile.readIniFile(iniLocation / LAUNCHER_INI, false);
 	}
 }
 
@@ -527,17 +566,17 @@ void TccLauncher::processIniSectionCommand() {
 }
 
 void TccLauncher::logCommandLine() const {
-#ifdef _DEBUG
-	if (! directives.empty()) {
-		logger::trace(_T("[%s] directives: %s"), _T(__FUNCTION__), boost::algorithm::join(directives, _T(" ")));
+	if (logger::isTrace()) {
+		if (!directives.empty()) {
+			logger::trace(_T("[%s] directives: %s"), _T(__FUNCTION__), boost::algorithm::join(directives, _T(" ")));
+		}
+		if (!options.empty()) {
+			logger::trace(_T("[%s] options: %s"), _T(__FUNCTION__), boost::algorithm::join(options, _T(" ")));
+		}
+		if (!commands.empty()) {
+			logger::trace(_T("[%s] commands: %s"), _T(__FUNCTION__), boost::algorithm::join(commands, _T(" ")));
+		}
 	}
-	if (! options.empty()) {
-		logger::trace(_T("[%s] options: %s"), _T(__FUNCTION__), boost::algorithm::join(options, _T(" ")));
-	}
-	if (! commands.empty()) {
-		logger::trace(_T("[%s] commands: %s"), _T(__FUNCTION__), boost::algorithm::join(commands, _T(" ")));
-	}
-#endif
 }
 
 void TccLauncher::processIniSectionProfile() {
@@ -577,7 +616,7 @@ void TccLauncher::locateSettingsDirectory() {
 		std::filesystem::path(
 			p_apps::Environment::expandEnv(
 				pCliInifile.getValueNonEmpty(_SECTION_LAUNCHER, _INI_NAME_SETTINGS_DIRECTORY))),
-		pAppsDir / p_apps::PORTABLE_APPS_DATA);
+		pAppsDir / PORTABLE_APPS_DATA);
 	logger::trace(_T("[%s] settings directory: %s"), _T(__FUNCTION__), settingsDirectory.c_str());
 }
 
@@ -593,7 +632,7 @@ void TccLauncher::fixTccIniFilename() {
 void TccLauncher::copyDefaultData() {
 
 	if (! is_directory(settingsDirectory)) {
-		const auto sourceDirectory = p_apps::canonical(p_apps::PORTABLE_APPS_DEFAULT_DATA, pAppsDir);
+		const auto sourceDirectory = p_apps::canonical(PORTABLE_APPS_DEFAULT_DATA, pAppsDir);
 		std::error_code errorCode;
 		std::filesystem::copy(sourceDirectory, settingsDirectory, errorCode);
 		if (errorCode) {
@@ -603,7 +642,7 @@ void TccLauncher::copyDefaultData() {
 
 	// iniFileName can be passed as an argument or retrieved from pCli.ini
 	if (! std::filesystem::exists(tccIniFilename.value())) {
-		const auto sourceFile = p_apps::canonical(p_apps::PORTABLE_APPS_DEFAULT_DATA / _INI_VALUE_TCC_INI, pAppsDir);
+		const auto sourceFile = p_apps::canonical(PORTABLE_APPS_DEFAULT_DATA / _INI_VALUE_TCC_INI, pAppsDir);
 
 		std::error_code errorCode;
 		std::filesystem::copy(sourceFile, tccIniFilename.value(), errorCode);
@@ -622,7 +661,7 @@ void TccLauncher::setupTempDirectory() {
 	std::optional<std::filesystem::path> tempPath;
 
 	if (auto tempPathName = pCliInifile.getValue(_SECTION_LAUNCHER, _INI_NAME_TEMP_DIRECTORY)) {
-		tempPath = p_apps::canonical(std::filesystem::path(p_apps::Environment::expandEnv(tempPathName.value())), pAppsDir / p_apps::PORTABLE_APPS_DATA);
+		tempPath = p_apps::canonical(std::filesystem::path(p_apps::Environment::expandEnv(tempPathName.value())), pAppsDir / PORTABLE_APPS_DATA);
 	}
 
 	if (! tempPath) {
@@ -686,7 +725,7 @@ void TccLauncher::processDirDrivesFile() {
 }
 
 void TccLauncher::processLogs() {
-	auto logsDirectory = p_apps::canonical(p_apps::Environment::expandEnv(pCliInifile.getValueNonEmpty(_SECTION_LAUNCHER, _INI_NAME_LOGS_DIRECTORY)), pAppsDir / p_apps::PORTABLE_APPS_DATA);
+	auto logsDirectory = p_apps::canonical(p_apps::Environment::expandEnv(pCliInifile.getValueNonEmpty(_SECTION_LAUNCHER, _INI_NAME_LOGS_DIRECTORY)), pAppsDir / PORTABLE_APPS_DATA);
 	p_apps::makeDirWriteable(logsDirectory);
 	logger::trace(_T("[%s] logs directory %s"), _T(__FUNCTION__), logsDirectory.c_str());
 
@@ -709,7 +748,7 @@ boost::optional<std::tstring> TccLauncher::locateKnownEditor() const {
 			return proposedEditor;
 		}
 	}
-	return {};
+	return boost::none;
 }
 
 void TccLauncher::processEditor() {
@@ -726,7 +765,7 @@ void TccLauncher::processEditor() {
 	}
 
 	if (externalEditor && externalEditor.value().empty()) {
-		externalEditor = {};
+		externalEditor = boost::none;
 	}
 
 	if (!externalEditor) {
@@ -866,6 +905,8 @@ void TccLauncher::launch() {
 	environment.setUp(envp);
 	environment.setNameBackup(_ENV_BACKUP_PREFIX);
 
+	captureCurrentPath();
+
 	getArgv0();
 
 	findHomeDirectory();
@@ -928,16 +969,16 @@ void TccLauncher::launch() {
 	*	Ready to execute
 	*******************************************************/
 	std::vector<std::tstring> effectiveArgv;
-	auto effectiveArgv0 = p_apps::normalize(tccExeDirectory / tccExeName);
+	const auto effectiveArgv0 = tccExeDirectory / tccExeName;
 	effectiveArgv.push_back(p_apps::quote(effectiveArgv0));
-	// commandComspec: ignored
-	effectiveArgv.push_back(std::tstring(_T("@")) + p_apps::quote(p_apps::normalize(tccIniFilename.value())));
+	// commandComspec: ignored	
+	effectiveArgv.push_back(std::tstring(_T("@")) + p_apps::quote(tccIniFilename.value()));
 	p_apps::appendContainer(effectiveArgv, directives);
 	p_apps::appendContainer(effectiveArgv, options);
 	p_apps::appendContainer(effectiveArgv, commands);
-	logger::trace(_T("[%s] finally argv:\n%s"), _T(__FUNCTION__), boost::algorithm::join(effectiveArgv, _T(" ")));
-	auto cwd = pAppsDir; // FIXME not really
-	execute(pWait, effectiveArgv0, effectiveArgv, environment, cwd);
+	if (logger::isTrace())
+		logger::trace(_T("[%s] finally argv:\n%s"), _T(__FUNCTION__), boost::algorithm::join(effectiveArgv, _T(" ")));
+	execute(pWait, effectiveArgv0, effectiveArgv, environment, currentPath);
 }
 
 /******************************************************************************

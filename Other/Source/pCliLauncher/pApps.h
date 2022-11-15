@@ -19,38 +19,6 @@ namespace p_apps {
 	 * \details Required: VER_PRODUCTNAME_STR is defined in version.h
 	 ****************************************************************************/
 
-	/******************************************************************************
-	 *
-	 * Some handy strings
-	 *
-	 * LAUNCHER_INI
-	 *   Name of launcher INI file
-	 *
-	 * PORTABLE_APPS
-	 *   Directory, where PortableApps platform is expected
-	 *
-	 * PORTABLE_APPS_APP
-	 *   Legacy name of application directory ( ie. "App" )
-	 *
-	 * PORTABLE_APPS_APP_LE_32
-	 *   Not legacy name of application 32-bit directory ( ie. "App\\32" )
-	 *
-	 * PORTABLE_APPS_APP_LE_64
-	 *   Not legacy name of application 64-bit directory ( ie. "App\\64" )
-	 *
-	 * PORTABLE_APPS_DATA
-	 *   Legacy name of data directory ( ie. "Data" )
-	 *
-	 * PORTABLE_APPS_DEFAULT
-	 *   Legacy name of defaults directory ( ie. "App\\DefaultData" )
-	 *
-	 *****************************************************************************/
-	extern const std::filesystem::path LAUNCHER_INI;
-	extern const std::filesystem::path PORTABLE_APPS;
-	extern const std::filesystem::path PORTABLE_APPS_APP;
-	extern const std::filesystem::path PORTABLE_APPS_DATA;
-	extern const std::filesystem::path PORTABLE_APPS_DEFAULT_DATA;
-
 	std::filesystem::path canonical(const std::filesystem::path& p, const std::filesystem::path& base);
 
 	std::wstring string2wstring(const std::string& str);
@@ -92,16 +60,7 @@ namespace p_apps {
 	 * \detail please note, that `"` in filename is illegal using windows
 	 ***************************************************************************/
 	std::tstring quote(const std::filesystem::path& fileName);
-
-	/****************************************************************************
-	 * \brief  "normalize" filesystem path - sanitize, resolve links, canonical
-	 *
-	 * \param  fileName filesystem path to be cleaned
-	 * \param  quoted add quotation marks if needed
-	 * \return clean filesystem path
-	 ***************************************************************************/
-	std::tstring normalize(const std::filesystem::path& fileName, bool quoted = true);
-
+	
 	/******************************************************************************
 	 *
 	 * getComputerName
@@ -143,19 +102,6 @@ namespace p_apps {
 
 	/******************************************************************************
 	 *
-	 * abend
-	 *   abnormal end of the thread
-	 *     shows message (can be translated) vi cerr or message box
-	 *     and exits.
-	 *	   adds to the pool of boost::locale::translate'd strings:
-	 *       _T( "Press [ENTER] key to exit." )
-	 *       _T( "Cann't to continue." )
-	 *
-	 *****************************************************************************/
-	void abend(const boost::_tformat& msg, int errCode);
-
-	/******************************************************************************
-	 *
 	 * errnoMsg
 	 *   wrapper for _tcserror_s
 	 *   clears errno
@@ -172,12 +118,6 @@ namespace p_apps {
 	 *****************************************************************************/
 	std::tstring lastErrorMsg();
 
-	enum class tpWait {
-		AUTO,
-		WAIT,
-		NO_WAIT
-	};
-
 	/******************************************************************************
 	 *
 	 * execute
@@ -187,7 +127,7 @@ namespace p_apps {
 	 *
 	 *****************************************************************************/
 
-	boost::optional<DWORD> execute(bool pWait, const std::tstring& cmdName, const std::vector<std::tstring>& cmdLine,
+	void execute(bool pWait, const std::tstring& cmdName, const std::vector<std::tstring>& cmdLine,
 	                               const Environment& cmdEnvironment, const std::filesystem::path& cwd);
 
 

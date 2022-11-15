@@ -14,17 +14,6 @@
 #include <random>
 
 namespace p_apps {
-
-	const std::filesystem::path LAUNCHER_INI(_T(VER_PRODUCTNAME_STR) _T(".ini"));
-
-	const std::filesystem::path PORTABLE_APPS = _T("PortableApps");
-
-	const std::filesystem::path PORTABLE_APPS_APP = _T("App");
-
-	const std::filesystem::path PORTABLE_APPS_DATA = _T("Data");
-
-	const std::filesystem::path PORTABLE_APPS_DEFAULT_DATA = _T("App\\DefaultData");
-
 	std::filesystem::path canonical(const std::filesystem::path& p, const std::filesystem::path& base) {
 		auto absolutePath = p.is_absolute()
 			                    ? absolute(p)
@@ -107,38 +96,6 @@ namespace p_apps {
 		return quote(fileName._tstring());
 	}
 
-	/****************************************************************************
-	 * \brief  "normalize" filesystem path - sanitize, resolve links, canonical
-	 * 
-	 * \param  fileName filesystem path to be cleaned
-	 * \param  quoted add quotation marks if needed
-	 * \return clean filesystem path 
-	 ***************************************************************************/
-	std::tstring normalize(const std::filesystem::path& fileName, const bool quoted) {
-		auto result = unquote(fileName._tstring());
-		boost::erase_all(result, _T("\"")); // double quotes are not allowed at all
-
-		static const std::tstring illegalFilenameChars = _T("<>|"); // Reference: http://msdn.microsoft.com/en-us/library/aa365247%28VS.85%29.aspx
-
-		while (const auto found = result.find_first_of(illegalFilenameChars) != std::string::npos) {
-			result.erase(found);
-		}
-
-		std::error_code errCode;
-		const auto currentPath = std::filesystem::current_path();
-		const auto absolutePath = absolute(std::filesystem::path(result), errCode);
-		if (!errCode) {
-			const auto canonicalPath = canonical(absolutePath, errCode);
-			if (!errCode) {
-				result = canonicalPath._tstring();
-			}
-		}
-
-		boost::replace_all(result, "/", "\\");
-		return quoted
-			       ? quote(result)
-			       : result;
-	}
 
 	/******************************************************************************
 	 *
@@ -336,7 +293,7 @@ namespace p_apps {
 	/*****************************************************************************
 	* like _texecve, but ComEmu / parent cmd aware. And more.
 	*****************************************************************************/
-	boost::optional<DWORD> execute(bool pWait, const std::tstring& cmdName, const std::vector<std::tstring>& cmdLine, const Environment& cmdEnvironment, const std::filesystem::path& cwd) {
+	void execute(bool pWait, const std::tstring& cmdName, const std::vector<std::tstring>& cmdLine, const Environment& cmdEnvironment, const std::filesystem::path& cwd) {
 
 		//-------------------------------------------- lpApplicationName
 		//-------------------------------------------- lpCommandLine
@@ -375,17 +332,16 @@ namespace p_apps {
 		processInfo.hThread = nullptr;
 		//-------------------------------------------- go
 
+		// ReSharper disable once CppTooWideScopeInitStatement
 		const auto ok = CreateProcess(cmdName.c_str(), commandLine.get(), nullptr, nullptr, FALSE, creationFlags, env.get(), cwd.c_str(), &startupInfo, &processInfo);
 
-		// env.reset();
-		// commandLine.reset();
 		if (! ok) {
 			fail(_T("Cann't execute %s: %s"), cmdName, lastErrorMsg());
 		}
 		SetPriorityClass(processInfo.hProcess, SysInfo::getProcessPriorityClass());
 
 		if (ResumeThread(processInfo.hThread) == static_cast<DWORD>(- 1)) {
-			abend(boost::_tformat(_T("Cann't execute %1%: %2%")) % cmdName % lastErrorMsg(), 1);
+			fail(_T("Cann't execute %s: %s"), cmdName, lastErrorMsg());
 		}
 
 		if (pWait && processInfo.hProcess != nullptr) {
@@ -400,8 +356,6 @@ namespace p_apps {
 			CloseHandle(processInfo.hThread);
 			processInfo.hThread = nullptr;
 		}
-
-		return boost::none;
 	}
 
 }
