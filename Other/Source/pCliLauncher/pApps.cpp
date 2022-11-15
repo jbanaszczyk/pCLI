@@ -27,8 +27,8 @@ namespace p_apps {
 			       : absolutePath;
 	}
 
-	std::vector<std::tstring> tokenize(const std::tstring& str) {
-		std::vector<std::tstring> result;
+	std::vector<std::wstring> tokenize(const std::wstring& str) {
+		std::vector<std::wstring> result;
 		boost::escaped_list_separator<wchar_t> Separator(_T('^'), _T(' '), _T('\"'));
 		boost::tokenizer<boost::escaped_list_separator<wchar_t>, std::wstring::const_iterator, std::wstring> tok(str, Separator);
 		for (auto it = tok.begin(); it != tok.end(); ++it) {
@@ -38,7 +38,7 @@ namespace p_apps {
 		return result;
 	}
 
-	static bool needsQuotation(const std::tstring& str) {
+	static bool needsQuotation(const std::wstring& str) {
 		return str.empty() || str.find(_T(' ')) != std::string::npos;
 	}
 
@@ -49,14 +49,14 @@ namespace p_apps {
 	 * \return unquoted string
 	 * \detail escape character is '^' - tcc escape char
 	 ***************************************************************************/
-	std::tstring unquote(const std::tstring& str) {
+	std::wstring unquote(const std::wstring& str) {
 		std::wstring result;
 		std::wistringstream ss(str);
 		ss >> std::quoted(result, _T('\"'), _T('^'));
 		return result;
 	}
 
-	std::tstring quote(const std::optional<std::tstring>& str) {
+	std::wstring quote(const std::optional<std::wstring>& str) {
 		if (str) {
 			return quote(str.value());
 		}
@@ -69,7 +69,7 @@ namespace p_apps {
 	 * \param  str string to be quoted
 	 * \return string surrounded with "" if it is required else the same string
 	 ***************************************************************************/
-	std::tstring quote(const std::tstring& str) {
+	std::wstring quote(const std::wstring& str) {
 		auto unquoted = unquote(str);
 		if (!needsQuotation(str)) {
 			return str;
@@ -86,8 +86,8 @@ namespace p_apps {
 	 * \return string surrounded with "" if it is required else the same string
 	 * \detail please note, that `"` in filename is illegal using windows
 	 ***************************************************************************/
-	std::tstring quote(const std::filesystem::path& fileName) {
-		return quote(fileName._tstring());
+	std::wstring quote(const std::filesystem::path& fileName) {
+		return quote(fileName.wstring());
 	}
 	
 	/******************************************************************************
@@ -96,7 +96,7 @@ namespace p_apps {
 	 *   retrieve NetBIOS computer name
 	 *
 	 *****************************************************************************/
-	std::tstring getComputerName() {
+	std::wstring getComputerName() {
 		DWORD bufSize = 0;
 		GetComputerName(nullptr, &bufSize);
 
@@ -115,14 +115,14 @@ namespace p_apps {
 	 *   retrieve SamCompatible user name. Something like Engineering\JSmith
 	 *
 	 *****************************************************************************/
-	std::tstring getUserName() {
+	std::wstring getUserName() {
 		DWORD bufSize = 0;
 		GetUserNameEx(NameSamCompatible, nullptr, &bufSize);
 
 		const std::unique_ptr<TCHAR[]> buf(new(std::nothrow) TCHAR[bufSize]);
 		if (buf) {
 			if (GetUserNameEx(NameSamCompatible, buf.get(), &bufSize)) {
-				std::tstring result = buf.get();
+				std::wstring result = buf.get();
 
 				// FIXME review boost iterators to make it prettier
 
@@ -144,7 +144,7 @@ namespace p_apps {
 	*   uses getUserName
 	*
 	*****************************************************************************/
-	std::tstring getDomainName() {
+	std::wstring getDomainName() {
 		auto userName = getUserName();
 		return userName.substr(0, userName.find(_T('\\')));
 	}
@@ -156,14 +156,14 @@ namespace p_apps {
 	*
 	*****************************************************************************/
 
-	std::tstring pathToUnc(const std::filesystem::path& netPath) {
+	std::wstring pathToUnc(const std::filesystem::path& netPath) {
 		DWORD bufSize = 0;
 		UNIVERSAL_NAME_INFO* nothing = nullptr;
-		if (ERROR_MORE_DATA == WNetGetUniversalName(netPath._tstring().c_str(), UNIVERSAL_NAME_INFO_LEVEL, &nothing, &bufSize)) {
+		if (ERROR_MORE_DATA == WNetGetUniversalName(netPath.wstring().c_str(), UNIVERSAL_NAME_INFO_LEVEL, &nothing, &bufSize)) {
 			const std::unique_ptr<BYTE[]> buf(new(std::nothrow) BYTE[bufSize]);
 			if (buf) {
-				if (WNetGetUniversalName(netPath._tstring().c_str(), UNIVERSAL_NAME_INFO_LEVEL, buf.get(), &bufSize) == NO_ERROR) {
-					const auto pUni = (UNIVERSAL_NAME_INFO*)buf.get();
+				if (WNetGetUniversalName(netPath.wstring().c_str(), UNIVERSAL_NAME_INFO_LEVEL, buf.get(), &bufSize) == NO_ERROR) {
+					const auto pUni = reinterpret_cast<UNIVERSAL_NAME_INFO*>(buf.get());
 					return pUni->lpUniversalName;
 				}
 			}
@@ -171,8 +171,8 @@ namespace p_apps {
 		return _T("");
 	}
 
-	std::tstring generateRandomAlphanumericString(std::size_t len) {
-		std::tstring str(_T("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"));
+	std::wstring generateRandomAlphanumericString(std::size_t len) {
+		std::wstring str(_T("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"));
 		std::random_device rd;
 		std::mt19937 generator(rd());
 		std::shuffle(str.begin(), str.end(), generator);
@@ -181,10 +181,10 @@ namespace p_apps {
 
 	std::wstring string2wstring(const std::string& str) {
 		size_t cchRequired = 0;
-		errno_t ret = ::mbstowcs_s(&cchRequired, nullptr, 0, str.c_str(), 0); // w/ null terminator
+		mbstowcs_s(&cchRequired, nullptr, 0, str.c_str(), 0); // w/ null terminator
 		std::wstring result(cchRequired, L'\0');
 		size_t cchActual = cchRequired;
-		ret = ::mbstowcs_s(&cchRequired, &result[0], cchActual, str.c_str(), cchActual);
+		mbstowcs_s(&cchRequired, &result[0], cchActual, str.c_str(), cchActual);
 		return result;
 	}
 
@@ -199,7 +199,7 @@ namespace p_apps {
 
 		create_directories(directory, errCode);
 		if (errCode) {
-			fail(_T("[%s] Cann't create directory: %s\nReason: %s"), _T(__FUNCTION__), directory._tstring(), string2wstring(errCode.message()));
+			fail(_T("[%s] Cann't create directory: %s\nReason: %s"), _T(__FUNCTION__), directory.wstring(), string2wstring(errCode.message()));
 		}
 
 		constexpr auto maxTry = 8;
@@ -217,7 +217,7 @@ namespace p_apps {
 			}
 		}
 
-		fail(_T("[%s] Cann't create files in directory: %s"), _T(__FUNCTION__), directory._tstring());
+		fail(_T("[%s] Cann't create files in directory: %s"), _T(__FUNCTION__), directory.wstring());
 	}
 
 	/******************************************************************************
@@ -227,7 +227,7 @@ namespace p_apps {
 	 *   clears errno
 	 *
 	 *****************************************************************************/
-	std::tstring errnoMsg() {
+	std::wstring errnoMsg() {
 		constexpr size_t msgSize = 120;
 		wchar_t buf[msgSize];
 		_tcserror_s(buf, errno);
@@ -237,11 +237,11 @@ namespace p_apps {
 	/******************************************************************************
 	 *
 	 * lastErrorMsg
-	 *   LastError as a std::_tstring
+	 *   LastError as a std::wstring
 	 *   clears LastError
 	 *
 	 *****************************************************************************/
-	std::tstring lastErrorMsg() {
+	std::wstring lastErrorMsg() {
 		const auto err = GetLastError();
 		SetLastError(ERROR_SUCCESS);
 		if (err) {
@@ -250,7 +250,7 @@ namespace p_apps {
 			                            reinterpret_cast<LPTSTR>(&lpMsgBuf),
 			                            0, nullptr);
 			if (bufLen) {
-				std::tstring result(lpMsgBuf, lpMsgBuf + bufLen);
+				std::wstring result(lpMsgBuf, lpMsgBuf + bufLen);
 				LocalFree(HLOCAL(lpMsgBuf));
 				return result;
 			}
@@ -261,7 +261,7 @@ namespace p_apps {
 	/*****************************************************************************
 	* like _texecve, but ComEmu / parent cmd aware. And more.
 	*****************************************************************************/
-	void execute(bool pWait, const std::tstring& cmdName, const std::vector<std::tstring>& cmdLine, const Environment& cmdEnvironment, const std::filesystem::path& cwd) {
+	void execute(bool pWait, const std::wstring& cmdName, const std::vector<std::wstring>& cmdLine, const Environment& cmdEnvironment, const std::filesystem::path& cwd) {
 
 		//-------------------------------------------- lpApplicationName
 		//-------------------------------------------- lpCommandLine
@@ -324,6 +324,16 @@ namespace p_apps {
 			CloseHandle(processInfo.hThread);
 			processInfo.hThread = nullptr;
 		}
+	}
+
+	void imbueIO() {
+		std::cout.imbue(std::locale());
+		std::cerr.imbue(std::locale());
+		std::cin.imbue(std::locale());
+
+		(void)_setmode(_fileno(stdout), _O_WTEXT);
+		(void)_setmode(_fileno(stdin), _O_WTEXT);
+		(void)_setmode(_fileno(stderr), _O_WTEXT);
 	}
 
 }

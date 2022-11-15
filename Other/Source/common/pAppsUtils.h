@@ -26,7 +26,7 @@ namespace p_apps {
 		};
 	};
 
-	using SetInsensitiveTChar = std::set<std::tstring, CaseInsensitiveMap<std::tstring>::Comparator>; // FIXME move somewhere near usage
+	using SetInsensitiveTChar = std::set<std::wstring, CaseInsensitiveMap<std::wstring>::Comparator>; // FIXME move somewhere near usage
 
 	/******************************************************************************
 	*	Merge two STL containers
@@ -41,13 +41,5 @@ namespace p_apps {
 		}
 	}
 
-	/******************************************************************************
-	*
-	* imbueIO
-	*   made stdin/stdout/stderr locale-aware
-	*
-	*****************************************************************************/
-	// ReSharper disable once CppInconsistentNaming
-	void imbueIO();
 
 }

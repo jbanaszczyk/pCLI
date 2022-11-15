@@ -27,8 +27,8 @@
 namespace p_apps {
 	class Environment {
 
-		std::map<std::tstring, std::tstring, CaseInsensitiveMap<std::tstring>::Comparator> mEnv;
-		std::tstring backupPrefix = std::tstring{};
+		std::map<std::wstring, std::wstring, CaseInsensitiveMap<std::wstring>::Comparator> mEnv;
+		std::wstring backupPrefix = std::wstring{};
 
 	public:
 		Environment() = default;
@@ -39,13 +39,13 @@ namespace p_apps {
 
 		Environment(const Environment&) = delete;
 		Environment(const Environment&&) = delete;
-		auto operator=(const Environment&) -> Environment& = delete;
-		auto operator=(const Environment&&) -> Environment&& = delete;
+		Environment& operator=(const Environment&)= delete;
+		Environment&& operator=(const Environment&&)= delete;
 		~Environment() = default;
 
 		typedef DWORD (WINAPI* ExpandEnvironmentStrings_t)(LPCTSTR, LPWSTR, DWORD);
 
-		static std::tstring expandEnv(const std::tstring& variableName, ExpandEnvironmentStrings_t ExpandEnvironmentStrings_f = ExpandEnvironmentStrings) {
+		static std::wstring expandEnv(const std::wstring& variableName, ExpandEnvironmentStrings_t ExpandEnvironmentStrings_f = ExpandEnvironmentStrings) {
 			const auto bufferSize = ExpandEnvironmentStrings_f(variableName.c_str(), nullptr, 0);
 
 			const std::unique_ptr<TCHAR[]> buffer(new(std::nothrow) TCHAR[bufferSize]);
@@ -58,7 +58,7 @@ namespace p_apps {
 			return buffer.get();
 		}
 
-		auto setUp(const TCHAR* const envp[]) -> void {
+		void setUp(const TCHAR* const envp[]) {
 			if (envp == nullptr) {
 				logger::warning(_T("%s: null constructor argument"), _T(__FUNCTION__));
 				return;
@@ -79,13 +79,13 @@ namespace p_apps {
 					logger::warning(_T("Environment: malformed, missing variable value in %s"), *ref);
 					continue;
 				}
-				mEnv.insert(std::pair(std::tstring{*ref, len}, std::tstring{sep}));
+				mEnv.insert(std::pair(std::wstring{*ref, len}, std::wstring{sep}));
 			}
 
 			logger::trace(_T("[%s] %d variables"), _T(__FUNCTION__), size());
 		}
 
-		void setNameBackup(const std::tstring& prefix) {
+		void setNameBackup(const std::wstring& prefix) {
 			backupPrefix = prefix;
 		}
 
@@ -93,25 +93,25 @@ namespace p_apps {
 			return mEnv.size();
 		}
 
-		[[nodiscard]] bool exists(const std::tstring& name) const {
+		[[nodiscard]] bool exists(const std::wstring& name) const {
 			if (name.empty()) {
 				return false;
 			}
 			return mEnv.end() != mEnv.find(name);
 		}
 
-		void erase(const std::tstring& name) {
+		void erase(const std::wstring& name) {
 			mEnv.erase(name);
 		}
 
-		std::tstring get(const std::tstring& name) {
+		std::wstring get(const std::wstring& name) {
 			if (!exists(name)) {
-				return std::tstring{};
+				return std::wstring{};
 			}
 			return mEnv[name];
 		}
 
-		void set(const std::tstring& name, const std::tstring& value, bool withBackup = false) {
+		void set(const std::wstring& name, const std::wstring& value, bool withBackup = false) {
 			if (withBackup) {
 				set(backupPrefix + name, get(name));
 			}

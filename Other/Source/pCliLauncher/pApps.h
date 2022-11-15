@@ -10,20 +10,15 @@
 
 #include "../common/common.h"
 #include "LauncherVersion.h"
-
 #include "../common/Environment.h"
-#include "../common/CtrlHandler.h"
 
 namespace p_apps {
-	/*****************************************************************************
-	 * \details Required: VER_PRODUCTNAME_STR is defined in version.h
-	 ****************************************************************************/
 
 	std::filesystem::path canonical(const std::filesystem::path& p, const std::filesystem::path& base);
 
 	std::wstring string2wstring(const std::string& str);
 
-	std::vector<std::tstring> tokenize(const std::tstring& str);
+	std::vector<std::wstring> tokenize(const std::wstring& str);
 
 	/****************************************************************************
 	 * \brief  check if string is already quoted
@@ -31,7 +26,7 @@ namespace p_apps {
 	 * \param  str string to be checked
 	 * \return true if string is surrounded with ""
 	 ***************************************************************************/
-	static bool needsQuotation(const std::tstring& str);
+	static bool needsQuotation(const std::wstring& str);
 
 	/****************************************************************************
 	 * \brief  remove quotation marks
@@ -40,9 +35,9 @@ namespace p_apps {
 	 * \return unquoted string
 	 * \detail escape character is '^' - tcc escape char
 	 ***************************************************************************/
-	std::tstring unquote(const std::tstring& str);
+	std::wstring unquote(const std::wstring& str);
 
-	std::tstring quote(const std::optional<std::tstring>& str);
+	std::wstring quote(const std::optional<std::wstring>& str);
 
 	/****************************************************************************
 	 * \brief  quote string if it contains spaces
@@ -50,7 +45,7 @@ namespace p_apps {
 	 * \param  str string to be quoted
 	 * \return string surrounded with "" if it is required else the same string
 	 ***************************************************************************/
-	std::tstring quote(const std::tstring& str);
+	std::wstring quote(const std::wstring& str);
 
 	/****************************************************************************
 	 * \brief  quote filename if it contains spaces
@@ -59,15 +54,15 @@ namespace p_apps {
 	 * \return string surrounded with "" if it is required else the same string
 	 * \detail please note, that `"` in filename is illegal using windows
 	 ***************************************************************************/
-	std::tstring quote(const std::filesystem::path& fileName);
-	
+	std::wstring quote(const std::filesystem::path& fileName);
+
 	/******************************************************************************
 	 *
 	 * getComputerName
 	 *   retrieve NetBIOS computer name
 	 *
 	 *****************************************************************************/
-	std::tstring getComputerName();
+	std::wstring getComputerName();
 
 	/******************************************************************************
 	 *
@@ -75,7 +70,7 @@ namespace p_apps {
 	 *   retrieve SamCompatible user name. Something like Engineering\JSmith
 	 *
 	 *****************************************************************************/
-	std::tstring getUserName();
+	std::wstring getUserName();
 
 	/******************************************************************************
 	*
@@ -83,7 +78,7 @@ namespace p_apps {
 	*   compatible with getUserName
 	*
 	*****************************************************************************/
-	std::tstring getDomainName();
+	std::wstring getDomainName();
 
 	/******************************************************************************
 	*
@@ -91,7 +86,7 @@ namespace p_apps {
 	*   Convert path to UNC
 	*
 	*****************************************************************************/
-	std::tstring pathToUnc(const std::filesystem::path& netPath);
+	std::wstring pathToUnc(const std::filesystem::path& netPath);
 
 	/****************************************************************************
 	 * \brief  create directory if doesn't exists, check if is writeable
@@ -107,16 +102,16 @@ namespace p_apps {
 	 *   clears errno
 	 *
 	 *****************************************************************************/
-	std::tstring errnoMsg();
+	std::wstring errnoMsg();
 
 	/******************************************************************************
 	 *
 	 * lastErrorMsg
-	 *   LastError as a std::_tstring
+	 *   LastError as a std::wstring
 	 *   clears LastError
 	 *
 	 *****************************************************************************/
-	std::tstring lastErrorMsg();
+	std::wstring lastErrorMsg();
 
 	/******************************************************************************
 	 *
@@ -127,8 +122,16 @@ namespace p_apps {
 	 *
 	 *****************************************************************************/
 
-	void execute(bool pWait, const std::tstring& cmdName, const std::vector<std::tstring>& cmdLine,
-	                               const Environment& cmdEnvironment, const std::filesystem::path& cwd);
-
+	void execute(bool pWait, const std::wstring& cmdName, const std::vector<std::wstring>& cmdLine,
+	             const Environment& cmdEnvironment, const std::filesystem::path& cwd);
+	
+	/******************************************************************************
+	*
+	* imbueIO
+	*   made stdin/stdout/stderr locale-aware
+	*
+	*****************************************************************************/
+	// ReSharper disable once CppInconsistentNaming
+	void imbueIO();
 
 }

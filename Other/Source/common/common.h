@@ -27,8 +27,8 @@
 #endif
 
 #define WINVER         0x0601  // _WIN32_WINNT_WIN7 
-#define _WIN32_WINDOWS 0x0601  // _WIN32_WINNT_WIN7 
-#define _WIN32_WINNT   0x0601  // _WIN32_WINNT_WIN7 
+#define _WIN32_WINDOWS 0x0601  // _WIN32_WINNT_WIN7   // NOLINT(clang-diagnostic-reserved-macro-identifier)
+#define _WIN32_WINNT   0x0601  // _WIN32_WINNT_WIN7   // NOLINT(clang-diagnostic-reserved-macro-identifier)
 
 #define SECURITY_WIN32
 
@@ -37,7 +37,7 @@
 #define WIN32_LEAN_AND_MEAN
 
 #ifdef _DEBUG
-#define _CRTDBG_MAP_ALLOC
+#define _CRTDBG_MAP_ALLOC  // NOLINT(bugprone-reserved-identifier)
 #include <crtdbg.h>
 #endif
 
@@ -47,7 +47,8 @@
 
 /** Common headers *********************************************************************/
 
-#include <cassert>
+// ReSharper disable CppUnusedIncludeDirective
+
 #include <windows.h>
 #include <tchar.h>
 #include <set>
@@ -55,28 +56,19 @@
 #include <vector>
 #include <TlHelp32.h>
 #include <psapi.h>
-#include <functional>
-#include <utility>
 #include <io.h>
 #include <iomanip>
 #include <fcntl.h>
-#include <errno.h>
-#include <winternl.h>
+#include <cerrno>
 #include <Shellapi.h>
 #include <Security.h>
 #include <process.h>
 #include <Winnetwk.h>
-#include <tchar.h>
 #include <timeapi.h>
 #include <locale>
-#include <codecvt>
 #include <cstdlib>
-
 #include <optional>
 #include <filesystem>
-
-#pragma comment( lib, "winmm.lib")
-
 
 #include <boost/locale.hpp>
 #include <boost/algorithm/string.hpp>
@@ -84,38 +76,12 @@
 #include <boost/format.hpp>
 #include <boost/tokenizer.hpp>
 
-using namespace std::string_literals; // NOLINT(clang-diagnostic-header-hygiene)
+// ReSharper restore CppUnusedIncludeDirective
 
 #if defined _DEBUG
 constexpr bool C_DEBUG = true;
 #else
 constexpr bool C_DEBUG = false;
-#endif
-
-#ifdef _INC_TCHAR
-namespace std {
-	using tstring = std::basic_string<TCHAR>;
-}
-
-#ifndef _UNICODE
-		#define _tcout cout
-		#define _tcerr cerr
-		#define _tcin  cin
-		#define _tclog  cin
-		#define _tformat format			// to be used with boost:: format
-		#define _tstring string			// to be used with boost:: filesystem
-		#define _texecve _execve
-		#define _tspawnve _spawnve
-#else
-#define _tcout wcout
-#define _tcerr wcerr
-#define _tcin  wcin
-#define _tclog  wclog
-#define _tformat wformat		// to be used with boost:: format
-#define _tstring wstring		// to be used with boost:: filesystem
-#define _texecve _wexecve
-#define _tspawnve _wspawnve
-#endif
 #endif
 
 #ifdef MAX_PATH
@@ -141,14 +107,6 @@ const size_t heapMaxReqReal = _HEAP_MAXREQ;
 #define GWL_WNDPROC_6432 GWL_WNDPROC
 #endif
 
-#endif
-
-#ifndef LOCALE_SNAME
-	#define LOCALE_SNAME                  0x0000005c   // since WINVER >= 0x0600 : (use with care) locale name (ie: en-us)
-#endif
-
-#ifndef LOCALE_SISO639LANGNAME2
-	#define LOCALE_SISO639LANGNAME2       0x00000067   // since WINVER >= 0x0600 : (use with care) 3 character ISO abbreviated language name, eg "eng"
 #endif
 
 #ifndef STATUS_SUCCESS

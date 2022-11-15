@@ -12,7 +12,7 @@
 * Supported strings: "Yes", "No", "true", "false", "1", "0"
 *
 * functor ()
-*   translates tstring or std::optional<tstring> to bool
+*   translates std::wstring or std::optional<std::wstring> to bool
 *
 *****************************************************************************/
 #include "./common.h"
@@ -22,11 +22,11 @@ namespace p_apps {
 
 	class YesNoOption {
 
-		std::map<std::tstring, bool, CaseInsensitiveMap<std::tstring>::Comparator> keyValues;
+		std::map<std::wstring, bool, CaseInsensitiveMap<std::wstring>::Comparator> keyValues;
 
 		const bool defaultValue = true;
 
-		[[nodiscard]] bool getOption(const std::tstring& key) const {
+		[[nodiscard]] bool getOption(const std::wstring& key) const {
 			const auto itValues = keyValues.find(key);
 			return itValues == keyValues.end()
 				? defaultValue
@@ -56,11 +56,11 @@ namespace p_apps {
 
 		YesNoOption& operator=(YesNoOption&& other) noexcept = delete;
 
-		bool operator()(const std::tstring& key) const {
+		bool operator()(const std::wstring& key) const {
 			return getOption(key);
 		}
 
-		bool operator()(const std::optional<std::tstring>& key) const {
+		bool operator()(const std::optional<std::wstring>& key) const {
 			return key
 				? getOption(key.value())
 				: defaultValue;

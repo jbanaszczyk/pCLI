@@ -4,10 +4,8 @@
 // *************************************************************
 
 #include "stdafx.h"
-
 #include <functional>
 #include <string>
-
 #include "../common/YesNoOption.h"
 
 using namespace testing;

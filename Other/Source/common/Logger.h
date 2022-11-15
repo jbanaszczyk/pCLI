@@ -22,12 +22,12 @@ namespace logger {
 		const std::wstring formatElapsedTime();
 		const std::wstring formatSeverityLevel(loggerSeverityLevel severityLevel);
 
-		inline std::wstring logHelper(const boost::_tformat& tf) {
+		inline std::wstring logHelper(const boost::wformat& tf) {
 			return boost::str(tf);
 		}
 
 		template <class T, class... Arguments>
-		std::wstring logHelper(boost::_tformat& tf, T&& t, Arguments&&... args) {
+		std::wstring logHelper(boost::wformat& tf, T&& t, Arguments&&... args) {
 			return logHelper(tf % std::forward<T>(t), std::forward<Arguments>(args)...);
 		}
 	}
@@ -39,9 +39,9 @@ namespace logger {
 	template <typename... Arguments>
 	std::optional<std::wstring> log(const loggerSeverityLevel severityLevel, const TCHAR* fmt, Arguments&&... args) {
 		if (severityLevel >= internal::currentSeverityLevel) {
-			boost::_tformat tf{fmt};
+			boost::wformat tf{fmt};
 			auto message = internal::logHelper(tf, std::forward<Arguments>(args)...);
-			*internal::logStream << boost::_tformat(_T("%s %s %s")) % internal::formatElapsedTime() % internal::formatSeverityLevel(severityLevel) % message << std::endl;
+			*internal::logStream << boost::wformat(_T("%s %s %s")) % internal::formatElapsedTime() % internal::formatSeverityLevel(severityLevel) % message << std::endl;
 			return message;
 		}
 		return std::nullopt;
@@ -109,9 +109,9 @@ template <typename... Arguments>
 	if (message.has_value()) {
 		if (SysInfo::ownsConsole()) {
 			*logger::internal::logStream << _T("Press [ENTER] to exit.") << std::endl;
-			std::_tcin.get();
+			std::wcin.get();
 		} else {
-			MessageBox(nullptr, message.value().c_str(), (boost::_tformat(_T("Can't continue."))).str().c_str(), MB_OK | MB_ICONERROR);
+			MessageBox(nullptr, message.value().c_str(), (boost::wformat(_T("Can't continue."))).str().c_str(), MB_OK | MB_ICONERROR);
 		}
 	}
 	exit(1);

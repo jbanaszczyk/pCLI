@@ -71,10 +71,10 @@
     <ClCompile Include="pApps.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\common\pAppsUtils.cpp">
+    <ClCompile Include="..\common\Logger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\common\Logger.cpp">
+    <ClCompile Include="..\common\IniFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -28,7 +28,7 @@ namespace SysInfo {
 	 *       especially ConEmu (conEmuHk.dll)
 	 *
 	 *****************************************************************************/
-	std::optional<std::filesystem::path> getDllName(const std::tstring& dllName);
+	std::optional<std::filesystem::path> getDllName(const std::wstring& dllName);
 
 	/******************************************************************************
 	 *

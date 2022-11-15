@@ -98,7 +98,7 @@ namespace SysInfo {
 		return std::nullopt;
 	}
 
-	std::optional<std::filesystem::path> getDllName(const std::tstring& dllName) {
+	std::optional<std::filesystem::path> getDllName(const std::wstring& dllName) {
 		const int processNameSize = MAX_PATH;
 		const std::unique_ptr<TCHAR[]> processName(new(std::nothrow) TCHAR[processNameSize]);
 		if (!processName) {

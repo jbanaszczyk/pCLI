@@ -117,8 +117,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\common\CtrlHandler.cpp" />
+    <ClCompile Include="..\common\IniFile.cpp" />
     <ClCompile Include="..\common\Logger.cpp" />
-    <ClCompile Include="..\common\pAppsUtils.cpp" />
     <ClCompile Include="..\common\SysInfo.cpp" />
     <ClCompile Include="pApps.cpp" />
     <ClCompile Include="pCliLauncher.cpp" />

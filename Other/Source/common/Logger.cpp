@@ -14,18 +14,18 @@ namespace logger {
 
 		const std::wstring formatElapsedTime() {
 			const auto elapsedTime = timeGetTime() - startTime;
-			return str(boost::_tformat(_T("[%10lu]")) % elapsedTime);
+			return str(boost::wformat(_T("[%10lu]")) % elapsedTime);
 		}
 
 		static const TCHAR* severityLevelNames[] = {
-			_T("[trace]  "),
-			_T("[debug]  "),
-			_T("[info]   "),
-			_T("[warning]"),
-			_T("[error]  "),
-			_T("[fatal]  "),
-			_T("[fail]   ")
-		};
+				_T("[trace]  "),
+				_T("[debug]  "),
+				_T("[info]   "),
+				_T("[warning]"),
+				_T("[error]  "),
+				_T("[fatal]  "),
+				_T("[fail]   ")
+			};
 
 		const std::wstring formatSeverityLevel(loggerSeverityLevel severityLevel) {
 			return severityLevelNames[severityLevel];
@@ -37,14 +37,15 @@ namespace logger {
 	}
 
 	void init() {
-		logger::init(C_DEBUG
-			? loggerSeverityLevel::trace
-			: loggerSeverityLevel::warning
+		// ReSharper disable once CppUnreachableCode
+		init(C_DEBUG
+			     ? loggerSeverityLevel::trace
+			     : loggerSeverityLevel::warning
 		);
 	}
 
 	void init(const loggerSeverityLevel initialSeverityLevel) {
-		internal::logStream = &std::_tclog;
+		internal::logStream = &std::wclog;
 		setSeverityLevel(initialSeverityLevel);
 	}
 
