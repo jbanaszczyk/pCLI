@@ -12,7 +12,7 @@
 * Supported strings: "Yes", "No", "true", "false", "1", "0"
 *
 * functor ()
-*   translates tstring or boost::optional<tstring> to bool
+*   translates tstring or std::optional<tstring> to bool
 *
 *****************************************************************************/
 #include "./common.h"
@@ -58,12 +58,6 @@ namespace p_apps {
 
 		bool operator()(const std::tstring& key) const {
 			return getOption(key);
-		}
-
-		bool operator()(const boost::optional<std::tstring>& key) const {
-			return key
-				? getOption(key.get())
-				: defaultValue;
 		}
 
 		bool operator()(const std::optional<std::tstring>& key) const {

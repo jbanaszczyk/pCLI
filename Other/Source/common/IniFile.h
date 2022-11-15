@@ -105,7 +105,7 @@ namespace p_apps {
 			std::tstring aValue;
 		};
 
-		static boost::optional<std::tstring> iniRead(const std::filesystem::path& fName, const std::tstring& section, const std::tstring& name, const std::tstring& defValue = _T(""));
+		static std::optional<std::tstring> iniRead(const std::filesystem::path& fName, const std::tstring& section, const std::tstring& name, const std::tstring& defValue = _T(""));
 
 		static void iniNames(const TCHAR* const sectionName, const std::filesystem::path& fName, std::vector<std::tstring>& sections) {
 			std::error_code errCode;
@@ -200,9 +200,9 @@ namespace p_apps {
 					auto valueStr = iniRead(iniName, itSections->c_str(), itNames->c_str(), defaultValue);
 					if (valueStr) {
 						if (values.end() == ref) {
-							values.insert(std::pair<iniKey, IniValue>(thisKey, IniValue(valueStr.get(), false, true)));
+							values.insert(std::pair<iniKey, IniValue>(thisKey, IniValue(valueStr.value(), false, true)));
 						} else {
-							ref->second.setValue(valueStr.get(), false, true);
+							ref->second.setValue(valueStr.value(), false, true);
 						}
 					}
 				}
@@ -227,9 +227,9 @@ namespace p_apps {
 			return result;
 		}
 
-		boost::optional<std::tstring> getValue(const std::tstring& section, const std::tstring& name) const;
+		std::optional<std::tstring> getValue(const std::tstring& section, const std::tstring& name) const;
 
-		boost::optional<std::tstring> getDefault(const std::tstring& section, const std::tstring& name) const;
+		std::optional<std::tstring> getDefault(const std::tstring& section, const std::tstring& name) const;
 
 		std::tstring getValueNonEmpty(const std::tstring& section, const std::tstring& name) const {
 			const iniKey thisKey(section, name);
@@ -276,10 +276,10 @@ namespace p_apps {
 		valueCurrent = value;
 	}
 
-	inline boost::optional<std::tstring> IniFile::iniRead(const std::filesystem::path& fName, const std::tstring& section, const std::tstring& name, const std::tstring& defValue) {
+	inline std::optional<std::tstring> IniFile::iniRead(const std::filesystem::path& fName, const std::tstring& section, const std::tstring& name, const std::tstring& defValue) {
 		std::error_code errCode;
 		if (!exists(fName, errCode)) {
-			return boost::none;
+			return std::nullopt;
 		}
 		std::unique_ptr<TCHAR[]> buf;
 		DWORD bufSize = 1024;
@@ -293,7 +293,7 @@ namespace p_apps {
 			const auto len = GetPrivateProfileString(section.c_str(), name.c_str(), defValue.c_str(), buf.get(), bufSize, fName.c_str());
 			if (ENOENT == errno) {
 				errno = 0;
-				return boost::none;
+				return std::nullopt;
 			}
 			if (bufSize - 1 > len) {
 				break;
@@ -313,10 +313,10 @@ namespace p_apps {
 				          : maxBufSize;
 		}
 		if (buf == nullptr) {
-			return boost::none;
+			return std::nullopt;
 		}
 		if (nullptr == buf) {
-			return boost::none;
+			return std::nullopt;
 		}
 		return buf.get();
 	}
@@ -325,28 +325,28 @@ namespace p_apps {
 		setValue(aSection, aName, aDefault, true);
 	}
 
-	inline boost::optional<std::tstring> IniFile::getValue(const std::tstring& section, const std::tstring& name) const {
+	inline std::optional<std::tstring> IniFile::getValue(const std::tstring& section, const std::tstring& name) const {
 		const iniKey thisKey(section, name);
 		const auto ref = values.find(thisKey);
 		if (values.end() == ref) {
-			return boost::none;
+			return std::nullopt;
 		}
 		auto result = ref->second.getValue();
 		if (result.empty()) {
-			return boost::none;
+			return std::nullopt;
 		}
 		return result;
 	}
 
-	inline boost::optional<std::tstring> IniFile::getDefault(const std::tstring& section, const std::tstring& name) const {
+	inline std::optional<std::tstring> IniFile::getDefault(const std::tstring& section, const std::tstring& name) const {
 		const iniKey thisKey(section, name);
 		const auto ref = values.find(thisKey);
 		if (values.end() == ref) {
-			return boost::none;
+			return std::nullopt;
 		}
 		auto result = ref->second.getDefault();
 		if (result.empty()) {
-			return boost::none;
+			return std::nullopt;
 		}
 		return result;
 	}

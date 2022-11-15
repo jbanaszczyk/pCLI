@@ -38,12 +38,6 @@ namespace p_apps {
 		return result;
 	}
 
-	/****************************************************************************
-	 * \brief  check if string is already quoted
-	 *
-	 * \param  str string to be checked
-	 * \return true if string is surrounded with ""
-	 ***************************************************************************/
 	static bool needsQuotation(const std::tstring& str) {
 		return str.empty() || str.find(_T(' ')) != std::string::npos;
 	}
@@ -62,7 +56,7 @@ namespace p_apps {
 		return result;
 	}
 
-	std::tstring quote(const boost::optional<std::tstring>& str) {
+	std::tstring quote(const std::optional<std::tstring>& str) {
 		if (str) {
 			return quote(str.value());
 		}
@@ -95,8 +89,7 @@ namespace p_apps {
 	std::tstring quote(const std::filesystem::path& fileName) {
 		return quote(fileName._tstring());
 	}
-
-
+	
 	/******************************************************************************
 	 *
 	 * getComputerName
@@ -225,31 +218,6 @@ namespace p_apps {
 		}
 
 		fail(_T("[%s] Cann't create files in directory: %s"), _T(__FUNCTION__), directory._tstring());
-	}
-
-
-	/******************************************************************************
-	 *
-	 * abend
-	 *   abnormal end of the thread
-	 *     shows message (can be translated) via std::wcerr or message box
-	 *     and exits.
-	 *	   adds to the pool of boost::locale::translate'd strings:
-	 *       _T( "Press [ENTER] key to exit." )
-	 *       _T( "Can't to continue." )
-	 *
-	 *****************************************************************************/
-
-	void abend(const boost::_tformat& msg, int errCode) {
-		std::_tcerr << msg << std::endl;
-		if (SysInfo::ownsConsole()) {
-			std::_tcerr << _T("Press [ENTER] key to exit.") << std::endl;
-			std::_tcin.get();
-
-		} else {
-			MessageBox(nullptr, msg.str().c_str(), (boost::_tformat(_T("Cann't continue."))).str().c_str(), MB_OK | MB_ICONERROR);
-		}
-		exit(errCode); // NOLINT(concurrency-mt-unsafe)
 	}
 
 	/******************************************************************************

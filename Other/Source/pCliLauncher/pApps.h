@@ -42,7 +42,7 @@ namespace p_apps {
 	 ***************************************************************************/
 	std::tstring unquote(const std::tstring& str);
 
-	std::tstring quote(const boost::optional<std::tstring>& str);
+	std::tstring quote(const std::optional<std::tstring>& str);
 
 	/****************************************************************************
 	 * \brief  quote string if it contains spaces

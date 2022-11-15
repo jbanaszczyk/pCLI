@@ -70,14 +70,13 @@
 #include <timeapi.h>
 #include <locale>
 #include <codecvt>
-#include  <cstdlib>
+#include <cstdlib>
+
+#include <optional>
+#include <filesystem>
 
 #pragma comment( lib, "winmm.lib")
 
-#include <boost/optional.hpp> // FIXME: To be migrated to std::optional
-#include <optional>
-
-#include <filesystem>
 
 #include <boost/locale.hpp>
 #include <boost/algorithm/string.hpp>

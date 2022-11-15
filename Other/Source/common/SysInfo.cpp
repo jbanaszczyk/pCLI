@@ -75,47 +75,47 @@ namespace SysInfo {
 		return OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, GetCurrentProcessId());
 	}
 
-	boost::optional<std::filesystem::path> getExeName() {
+	std::optional<std::filesystem::path> getExeName() {
 		const int moduleNameSize = MAX_PATH;
 		const std::unique_ptr<TCHAR[]> moduleName(new(std::nothrow) TCHAR[moduleNameSize]);
 		if (!moduleName) {
-			return boost::none;
+			return std::nullopt;
 		}
 
 		const SmartHandlePtr hProcess(OpenMyProcessForQuery());
 		if (!hProcess) {
-			return boost::none;
+			return std::nullopt;
 		}
 
 		HMODULE hMod;
 		DWORD cbNeeded = 0;
 		if (EnumProcessModules(hProcess.get(), &hMod, sizeof (hMod), &cbNeeded)) {
 			if (GetModuleFileNameEx(hProcess.get(), hMod, moduleName.get(), moduleNameSize)) {
-				return boost::optional<std::filesystem::path>(moduleName.get());
+				return std::optional<std::filesystem::path>(moduleName.get());
 			}
 		}
 
-		return boost::none;
+		return std::nullopt;
 	}
 
-	boost::optional<std::filesystem::path> getDllName(const std::tstring& dllName) {
+	std::optional<std::filesystem::path> getDllName(const std::tstring& dllName) {
 		const int processNameSize = MAX_PATH;
 		const std::unique_ptr<TCHAR[]> processName(new(std::nothrow) TCHAR[processNameSize]);
 		if (!processName) {
-			return boost::none;
+			return std::nullopt;
 		}
 
 		const SmartHandlePtr hProcess(OpenMyProcessForQuery());
 		if (!hProcess) {
-			return boost::none;
+			return std::nullopt;
 		}
-		boost::optional<std::filesystem::path> result = boost::none;
+		std::optional<std::filesystem::path> result = std::nullopt;
 		DWORD cbNeeded = 0;
 		if (EnumProcessModules(hProcess.get(), nullptr, 0, &cbNeeded)) {
 			DWORD nEntries = cbNeeded / sizeof(HMODULE);
 			std::unique_ptr<HMODULE[]> hMod(new(std::nothrow) HMODULE[nEntries]);
 			if (!hMod) {
-				return boost::none;
+				return std::nullopt;
 			}
 			if (EnumProcessModules(hProcess.get(), hMod.get(), nEntries * sizeof(hMod[0]), &cbNeeded)) {
 				// probably nEntries * sizeof( *hMod ) == cbNeeded, but ...
@@ -123,13 +123,13 @@ namespace SysInfo {
 					if (GetModuleFileNameEx(hProcess.get(), hMod[idx], processName.get(), processNameSize)) {
 						std::filesystem::path dll(processName.get());
 						if (boost::iequals(dll.filename().c_str(), dllName)) {
-							return boost::optional<std::filesystem::path>(dll);
+							return std::optional<std::filesystem::path>(dll);
 						}
 					}
 				}
 			}
 		}
-		return boost::none;
+		return std::nullopt;
 	}
 
 	bool isWow64() {

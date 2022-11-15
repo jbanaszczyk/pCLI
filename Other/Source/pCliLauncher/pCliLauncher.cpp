@@ -242,9 +242,9 @@ class Directives : public CommandItems {
 public:
 	void push_back(const std::wstring& directive);
 	std::wstring toString(const std::wstring& key, const std::wstring& value) const;
-	std::wstring toString(const std::wstring& key, const boost::optional<std::wstring>& value) const;
+	std::wstring toString(const std::wstring& key, const std::optional<std::wstring>& value) const;
 	void set(const std::wstring& key, const std::wstring& value);
-	void set(const std::wstring& key, const boost::optional<std::wstring>& value);
+	void setOptional(const std::wstring& key, const std::optional<std::wstring>& value);
 	bool exists(const std::wstring& key, const std::wstring& value);
 };
 
@@ -267,7 +267,7 @@ std::wstring Directives::toString(const std::wstring& key, const std::wstring& v
 	return _T("//") + key + _T("=") + p_apps::quote(value);
 }
 
-std::wstring Directives::toString(const std::wstring& key, const boost::optional<std::wstring>& value) const {
+std::wstring Directives::toString(const std::wstring& key, const std::optional<std::wstring>& value) const {
 	return _T("//") + key + _T("=") + p_apps::quote(value);
 }
 
@@ -275,7 +275,7 @@ void Directives::set(const std::wstring& key, const std::wstring& value) {
 	std::vector<std::wstring>::push_back(toString(key, value));
 }
 
-void Directives::set(const std::wstring& key, const boost::optional<std::wstring>& value) {
+void Directives::setOptional(const std::wstring& key, const std::optional<std::wstring>& value) {
 	std::vector<std::wstring>::push_back(toString(key, value));
 }
 
@@ -297,9 +297,9 @@ bool Options::exists(const std::wstring& option) {
 
 class TccLauncher final : public Launcher {
 	std::filesystem::path currentPath;
-	boost::optional<std::tstring> comspec = boost::none;
-	boost::optional<std::tstring> tccIniFilename = boost::none;
-	boost::optional<std::tstring> pCliIniFilename = boost::none;
+	std::optional<std::tstring> comspec = std::nullopt;
+	std::optional<std::tstring> tccIniFilename = std::nullopt;
+	std::optional<std::tstring> pCliIniFilename = std::nullopt;
 	Directives directives;
 	Options options;
 	Commands commands;
@@ -340,7 +340,7 @@ public:
 	void processDirHistoryFile();
 	void processDirDrivesFile();
 	void processLogs();
-	[[nodiscard]] boost::optional<std::tstring> locateKnownEditor() const;
+	[[nodiscard]] std::optional<std::tstring> locateKnownEditor() const;
 	void processEditor();
 	void selectTccExe();
 	void selectLanguage();
@@ -742,13 +742,13 @@ void TccLauncher::processLogs() {
 	logger::trace(_T("[%s] history log file: %s"), _T(__FUNCTION__), historyLogFile);
 }
 
-boost::optional<std::tstring> TccLauncher::locateKnownEditor() const {
+std::optional<std::tstring> TccLauncher::locateKnownEditor() const {
 	for (const auto& proposedEditor : knownEditors) {
 		if (exists(pAppsDir / _T("..") / proposedEditor)) {
 			return proposedEditor;
 		}
 	}
-	return boost::none;
+	return std::nullopt;
 }
 
 void TccLauncher::processEditor() {
@@ -765,7 +765,7 @@ void TccLauncher::processEditor() {
 	}
 
 	if (externalEditor && externalEditor.value().empty()) {
-		externalEditor = boost::none;
+		externalEditor = std::nullopt;
 	}
 
 	if (!externalEditor) {
@@ -784,7 +784,7 @@ void TccLauncher::processEditor() {
 	}
 
 	if (externalEditorInit != externalEditor) {
-		directives.set(_INI_NAME_EDITOR, externalEditor);
+		directives.setOptional(_INI_NAME_EDITOR, externalEditor);
 		logger::trace(_T("[%s] external editor: %s"), _T(__FUNCTION__), externalEditor.value().c_str());
 	}
 }
@@ -829,11 +829,11 @@ void TccLauncher::selectLanguage() {
 	}
 
 	if (languageDll && !exists(tccExeDirectory / languageDll.value())) {
-		languageDll = boost::none;
+		languageDll = std::nullopt;
 	}
 
 	if (languageDllInit != languageDll) {
-		directives.set(_INI_4NT_NAME_LANGUAGE_DLL, languageDll);
+		directives.setOptional(_INI_4NT_NAME_LANGUAGE_DLL, languageDll);
 		logger::trace(_T("[%s] using LanguageDLL: %s"), _T(__FUNCTION__), languageDll.value().c_str());
 	}
 }
@@ -850,7 +850,7 @@ void TccLauncher::copyMoreDirectives() {
 			value = p_apps::Environment::expandEnv(value.value());
 		}
 
-		directives.set(key, value);
+		directives.setOptional(key, value);
 	}
 	logger::trace(_T("[%s] more tcc.ini %s entries: %d values"), _T(__FUNCTION__), _SECTION_4NT, names4NT.size());
 }
