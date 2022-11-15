@@ -14,17 +14,17 @@ namespace logger {
 
 		const std::wstring formatElapsedTime() {
 			const auto elapsedTime = timeGetTime() - startTime;
-			return str(boost::wformat(_T("[%10lu]")) % elapsedTime);
+			return str(boost::wformat(L"[%10lu]") % elapsedTime);
 		}
 
-		static const TCHAR* severityLevelNames[] = {
-				_T("[trace]  "),
-				_T("[debug]  "),
-				_T("[info]   "),
-				_T("[warning]"),
-				_T("[error]  "),
-				_T("[fatal]  "),
-				_T("[fail]   ")
+		static const wchar_t* severityLevelNames[] = {
+				L"[trace]  ",
+				L"[debug]  ",
+				L"[info]   ",
+				L"[warning]",
+				L"[error]  ",
+				L"[fatal]  ",
+				L"[fail]   "
 			};
 
 		const std::wstring formatSeverityLevel(loggerSeverityLevel severityLevel) {

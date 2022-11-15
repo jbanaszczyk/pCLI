@@ -29,7 +29,7 @@
  *
  * void setDefaults
  *   provide array of iniDefaults structs.
- *     { _T("Section"), _T("Name"),    _T("Default") }, ... }
+ *     { L"Section", L"Name", L"Default" }, ... }
  * void readIniFile
  *   cache all settings.
  * writeIniFile
@@ -94,9 +94,9 @@ namespace p_apps {
 			std::wstring aValue;
 		};
 
-		static std::optional<std::wstring> iniRead(const std::filesystem::path& fName, const std::wstring& section, const std::wstring& name, const std::wstring& defValue = _T(""));
+		static std::optional<std::wstring> iniRead(const std::filesystem::path& fName, const std::wstring& section, const std::wstring& name, const std::wstring& defValue = L"");
 
-		static void iniNames(const TCHAR* const sectionName, const std::filesystem::path& fName, std::vector<std::wstring>& sections);
+		static void iniNames(const wchar_t* const sectionName, const std::filesystem::path& fName, std::vector<std::wstring>& sections);
 
 
 	public:

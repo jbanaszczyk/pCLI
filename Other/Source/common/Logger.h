@@ -37,43 +37,43 @@ namespace logger {
 	void setSeverityLevel(loggerSeverityLevel newSeverityLevel);
 
 	template <typename... Arguments>
-	std::optional<std::wstring> log(const loggerSeverityLevel severityLevel, const TCHAR* fmt, Arguments&&... args) {
+	std::optional<std::wstring> log(const loggerSeverityLevel severityLevel, const wchar_t* fmt, Arguments&&... args) {
 		if (severityLevel >= internal::currentSeverityLevel) {
 			boost::wformat tf{fmt};
 			auto message = internal::logHelper(tf, std::forward<Arguments>(args)...);
-			*internal::logStream << boost::wformat(_T("%s %s %s")) % internal::formatElapsedTime() % internal::formatSeverityLevel(severityLevel) % message << std::endl;
+			*internal::logStream << boost::wformat(L"%s %s %s") % internal::formatElapsedTime() % internal::formatSeverityLevel(severityLevel) % message << std::endl;
 			return message;
 		}
 		return std::nullopt;
 	}
 
 	template <typename... Arguments>
-	void trace(const TCHAR* fmt, Arguments&&... args) {
+	void trace(const wchar_t* fmt, Arguments&&... args) {
 		log(loggerSeverityLevel::trace, fmt, std::forward<Arguments>(args)...);
 	}
 
 	template <typename... Arguments>
-	void debug(const TCHAR* fmt, Arguments&&... args) {
+	void debug(const wchar_t* fmt, Arguments&&... args) {
 		log(loggerSeverityLevel::debug, fmt, std::forward<Arguments>(args)...);
 	}
 
 	template <typename... Arguments>
-	void info(const TCHAR* fmt, Arguments&&... args) {
+	void info(const wchar_t* fmt, Arguments&&... args) {
 		log(loggerSeverityLevel::info, fmt, std::forward<Arguments>(args)...);
 	}
 
 	template <typename... Arguments>
-	void warning(const TCHAR* fmt, Arguments&&... args) {
+	void warning(const wchar_t* fmt, Arguments&&... args) {
 		log(loggerSeverityLevel::warning, fmt, std::forward<Arguments>(args)...);
 	}
 
 	template <typename... Arguments>
-	void error(const TCHAR* fmt, Arguments&&... args) {
+	void error(const wchar_t* fmt, Arguments&&... args) {
 		log(loggerSeverityLevel::error, fmt, std::forward<Arguments>(args)...);
 	}
 
 	template <typename... Arguments>
-	void fatal(const TCHAR* fmt, Arguments&&... args) {
+	void fatal(const wchar_t* fmt, Arguments&&... args) {
 		log(loggerSeverityLevel::fatal, fmt, std::forward<Arguments>(args)...);
 	}
 
@@ -104,14 +104,14 @@ namespace logger {
 }
 
 template <typename... Arguments>
-[[noreturn]] void fail(const TCHAR* fmt, Arguments&&... args) {
+[[noreturn]] void fail(const wchar_t* fmt, Arguments&&... args) {
 	auto message = logger::log(loggerSeverityLevel::fail_, fmt, std::forward<Arguments>(args)...);
 	if (message.has_value()) {
 		if (SysInfo::ownsConsole()) {
-			*logger::internal::logStream << _T("Press [ENTER] to exit.") << std::endl;
+			*logger::internal::logStream << L"Press [ENTER] to exit." << std::endl;
 			std::wcin.get();
 		} else {
-			MessageBox(nullptr, message.value().c_str(), (boost::wformat(_T("Can't continue."))).str().c_str(), MB_OK | MB_ICONERROR);
+			MessageBox(nullptr, message.value().c_str(), (boost::wformat(L"Can't continue.")).str().c_str(), MB_OK | MB_ICONERROR);
 		}
 	}
 	exit(1);

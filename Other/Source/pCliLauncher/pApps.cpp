@@ -29,7 +29,7 @@ namespace p_apps {
 
 	std::vector<std::wstring> tokenize(const std::wstring& str) {
 		std::vector<std::wstring> result;
-		boost::escaped_list_separator<wchar_t> Separator(_T('^'), _T(' '), _T('\"'));
+		boost::escaped_list_separator<wchar_t> Separator(L'^', L' ', L'\"');
 		boost::tokenizer<boost::escaped_list_separator<wchar_t>, std::wstring::const_iterator, std::wstring> tok(str, Separator);
 		for (auto it = tok.begin(); it != tok.end(); ++it) {
 			result.push_back(*it);
@@ -39,7 +39,7 @@ namespace p_apps {
 	}
 
 	static bool needsQuotation(const std::wstring& str) {
-		return str.empty() || str.find(_T(' ')) != std::string::npos;
+		return str.empty() || str.find(L' ') != std::string::npos;
 	}
 
 	/****************************************************************************
@@ -52,7 +52,7 @@ namespace p_apps {
 	std::wstring unquote(const std::wstring& str) {
 		std::wstring result;
 		std::wistringstream ss(str);
-		ss >> std::quoted(result, _T('\"'), _T('^'));
+		ss >> std::quoted(result, L'\"', L'^');
 		return result;
 	}
 
@@ -60,7 +60,7 @@ namespace p_apps {
 		if (str) {
 			return quote(str.value());
 		}
-		return _T("");
+		return L"";
 	}
 
 	/****************************************************************************
@@ -75,7 +75,7 @@ namespace p_apps {
 			return str;
 		}
 		std::wostringstream oss;
-		oss << std::quoted(str,_T('\"'), _T('^'));
+		oss << std::quoted(str,L'\"', L'^');
 		return oss.str();
 	}
 
@@ -100,13 +100,13 @@ namespace p_apps {
 		DWORD bufSize = 0;
 		GetComputerName(nullptr, &bufSize);
 
-		const std::unique_ptr<TCHAR[]> buf(new(std::nothrow) TCHAR[bufSize]);
+		const std::unique_ptr<wchar_t[]> buf(new(std::nothrow) wchar_t[bufSize]);
 		if (buf) {
 			if (GetComputerName(buf.get(), &bufSize)) {
 				return buf.get();
 			}
 		}
-		return _T("localhost");
+		return L"localhost";
 	}
 
 	/******************************************************************************
@@ -119,7 +119,7 @@ namespace p_apps {
 		DWORD bufSize = 0;
 		GetUserNameEx(NameSamCompatible, nullptr, &bufSize);
 
-		const std::unique_ptr<TCHAR[]> buf(new(std::nothrow) TCHAR[bufSize]);
+		const std::unique_ptr<wchar_t[]> buf(new(std::nothrow) wchar_t[bufSize]);
 		if (buf) {
 			if (GetUserNameEx(NameSamCompatible, buf.get(), &bufSize)) {
 				std::wstring result = buf.get();
@@ -130,12 +130,12 @@ namespace p_apps {
 					result.pop_back();
 				}
 
-				if (boost::find_first(result, _T("\\"))) {
+				if (boost::find_first(result, L"\\")) {
 					return result;
 				}
 			}
 		}
-		return getComputerName() + _T("\\user");
+		return getComputerName() + L"\\user";
 	}
 
 	/******************************************************************************
@@ -146,7 +146,7 @@ namespace p_apps {
 	*****************************************************************************/
 	std::wstring getDomainName() {
 		auto userName = getUserName();
-		return userName.substr(0, userName.find(_T('\\')));
+		return userName.substr(0, userName.find(L'\\'));
 	}
 
 	/******************************************************************************
@@ -168,11 +168,11 @@ namespace p_apps {
 				}
 			}
 		}
-		return _T("");
+		return L"";
 	}
 
 	std::wstring generateRandomAlphanumericString(std::size_t len) {
-		std::wstring str(_T("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"));
+		std::wstring str(L"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
 		std::random_device rd;
 		std::mt19937 generator(rd());
 		std::shuffle(str.begin(), str.end(), generator);
@@ -199,7 +199,7 @@ namespace p_apps {
 
 		create_directories(directory, errCode);
 		if (errCode) {
-			fail(_T("[%s] Cann't create directory: %s\nReason: %s"), _T(__FUNCTION__), directory.wstring(), string2wstring(errCode.message()));
+			fail(L"[%s] Cann't create directory: %s\nReason: %s", _T(__FUNCTION__), directory.wstring(), string2wstring(errCode.message()));
 		}
 
 		constexpr auto maxTry = 8;
@@ -207,7 +207,7 @@ namespace p_apps {
 			auto testPath = directory / generateRandomAlphanumericString(8);
 
 			FILE* stream;
-			_wfopen_s(&stream, testPath.c_str(), _T("wx"));
+			_wfopen_s(&stream, testPath.c_str(), L"wx");
 
 			if (stream) {
 				[[maybe_unused]] auto ignored = fclose(stream);
@@ -217,7 +217,7 @@ namespace p_apps {
 			}
 		}
 
-		fail(_T("[%s] Cann't create files in directory: %s"), _T(__FUNCTION__), directory.wstring());
+		fail(L"[%s] Cann't create files in directory: %s", _T(__FUNCTION__), directory.wstring());
 	}
 
 	/******************************************************************************
@@ -255,7 +255,7 @@ namespace p_apps {
 				return result;
 			}
 		}
-		return _T("");
+		return L"";
 	}
 
 	/*****************************************************************************
@@ -266,8 +266,8 @@ namespace p_apps {
 		//-------------------------------------------- lpApplicationName
 		//-------------------------------------------- lpCommandLine
 
-		const auto argv = boost::algorithm::join(cmdLine, _T(" "));
-		const std::unique_ptr<TCHAR[]> commandLine(new(std::nothrow) TCHAR[argv.length() + 1]);
+		const auto argv = boost::algorithm::join(cmdLine, L" ");
+		const std::unique_ptr<wchar_t[]> commandLine(new(std::nothrow) wchar_t[argv.length() + 1]);
 		if (commandLine) {
 			wcscpy_s(commandLine.get(), argv.length() + 1, argv.c_str());
 		}
@@ -280,7 +280,7 @@ namespace p_apps {
 		creationFlags |= CREATE_UNICODE_ENVIRONMENT;
 #endif
 		//-------------------------------------------- lpEnvironment
-		std::unique_ptr<TCHAR[]> env;
+		std::unique_ptr<wchar_t[]> env;
 		cmdEnvironment.dump(env);
 		//-------------------------------------------- lpCurrentDirectory
 		//-------------------------------------------- lpStartupInfo
@@ -304,12 +304,12 @@ namespace p_apps {
 		const auto ok = CreateProcess(cmdName.c_str(), commandLine.get(), nullptr, nullptr, FALSE, creationFlags, env.get(), cwd.c_str(), &startupInfo, &processInfo);
 
 		if (! ok) {
-			fail(_T("Cann't execute %s: %s"), cmdName, lastErrorMsg());
+			fail(L"Cann't execute %s: %s", cmdName, lastErrorMsg());
 		}
 		SetPriorityClass(processInfo.hProcess, SysInfo::getProcessPriorityClass());
 
 		if (ResumeThread(processInfo.hThread) == static_cast<DWORD>(- 1)) {
-			fail(_T("Cann't execute %s: %s"), cmdName, lastErrorMsg());
+			fail(L"Cann't execute %s: %s", cmdName, lastErrorMsg());
 		}
 
 		if (pWait && processInfo.hProcess != nullptr) {

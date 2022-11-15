@@ -25,17 +25,17 @@ namespace p_apps {
 		return !boost::equals(valueInterim, valueCurrent);
 	}
 
-	void IniFile::iniNames(const TCHAR* const sectionName, const std::filesystem::path& fName, std::vector<std::wstring>& sections) {
+	void IniFile::iniNames(const wchar_t* const sectionName, const std::filesystem::path& fName, std::vector<std::wstring>& sections) {
 		std::error_code errCode;
 		if (!exists(fName, errCode)) {
 			return;
 		}
 
-		std::unique_ptr<TCHAR[]> bufPtr;
+		std::unique_ptr<wchar_t[]> bufPtr;
 
 		DWORD bufSize = 1024;
 		while (true) {
-			bufPtr.reset(new(std::nothrow) TCHAR[bufSize]);
+			bufPtr.reset(new(std::nothrow) wchar_t[bufSize]);
 			if (!bufPtr) {
 				break;
 			}
@@ -51,9 +51,9 @@ namespace p_apps {
 			}
 
 #ifdef _WIN64
-		const DWORD maxBufSize = UINT_MAX / sizeof TCHAR;
+		const DWORD maxBufSize = UINT_MAX / sizeof(wchar_t);
 #else
-			const DWORD maxBufSize = heapMaxReqReal / sizeof TCHAR;
+			const DWORD maxBufSize = heapMaxReqReal / sizeof (wchar_t);
 #endif
 			if (maxBufSize == bufSize) {
 				break;
@@ -66,7 +66,7 @@ namespace p_apps {
 			return;
 		}
 		auto ref = bufPtr.get();
-		while (_T('\0') != *ref) {
+		while (L'\0' != *ref) {
 			const auto len = wcslen(ref);
 			sections.emplace_back(ref);
 			ref += len + 1;
@@ -74,7 +74,7 @@ namespace p_apps {
 	}
 
 	IniFile::IniFile()
-		: iniName_(_T("")) {
+		: iniName_(L"") {
 	}
 
 	IniFile::~IniFile() = default;
@@ -90,7 +90,7 @@ namespace p_apps {
 		if (!exists(iniName, errCode)) {
 			return;
 		}
-		logger::trace(_T("[%s] reading INI file: %s"), _T(__FUNCTION__), iniName.c_str());
+		logger::trace(L"[%s] reading INI file: %s", _T(__FUNCTION__), iniName.c_str());
 
 		iniName_ = iniName;
 		std::vector<std::wstring> sectionNames;
@@ -122,7 +122,7 @@ namespace p_apps {
 		const iniKey thisKey(section, name);
 		const auto ref = values.find(thisKey);
 		if (values.end() == ref) {
-			return _T("");
+			return L"";
 		}
 		auto result = ref->second.getValue();
 		if (result.empty()) {
@@ -164,10 +164,10 @@ namespace p_apps {
 		if (!exists(fName, errCode)) {
 			return std::nullopt;
 		}
-		std::unique_ptr<TCHAR[]> buf;
+		std::unique_ptr<wchar_t[]> buf;
 		DWORD bufSize = 1024;
 		while (true) {
-			buf.reset(new(std::nothrow) TCHAR[bufSize]);
+			buf.reset(new(std::nothrow) wchar_t[bufSize]);
 
 			if (buf == nullptr) {
 				break;
@@ -184,7 +184,7 @@ namespace p_apps {
 #ifdef _WIN64
 		const DWORD maxBufSize = UINT_MAX / sizeof buf[0];
 #else
-			const DWORD maxBufSize = heapMaxReqReal / sizeof TCHAR;
+			const DWORD maxBufSize = heapMaxReqReal / sizeof(wchar_t);
 #endif
 			if (maxBufSize == bufSize) {
 				break;

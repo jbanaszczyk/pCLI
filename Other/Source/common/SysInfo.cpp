@@ -15,7 +15,7 @@ namespace SysInfo {
 			: handle(nullptr) {
 		}
 
-		SmartHandle(HANDLE value)
+		SmartHandle(const HANDLE value)
 			: handle(value == INVALID_HANDLE_VALUE
 				         ? nullptr
 				         : value) {
@@ -29,11 +29,11 @@ namespace SysInfo {
 			return handle;
 		}
 
-		friend bool operator ==(SmartHandle lhs, SmartHandle rhs) {
+		friend bool operator ==(const SmartHandle lhs, const SmartHandle rhs) {
 			return lhs.handle == rhs.handle;
 		}
 
-		friend bool operator !=(SmartHandle lhs, SmartHandle rhs) {
+		friend bool operator !=(const SmartHandle lhs, const SmartHandle rhs) {
 			return !(lhs == rhs);
 		}
 
@@ -76,8 +76,8 @@ namespace SysInfo {
 	}
 
 	std::optional<std::filesystem::path> getExeName() {
-		const int moduleNameSize = MAX_PATH;
-		const std::unique_ptr<TCHAR[]> moduleName(new(std::nothrow) TCHAR[moduleNameSize]);
+		constexpr int moduleNameSize = MAX_PATH;
+		const std::unique_ptr<wchar_t[]> moduleName(new(std::nothrow) wchar_t[moduleNameSize]);
 		if (!moduleName) {
 			return std::nullopt;
 		}
@@ -91,7 +91,7 @@ namespace SysInfo {
 		DWORD cbNeeded = 0;
 		if (EnumProcessModules(hProcess.get(), &hMod, sizeof (hMod), &cbNeeded)) {
 			if (GetModuleFileNameEx(hProcess.get(), hMod, moduleName.get(), moduleNameSize)) {
-				return std::optional<std::filesystem::path>(moduleName.get());
+				return std::optional<std::filesystem::path>{moduleName.get()};
 			}
 		}
 
@@ -99,8 +99,8 @@ namespace SysInfo {
 	}
 
 	std::optional<std::filesystem::path> getDllName(const std::wstring& dllName) {
-		const int processNameSize = MAX_PATH;
-		const std::unique_ptr<TCHAR[]> processName(new(std::nothrow) TCHAR[processNameSize]);
+		constexpr int processNameSize = MAX_PATH;
+		const std::unique_ptr<wchar_t[]> processName(new(std::nothrow) wchar_t[processNameSize]);
 		if (!processName) {
 			return std::nullopt;
 		}
@@ -113,7 +113,7 @@ namespace SysInfo {
 		DWORD cbNeeded = 0;
 		if (EnumProcessModules(hProcess.get(), nullptr, 0, &cbNeeded)) {
 			DWORD nEntries = cbNeeded / sizeof(HMODULE);
-			std::unique_ptr<HMODULE[]> hMod(new(std::nothrow) HMODULE[nEntries]);
+			const std::unique_ptr<HMODULE[]> hMod(new(std::nothrow) HMODULE[nEntries]);
 			if (!hMod) {
 				return std::nullopt;
 			}
@@ -123,7 +123,7 @@ namespace SysInfo {
 					if (GetModuleFileNameEx(hProcess.get(), hMod[idx], processName.get(), processNameSize)) {
 						std::filesystem::path dll(processName.get());
 						if (boost::iequals(dll.filename().c_str(), dllName)) {
-							return std::optional<std::filesystem::path>(dll);
+							return std::optional{dll};
 						}
 					}
 				}
@@ -136,7 +136,7 @@ namespace SysInfo {
 #ifdef _WIN64
 		return true;
 #else
-		SmartHandlePtr hProcess(OpenMyProcessForQuery());
+		const SmartHandlePtr hProcess(OpenMyProcessForQuery());
 		if (!hProcess) {
 			return false;
 		}

@@ -36,12 +36,12 @@ namespace p_apps {
 	public:
 		YesNoOption()
 			: keyValues({
-				{_T("yes"), true},
-				{_T("true"), true},
-				{_T("1"), true},
-				{_T("no"), false},
-				{_T("false"), false},
-				{_T("0"), false}
+				{L"yes", true},
+				{L"true", true},
+				{L"1", true},
+				{L"no", false},
+				{L"false", false},
+				{L"0", false}
 				})
 		{
 		}

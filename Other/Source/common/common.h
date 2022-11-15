@@ -100,13 +100,6 @@ constexpr size_t heapMaxReqReal = _HEAP_MAXREQ - 36;
 #else
 const size_t heapMaxReqReal = _HEAP_MAXREQ;
 #endif
-
-#ifdef _WIN64
-#define GWL_WNDPROC_6432 GWLP_WNDPROC
-#else
-#define GWL_WNDPROC_6432 GWL_WNDPROC
-#endif
-
 #endif
 
 #ifndef STATUS_SUCCESS

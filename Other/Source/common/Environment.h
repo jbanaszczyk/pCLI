@@ -33,7 +33,7 @@ namespace p_apps {
 	public:
 		Environment() = default;
 
-		explicit Environment(const TCHAR* const envp[]) {
+		explicit Environment(const wchar_t* const envp[]) {
 			setUp(envp);
 		}
 
@@ -48,7 +48,7 @@ namespace p_apps {
 		static std::wstring expandEnv(const std::wstring& variableName, ExpandEnvironmentStrings_t ExpandEnvironmentStrings_f = ExpandEnvironmentStrings) {
 			const auto bufferSize = ExpandEnvironmentStrings_f(variableName.c_str(), nullptr, 0);
 
-			const std::unique_ptr<TCHAR[]> buffer(new(std::nothrow) TCHAR[bufferSize]);
+			const std::unique_ptr<wchar_t[]> buffer(new(std::nothrow) wchar_t[bufferSize]);
 			if (bufferSize == 0 || buffer == nullptr) {
 				return variableName;
 			}
@@ -58,31 +58,31 @@ namespace p_apps {
 			return buffer.get();
 		}
 
-		void setUp(const TCHAR* const envp[]) {
+		void setUp(const wchar_t* const envp[]) {
 			if (envp == nullptr) {
-				logger::warning(_T("%s: null constructor argument"), _T(__FUNCTION__));
+				logger::warning(L"%s: null constructor argument", _T(__FUNCTION__));
 				return;
 			}
-			for (auto* ref = envp; (*ref != nullptr) && (**ref != _T('\0')); ++ref) {
-				auto* sep = _tcschr(*ref, _T('='));
+			for (auto* ref = envp; (*ref != nullptr) && (**ref != L'\0'); ++ref) {
+				auto* sep = _tcschr(*ref, L'=');
 				if (sep == nullptr) {
-					logger::warning(_T("Environment: garbage, missing '=' in %s"), *ref);
+					logger::warning(L"Environment: garbage, missing '=' in %s", *ref);
 					break;
 				}
 				const size_t len = sep - *ref;
 				if (len == 0) {
-					logger::warning(_T("Environment: malformed, missing variable name in %s"), *ref);
+					logger::warning(L"Environment: malformed, missing variable name in %s", *ref);
 					continue;
 				}
 				++sep;
-				if (*sep == _T('\0')) {
-					logger::warning(_T("Environment: malformed, missing variable value in %s"), *ref);
+				if (*sep == L'\0') {
+					logger::warning(L"Environment: malformed, missing variable value in %s", *ref);
 					continue;
 				}
 				mEnv.insert(std::pair(std::wstring{*ref, len}, std::wstring{sep}));
 			}
 
-			logger::trace(_T("[%s] %d variables"), _T(__FUNCTION__), size());
+			logger::trace(L"[%s] %d variables", _T(__FUNCTION__), size());
 		}
 
 		void setNameBackup(const std::wstring& prefix) {
@@ -124,12 +124,12 @@ namespace p_apps {
 			}
 		}
 
-		void dump(std::unique_ptr<TCHAR[]>& result) const {
+		void dump(std::unique_ptr<wchar_t[]>& result) const {
 			auto len = 2 * mEnv.size() + 1; // equal signs, zeros after every string, extra zero
 			for (const auto& it : mEnv) {
 				len += it.first.length() + it.second.length();
 			}
-			result.reset(new(std::nothrow) TCHAR[len]);
+			result.reset(new(std::nothrow) wchar_t[len]);
 
 			if (!result) {
 				return;
@@ -142,16 +142,16 @@ namespace p_apps {
 				wcsncpy_s(ref, len, it.first.c_str(), thisLen);
 				ref += thisLen;
 				len -= thisLen;
-				*(ref++) = _T('=');
+				*(ref++) = L'=';
 				--len;
 				thisLen = it.second.length();
 				wcsncpy_s(ref, len, it.second.c_str(), thisLen);
 				ref += thisLen;
 				len -= thisLen;
-				*(ref++) = _T('\0');
+				*(ref++) = L'\0';
 				--len;
 			}
-			*ref = _T('\0');
+			*ref = L'\0';
 		}
 	};
 }
