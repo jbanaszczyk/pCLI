@@ -1,1 +1,1 @@
-https://iconarchive.com/show/small-n-flat-icons-by-paomedia/terminal-icon.html
+https://icons8.com/icon/54612/command-line

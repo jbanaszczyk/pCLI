@@ -75,7 +75,7 @@ namespace p_apps {
 			return str;
 		}
 		std::wostringstream oss;
-		oss << std::quoted(str,L'\"', L'^');
+		oss << std::quoted(str, L'\"', L'^');
 		return oss.str();
 	}
 
@@ -89,7 +89,7 @@ namespace p_apps {
 	std::wstring quote(const std::filesystem::path& fileName) {
 		return quote(fileName.wstring());
 	}
-	
+
 	/******************************************************************************
 	 *
 	 * getComputerName
@@ -275,10 +275,8 @@ namespace p_apps {
 		//-------------------------------------------- lpThreadAttributes
 		//-------------------------------------------- bInheritHandles
 		//-------------------------------------------- dwCreationFlags
-		DWORD creationFlags = CREATE_SUSPENDED;
-#ifdef _UNICODE
-		creationFlags |= CREATE_UNICODE_ENVIRONMENT;
-#endif
+		const DWORD creationFlags = CREATE_SUSPENDED | CREATE_UNICODE_ENVIRONMENT;
+
 		//-------------------------------------------- lpEnvironment
 		std::unique_ptr<wchar_t[]> env;
 		cmdEnvironment.dump(env);
@@ -291,7 +289,13 @@ namespace p_apps {
 		CopyMemory(&startupInfo, &myStartupInfoPtr, sizeof startupInfo);
 
 		startupInfo.lpTitle = nullptr;
-		startupInfo.dwFlags &= ~(STARTF_USESHOWWINDOW);
+		
+		startupInfo.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
+		startupInfo.hStdError = GetStdHandle(STD_ERROR_HANDLE);
+		startupInfo.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+		startupInfo.dwFlags |= STARTF_USESTDHANDLES;
+		startupInfo.dwFlags &= ~STARTF_USESHOWWINDOW;
+		
 		startupInfo.cb = sizeof startupInfo;
 		//-------------------------------------------- lpProcessInformation
 		PROCESS_INFORMATION processInfo;
@@ -301,15 +305,15 @@ namespace p_apps {
 		//-------------------------------------------- go
 
 		// ReSharper disable once CppTooWideScopeInitStatement
-		const auto ok = CreateProcess(cmdName.c_str(), commandLine.get(), nullptr, nullptr, FALSE, creationFlags, env.get(), cwd.c_str(), &startupInfo, &processInfo);
+		const auto ok = CreateProcess(cmdName.c_str(), commandLine.get(), nullptr, nullptr, TRUE, creationFlags, env.get(), cwd.c_str(), &startupInfo, &processInfo);
 
 		if (! ok) {
-			fail(L"Cann't execute %s: %s", cmdName, lastErrorMsg());
+			fail(L"Cannot execute %s: %s", cmdName, lastErrorMsg());
 		}
 		SetPriorityClass(processInfo.hProcess, SysInfo::getProcessPriorityClass());
 
 		if (ResumeThread(processInfo.hThread) == static_cast<DWORD>(- 1)) {
-			fail(L"Cann't execute %s: %s", cmdName, lastErrorMsg());
+			fail(L"Cannot execute %s: %s", cmdName, lastErrorMsg());
 		}
 
 		if (pWait && processInfo.hProcess != nullptr) {
