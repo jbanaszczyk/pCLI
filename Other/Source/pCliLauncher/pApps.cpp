@@ -312,7 +312,7 @@ namespace p_apps {
 		}
 		SetPriorityClass(processInfo.hProcess, SysInfo::getProcessPriorityClass());
 
-		if (ResumeThread(processInfo.hThread) == static_cast<DWORD>(- 1)) {
+		if (ResumeThread(processInfo.hThread) == static_cast<DWORD>(-1)) {
 			fail(L"Cannot execute %s: %s", cmdName, lastErrorMsg());
 		}
 
