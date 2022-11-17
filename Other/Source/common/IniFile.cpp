@@ -51,9 +51,9 @@ namespace p_apps {
 			}
 
 #ifdef _WIN64
-		const DWORD maxBufSize = UINT_MAX / sizeof(wchar_t);
+			constexpr DWORD maxBufSize = UINT_MAX / sizeof(wchar_t);
 #else
-			const DWORD maxBufSize = heapMaxReqReal / sizeof (wchar_t);
+			constexpr DWORD maxBufSize = heapMaxReqReal / sizeof (wchar_t);
 #endif
 			if (maxBufSize == bufSize) {
 				break;
@@ -87,7 +87,7 @@ namespace p_apps {
 
 	void IniFile::readIniFile(const std::filesystem::path& iniName) {
 		std::error_code errCode;
-		if (!exists(iniName, errCode)) {
+		if (!exists(iniName, errCode) || errCode) {
 			return;
 		}
 		logger::trace(L"[%s] reading INI file: %s", _T(__FUNCTION__), iniName.c_str());
@@ -182,9 +182,9 @@ namespace p_apps {
 				break;
 			}
 #ifdef _WIN64
-		const DWORD maxBufSize = UINT_MAX / sizeof buf[0];
+			constexpr DWORD maxBufSize = UINT_MAX / sizeof buf[0];
 #else
-			const DWORD maxBufSize = heapMaxReqReal / sizeof(wchar_t);
+			constexpr DWORD maxBufSize = heapMaxReqReal / sizeof(wchar_t);
 #endif
 			if (maxBufSize == bufSize) {
 				break;

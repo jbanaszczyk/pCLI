@@ -91,7 +91,7 @@ namespace SysInfo {
 		DWORD cbNeeded = 0;
 		if (EnumProcessModules(hProcess.get(), &hMod, sizeof (hMod), &cbNeeded)) {
 			if (GetModuleFileNameEx(hProcess.get(), hMod, moduleName.get(), moduleNameSize)) {
-				return std::optional<std::filesystem::path>{moduleName.get()};
+				return moduleName.get();
 			}
 		}
 
@@ -123,7 +123,7 @@ namespace SysInfo {
 					if (GetModuleFileNameEx(hProcess.get(), hMod[idx], processName.get(), processNameSize)) {
 						std::filesystem::path dll(processName.get());
 						if (boost::iequals(dll.filename().c_str(), dllName)) {
-							return std::optional{dll};
+							return dll;
 						}
 					}
 				}

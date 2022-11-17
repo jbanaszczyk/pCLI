@@ -85,9 +85,9 @@ static const auto INI_NAME_PROFILE_DIRECTORY = L"ProfileDirectory";
 static const auto INI_NAME_SETTINGS_DIRECTORY = L"SettingsDirectory";
 
 static const auto INI_NAME_LOGS_DIRECTORY = L"LogsDirectory";
-static const auto INI_NAME_COMMAND_LOG_FILE = L"CommandLog";
-static const auto INI_NAME_ERRORS_LOG_FILE = L"ErrorsLog";
-static const auto INI_NAME_HISTORY_LOG_FILE = L"HistoryLog";
+static const auto INI_NAME_COMMAND_LOG_FILE = L"LogName";
+static const auto INI_NAME_ERRORS_LOG_FILE = L"LogErrorsName";
+static const auto INI_NAME_HISTORY_LOG_FILE = L"HistLogName";
 
 static const auto INI_NAME_INI_FILE = L"TccIniFile";
 static const auto INI_NAME_EDITOR = L"Editor";
@@ -563,36 +563,6 @@ void TccLauncher::logCommandLine() const {
 }
 
 void TccLauncher::processIniSectionProfile() {
-	// if (yesNoOption(pCliInifile.getValue(SECTION_LAUNCHER, INI_NAME_PROFILE_PORTABLE))) {
-	//
-	// 	static const std::wstring iniProfileNames[] = {
-	// 			INI_NAME_PROFILE_LOCAL,
-	// 			INI_NAME_PROFILE_USER,
-	// 			INI_NAME_PROFILE_ROAMING,
-	// 		};
-	//
-	// 	for (const auto& profileName : iniProfileNames) {
-	//
-	// 		auto profileSettings = pCliInifile.getValue(SECTION_PROFILE, profileName);
-	// 		if (! profileSettings) {
-	// 			continue;
-	// 		}
-	// 		auto profilePath = p_apps::canonical(p_apps::Environment::expandEnv(profileSettings.value()), profileDirectory);
-	//
-	// 		p_apps::makeDirWriteable(profilePath);
-	//
-	// 		environment.set(profileName, profilePath.wstring(), true);
-	//
-	// 		if (profileName == INI_NAME_PROFILE_USER) {
-	// 			environment.set(INI_NAME_ENV_HOME_PATH, (profilePath.root_directory() / profilePath.relative_path()).wstring(), true);
-	// 			environment.set(INI_NAME_ENV_HOME_DRIVE, profilePath.root_name().wstring(), true);
-	// 			environment.set(INI_NAME_ENV_HOME_SHARE, p_apps::pathToUnc(profilePath.root_name().wstring()), true);
-	// 		}
-	//
-	// 		logger::trace(L"[%s] profile: %s in %s", _T(__FUNCTION__), profileName, profilePath.wstring());
-	// 	}
-	// }
-
 	p_apps::SetInsensitiveTChar names4NT;
 	pCliInifile.enumNames(SECTION_PROFILE, names4NT);
 
@@ -605,6 +575,7 @@ void TccLauncher::processIniSectionProfile() {
 		}
 
 		environment.set(key, profilePath.wstring(), true);
+		logger::trace(L"[%s] profile: %s = %s", _T(__FUNCTION__), key, profilePath.c_str());
 
 		if (key == INI_NAME_PROFILE_USER) {
 			environment.set(INI_NAME_ENV_HOME_PATH, (profilePath.root_directory() / profilePath.relative_path()).wstring(), true);
@@ -739,7 +710,7 @@ std::optional<std::wstring> TccLauncher::locateKnownEditor() const {
 			return proposedEditor;
 		}
 	}
-	return std::nullopt;
+	return std::nullopt; 
 }
 
 void TccLauncher::processEditor() {
@@ -948,8 +919,8 @@ void TccLauncher::launch() {
 	/*******************************************************
 	*	Ready to execute
 	*******************************************************/
-	std::vector<std::wstring> effectiveArgv;
 	const auto effectiveArgv0 = tccExeDirectory / tccExeName;
+	std::vector<std::wstring> effectiveArgv;
 	effectiveArgv.push_back(p_apps::quote(effectiveArgv0));
 	// commandComspec: ignored	
 	effectiveArgv.push_back(std::wstring(L"@") + p_apps::quote(tccIniFilename.value()));
