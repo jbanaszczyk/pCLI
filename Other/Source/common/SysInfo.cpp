@@ -76,7 +76,7 @@ namespace SysInfo {
 	}
 
 	std::optional<std::filesystem::path> getExeName() {
-		constexpr int moduleNameSize = MAX_PATH;
+		constexpr auto moduleNameSize = MAX_PATH;
 		const std::unique_ptr<wchar_t[]> moduleName(new(std::nothrow) wchar_t[moduleNameSize]);
 		if (!moduleName) {
 			return std::nullopt;
@@ -89,7 +89,7 @@ namespace SysInfo {
 
 		HMODULE hMod;
 		DWORD cbNeeded = 0;
-		if (EnumProcessModules(hProcess.get(), &hMod, sizeof (hMod), &cbNeeded)) {
+		if (EnumProcessModules(hProcess.get(), &hMod, sizeof hMod, &cbNeeded)) {  // NOLINT(bugprone-sizeof-expression)
 			if (GetModuleFileNameEx(hProcess.get(), hMod, moduleName.get(), moduleNameSize)) {
 				return moduleName.get();
 			}
@@ -117,7 +117,7 @@ namespace SysInfo {
 			if (!hMod) {
 				return std::nullopt;
 			}
-			if (EnumProcessModules(hProcess.get(), hMod.get(), nEntries * sizeof(hMod[0]), &cbNeeded)) {
+			if (EnumProcessModules(hProcess.get(), hMod.get(), nEntries * sizeof hMod[0], &cbNeeded)) {  // NOLINT(bugprone-sizeof-expression)
 				// probably nEntries * sizeof( *hMod ) == cbNeeded, but ...
 				for (decltype(nEntries) idx = 0; idx < nEntries; ++idx) {
 					if (GetModuleFileNameEx(hProcess.get(), hMod[idx], processName.get(), processNameSize)) {
@@ -154,24 +154,20 @@ namespace SysInfo {
 		if (!hProcess) {
 			return NORMAL_PRIORITY_CLASS;
 		}
-		auto result = GetPriorityClass(hProcess.get());
-		if (!result) {
-			result = NORMAL_PRIORITY_CLASS;
-		}
-		return result;
+		const auto result = GetPriorityClass(hProcess.get());
+		return result
+			       ? result
+			       : NORMAL_PRIORITY_CLASS;
 	}
 
 	bool ownsConsole() {
 		const auto consoleWindow = GetConsoleWindow();
 		DWORD dwProcessId;
 		GetWindowThreadProcessId(consoleWindow, &dwProcessId);
-		if (GetCurrentProcessId() != dwProcessId) {
-			return false;
-		}
 
-		if (!_isatty(_fileno(stdout)) || !_isatty(_fileno(stdin)) || !_isatty(_fileno(stderr))) {
-			return false;
-		}
-		return true;
+		return GetCurrentProcessId() == dwProcessId
+		       && _isatty(_fileno(stdout))
+		       && _isatty(_fileno(stdin))
+		       && _isatty(_fileno(stderr));
 	}
 }

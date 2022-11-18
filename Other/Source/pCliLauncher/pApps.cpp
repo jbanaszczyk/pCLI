@@ -1,7 +1,7 @@
 /*************************************************************************/ /**
  * \file      pApps.cpp
  * \brief     Some commonly used functions
- * 
+ *
  * \copyright (c) 2011 jacek.banaszczyk@gmail.com
  * \short     Part of pCli project: https://github.com/jbanaszczyk/pCli
  ****************************************************************************/
@@ -16,15 +16,15 @@
 namespace p_apps {
 	std::filesystem::path canonical(const std::filesystem::path& p, const std::filesystem::path& base) {
 		auto absolutePath = p.is_absolute()
-			                    ? absolute(p)
-			                    : absolute(base / p);
+			? absolute(p)
+			: absolute(base / p);
 
 		std::error_code ec;
 		auto result = canonical(absolutePath, ec);
 
 		return !ec
-			       ? result
-			       : absolutePath;
+			? result
+			: absolutePath;
 	}
 
 	std::vector<std::wstring> tokenize(const std::wstring& str) {
@@ -44,7 +44,7 @@ namespace p_apps {
 
 	/****************************************************************************
 	 * \brief  remove quotation marks
-	 * 
+	 *
 	 * \param  str string to be unquoted
 	 * \return unquoted string
 	 * \detail escape character is '^' - tcc escape char
@@ -65,7 +65,7 @@ namespace p_apps {
 
 	/****************************************************************************
 	 * \brief  quote string if it contains spaces
-	 * 
+	 *
 	 * \param  str string to be quoted
 	 * \return string surrounded with "" if it is required else the same string
 	 ***************************************************************************/
@@ -181,18 +181,27 @@ namespace p_apps {
 
 	std::wstring string2wstring(const std::string& str) {
 		size_t cchRequired = 0;
-		mbstowcs_s(&cchRequired, nullptr, 0, str.c_str(), 0); // w/ null terminator
+		auto ignored1 = mbstowcs_s(&cchRequired, nullptr, 0, str.c_str(), 0); // w/ null terminator
 		std::wstring result(cchRequired, L'\0');
-		size_t cchActual = cchRequired;
-		mbstowcs_s(&cchRequired, &result[0], cchActual, str.c_str(), cchActual);
+		const size_t cchActual = cchRequired;
+		auto ignored2 = mbstowcs_s(&cchRequired, result.data(), cchActual, str.c_str(), cchActual);
 		return result;
+	}
+
+
+	FILE* createEmptyFile(const std::filesystem::path& fileName) {
+		FILE* stream;
+		_wfopen_s(&stream, fileName.c_str(), L"wx");
+		if (stream) {
+			[[maybe_unused]] auto ignored = fclose(stream);
+		}
+		return stream;
 	}
 
 	/****************************************************************************
 	 * \brief  create directory if doesn't exists, check if is writeable
-	 * 
+	 *
 	 * \param  directory to be created
-
 	 ***************************************************************************/
 	void makeDirWriteable(const std::filesystem::path& directory) {
 		std::error_code errCode;
@@ -206,13 +215,10 @@ namespace p_apps {
 		for (auto counter = 0; counter < maxTry; counter++) {
 			auto testPath = directory / generateRandomAlphanumericString(8);
 
-			FILE* stream;
-			_wfopen_s(&stream, testPath.c_str(), L"wx");
-
+			// ReSharper disable once CppTooWideScope
+			const auto stream = createEmptyFile(testPath);
 			if (stream) {
-				[[maybe_unused]] auto ignored = fclose(stream);
-				std::error_code ignoredErrorCode;
-				std::filesystem::remove(testPath, ignoredErrorCode);
+				std::filesystem::remove(testPath );
 				return;
 			}
 		}
@@ -228,9 +234,10 @@ namespace p_apps {
 	 *
 	 *****************************************************************************/
 	std::wstring errnoMsg() {
-		constexpr size_t msgSize = 120;
+		constexpr size_t msgSize = 128;
 		wchar_t buf[msgSize];
 		_tcserror_s(buf, errno);
+		buf[msgSize - 1] = L'\0';
 		return buf;
 	}
 
@@ -246,9 +253,10 @@ namespace p_apps {
 		SetLastError(ERROR_SUCCESS);
 		if (err) {
 			LPCTSTR lpMsgBuf = nullptr;
-			auto bufLen = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_ARGUMENT_ARRAY | FORMAT_MESSAGE_ALLOCATE_BUFFER, nullptr, err, 0,
-			                            reinterpret_cast<LPTSTR>(&lpMsgBuf),
-			                            0, nullptr);
+			// ReSharper disable once CppTooWideScope
+			const auto bufLen = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_ARGUMENT_ARRAY | FORMAT_MESSAGE_ALLOCATE_BUFFER, nullptr, err, 0,
+				reinterpret_cast<LPTSTR>(&lpMsgBuf),
+				0, nullptr);
 			if (bufLen) {
 				std::wstring result(lpMsgBuf, lpMsgBuf + bufLen);
 				LocalFree(HLOCAL(lpMsgBuf));
@@ -275,7 +283,7 @@ namespace p_apps {
 		//-------------------------------------------- lpThreadAttributes
 		//-------------------------------------------- bInheritHandles
 		//-------------------------------------------- dwCreationFlags
-		const DWORD creationFlags = CREATE_SUSPENDED | CREATE_UNICODE_ENVIRONMENT;
+		constexpr DWORD creationFlags = CREATE_SUSPENDED | CREATE_UNICODE_ENVIRONMENT;
 
 		//-------------------------------------------- lpEnvironment
 		std::unique_ptr<wchar_t[]> env;
@@ -289,13 +297,13 @@ namespace p_apps {
 		CopyMemory(&startupInfo, &myStartupInfoPtr, sizeof startupInfo);
 
 		startupInfo.lpTitle = nullptr;
-		
+
 		startupInfo.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
 		startupInfo.hStdError = GetStdHandle(STD_ERROR_HANDLE);
 		startupInfo.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 		startupInfo.dwFlags |= STARTF_USESTDHANDLES;
 		startupInfo.dwFlags &= ~STARTF_USESHOWWINDOW;
-		
+
 		startupInfo.cb = sizeof startupInfo;
 		//-------------------------------------------- lpProcessInformation
 		PROCESS_INFORMATION processInfo;
@@ -307,7 +315,7 @@ namespace p_apps {
 		// ReSharper disable once CppTooWideScopeInitStatement
 		const auto ok = CreateProcess(cmdName.c_str(), commandLine.get(), nullptr, nullptr, TRUE, creationFlags, env.get(), cwd.c_str(), &startupInfo, &processInfo);
 
-		if (! ok) {
+		if (!ok) {
 			fail(L"Cannot execute %s: %s", cmdName, lastErrorMsg());
 		}
 		SetPriorityClass(processInfo.hProcess, SysInfo::getProcessPriorityClass());

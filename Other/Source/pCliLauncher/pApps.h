@@ -88,6 +88,8 @@ namespace p_apps {
 	*****************************************************************************/
 	std::wstring pathToUnc(const std::filesystem::path& netPath);
 
+	FILE* createEmptyFile(const std::filesystem::path& fileName);
+
 	/****************************************************************************
 	 * \brief  create directory if doesn't exists, check if is writeable
 	 *

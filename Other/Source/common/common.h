@@ -98,7 +98,7 @@ constexpr size_t heapMaxReqReal = _HEAP_MAXREQ - 52;
 constexpr size_t heapMaxReqReal = _HEAP_MAXREQ - 36;
 #endif
 #else
-const size_t heapMaxReqReal = _HEAP_MAXREQ;
+constexpr size_t heapMaxReqReal = _HEAP_MAXREQ;
 #endif
 #endif
 

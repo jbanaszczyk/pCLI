@@ -26,7 +26,7 @@ namespace p_apps {
 		};
 	};
 
-	using SetInsensitiveTChar = std::set<std::wstring, CaseInsensitiveMap<std::wstring>::Comparator>; // FIXME move somewhere near usage
+	using SetInsensitiveTChar = std::set<std::wstring, CaseInsensitiveMap<std::wstring>::Comparator>;
 
 	/******************************************************************************
 	*	Merge two STL containers
@@ -34,7 +34,6 @@ namespace p_apps {
 	*****************************************************************************/
 	template <typename T, typename U>
 	void appendContainer(T& destination, const U& source) {
-		// FIXME try to simplify
 		if (!source.empty()) {
 			destination.reserve(destination.size() + source.size());
 			destination.insert(destination.end(), source.begin(), source.end());
