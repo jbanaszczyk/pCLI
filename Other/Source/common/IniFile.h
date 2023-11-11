@@ -59,7 +59,7 @@
 #include "pAppsUtils.h"
 
 namespace p_apps {
-	class IniFile {
+	class IniFile {  // NOLINT(cppcoreguidelines-special-member-functions)
 
 	private:
 		class IniValue {
@@ -68,7 +68,7 @@ namespace p_apps {
 			std::wstring valueInterim; // was read from file
 			std::wstring valueCurrent; // effective
 		public:
-			IniValue(const std::wstring& value, const bool setDefault, const bool setInterim);
+			IniValue(const std::wstring& value, bool setDefault, bool setInterim);
 
 			void setValue(const std::wstring& value, bool setDefault, bool setInterim);
 
@@ -96,7 +96,7 @@ namespace p_apps {
 
 		static std::optional<std::wstring> iniRead(const std::filesystem::path& fName, const std::wstring& section, const std::wstring& name, const std::wstring& defValue = L"");
 
-		static void iniNames(const wchar_t* const sectionName, const std::filesystem::path& fName, std::vector<std::wstring>& sections);
+		static void iniNames(const wchar_t* sectionName, const std::filesystem::path& fName, std::vector<std::wstring>& sections);
 
 
 	public:
@@ -106,7 +106,7 @@ namespace p_apps {
 
 		void setDefaults(const std::wstring& aSection, const std::wstring& aName, const std::wstring& aDefault);
 
-		void setDefaults(const iniDefaults* defaults, const size_t nElements = 1);
+		void setDefaults(const iniDefaults* defaults, size_t nElements = 1);
 
 		void readIniFile(const std::filesystem::path& iniName);
 
@@ -122,7 +122,7 @@ namespace p_apps {
 
 		void setValue(const std::wstring& section, const std::wstring& name, const std::wstring& value, bool isDefault = false);
 
-		void setValue(const iniDefaults& defaults, const bool isDefault = false);
+		void setValue(const iniDefaults& defaults, bool isDefault = false);
 	};
 
 }

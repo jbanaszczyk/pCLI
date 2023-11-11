@@ -10,9 +10,6 @@
 #include "./pApps.h"
 #include "../common/SysInfo.h"
 
-#include <windows.h>
-#include <random>
-
 namespace p_apps {
 	std::filesystem::path canonical(const std::filesystem::path& p, const std::filesystem::path& base) {
 		auto absolutePath = p.is_absolute()
@@ -172,7 +169,9 @@ namespace p_apps {
 	}
 
 	std::wstring generateRandomAlphanumericString(std::size_t len) {
+		// ReSharper disable StringLiteralTypo
 		std::wstring str(L"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
+		// ReSharper restore StringLiteralTypo
 		std::random_device rd;
 		std::mt19937 generator(rd());
 		std::shuffle(str.begin(), str.end(), generator);
@@ -181,10 +180,10 @@ namespace p_apps {
 
 	std::wstring string2wstring(const std::string& str) {
 		size_t cchRequired = 0;
-		auto ignored1 = mbstowcs_s(&cchRequired, nullptr, 0, str.c_str(), 0); // w/ null terminator
+		[[maybe_unused]] auto ignored1 = mbstowcs_s(&cchRequired, nullptr, 0, str.c_str(), 0); // w/ null terminator
 		std::wstring result(cchRequired, L'\0');
 		const size_t cchActual = cchRequired;
-		auto ignored2 = mbstowcs_s(&cchRequired, result.data(), cchActual, str.c_str(), cchActual);
+		[[maybe_unused]] auto ignored2 = mbstowcs_s(&cchRequired, result.data(), cchActual, str.c_str(), cchActual);
 		return result;
 	}
 
@@ -199,7 +198,7 @@ namespace p_apps {
 	}
 
 	/****************************************************************************
-	 * \brief  create directory if doesn't exists, check if is writeable
+	 * \brief  create directory if does not exist, check if is writeable
 	 *
 	 * \param  directory to be created
 	 ***************************************************************************/
@@ -208,7 +207,7 @@ namespace p_apps {
 
 		create_directories(directory, errCode);
 		if (errCode) {
-			fail(L"[%s] Cann't create directory: %s\nReason: %s", _T(__FUNCTION__), directory.wstring(), string2wstring(errCode.message()));
+			fail(L"[%s] Cannot create directory: %s\nReason: %s", _T(__FUNCTION__), directory.wstring(), string2wstring(errCode.message()));
 		}
 
 		constexpr auto maxTry = 8;
@@ -218,12 +217,12 @@ namespace p_apps {
 			// ReSharper disable once CppTooWideScope
 			const auto stream = createEmptyFile(testPath);
 			if (stream) {
-				std::filesystem::remove(testPath );
+				std::filesystem::remove(testPath);
 				return;
 			}
 		}
 
-		fail(L"[%s] Cann't create files in directory: %s", _T(__FUNCTION__), directory.wstring());
+		fail(L"[%s] Cannot create files in directory: %s", _T(__FUNCTION__), directory.wstring());
 	}
 
 	/******************************************************************************
@@ -259,6 +258,7 @@ namespace p_apps {
 				0, nullptr);
 			if (bufLen) {
 				std::wstring result(lpMsgBuf, lpMsgBuf + bufLen);
+				// ReSharper disable once CppFunctionalStyleCast
 				LocalFree(HLOCAL(lpMsgBuf));
 				return result;
 			}
@@ -266,9 +266,6 @@ namespace p_apps {
 		return L"";
 	}
 
-	/*****************************************************************************
-	* like _texecve, but ComEmu / parent cmd aware. And more.
-	*****************************************************************************/
 	void execute(bool pWait, const std::wstring& cmdName, const std::vector<std::wstring>& cmdLine, const Environment& cmdEnvironment, const std::filesystem::path& cwd) {
 
 		//-------------------------------------------- lpApplicationName
@@ -291,7 +288,7 @@ namespace p_apps {
 		//-------------------------------------------- lpCurrentDirectory
 		//-------------------------------------------- lpStartupInfo
 		STARTUPINFO startupInfo;
-		ZeroMemory(&startupInfo, sizeof startupInfo); // SecureZeroMemory(&si, sizeof(STARTUPINFO)); ?
+		ZeroMemory(&startupInfo, sizeof startupInfo);
 		STARTUPINFO myStartupInfoPtr;
 		GetStartupInfo(&myStartupInfoPtr);
 		CopyMemory(&startupInfo, &myStartupInfoPtr, sizeof startupInfo);
@@ -312,8 +309,9 @@ namespace p_apps {
 		processInfo.hThread = nullptr;
 		//-------------------------------------------- go
 
-		// ReSharper disable once CppTooWideScopeInitStatement
-		const auto ok = CreateProcess(cmdName.c_str(), commandLine.get(), nullptr, nullptr, TRUE, creationFlags, env.get(), cwd.c_str(), &startupInfo, &processInfo);
+		auto qq = env.get();
+
+		const auto ok = CreateProcess(cmdName.c_str(), commandLine.get(), nullptr, nullptr, TRUE, creationFlags, qq, cwd.c_str(), &startupInfo, &processInfo);
 
 		if (!ok) {
 			fail(L"Cannot execute %s: %s", cmdName, lastErrorMsg());
@@ -324,9 +322,30 @@ namespace p_apps {
 			fail(L"Cannot execute %s: %s", cmdName, lastErrorMsg());
 		}
 
+		// auto_close<void*, &::DestroyEnvironmentBlock> environment(NULL);
+
+
+		HANDLE hToken = NULL;
+		HANDLE qq1 = processInfo.hProcess;
+		HANDLE qq2 = GetCurrentProcess();
+
+		BOOL ok1 = OpenProcessToken(processInfo.hProcess, TOKEN_READ, &hToken);
+		// BOOL ok1 = OpenProcessToken(GetCurrentProcess(), TOKEN_READ, &hToken);
+
+
+		assert(ok);
+		wchar_t* penv = NULL;
+		ok1 = CreateEnvironmentBlock((void**)&penv, hToken, FALSE);
+		assert(ok);
+
+
 		if (pWait && processInfo.hProcess != nullptr) {
 			WaitForSingleObject(processInfo.hProcess, INFINITE);
 		}
+
+
+
+
 
 		if (processInfo.hProcess != nullptr) {
 			CloseHandle(processInfo.hProcess);

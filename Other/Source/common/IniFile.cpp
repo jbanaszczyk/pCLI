@@ -88,6 +88,7 @@ namespace p_apps {
 	void IniFile::readIniFile(const std::filesystem::path& iniName) {
 		std::error_code errCode;
 		if (!exists(iniName, errCode) || errCode) {
+			logger::trace(L"[%s] trying  INI file: %s", _T(__FUNCTION__), iniName.c_str());
 			return;
 		}
 		logger::trace(L"[%s] reading INI file: %s", _T(__FUNCTION__), iniName.c_str());
@@ -236,7 +237,7 @@ namespace p_apps {
 		iniKey thisKey(section, name);
 		const auto ref = values.find(thisKey);
 		if (values.end() == ref) {
-			values.insert(std::pair<iniKey, IniValue>(thisKey, IniValue(value, isDefault, false)));
+			values.insert(std::pair(thisKey, IniValue(value, isDefault, false)));
 		} else {
 			ref->second.setValue(value, isDefault, false);
 		}

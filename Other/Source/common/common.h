@@ -16,7 +16,7 @@
  *
  *****************************************************************************/
 
-/** Compiler and environment ************************************************************/
+ /** Compiler and environment ************************************************************/
 
 #ifndef _MSC_VER
 #error "COMPILER IS NOT SUPPORTED"
@@ -27,8 +27,8 @@
 #endif
 
 #define WINVER         0x0601  // _WIN32_WINNT_WIN7 
-#define _WIN32_WINDOWS 0x0601  // _WIN32_WINNT_WIN7   // NOLINT(clang-diagnostic-reserved-macro-identifier)
-#define _WIN32_WINNT   0x0601  // _WIN32_WINNT_WIN7   // NOLINT(clang-diagnostic-reserved-macro-identifier)
+#define _WIN32_WINDOWS 0x0601  // _WIN32_WINNT_WIN7     // NOLINT(clang-diagnostic-reserved-macro-identifier, bugprone-reserved-identifier)   
+#define _WIN32_WINNT   0x0601  // _WIN32_WINNT_WIN7     // NOLINT(clang-diagnostic-reserved-macro-identifier)
 
 #define SECURITY_WIN32
 
@@ -37,13 +37,14 @@
 #define WIN32_LEAN_AND_MEAN
 
 #ifdef _DEBUG
-#define _CRTDBG_MAP_ALLOC  // NOLINT(bugprone-reserved-identifier)
+#define _CRTDBG_MAP_ALLOC    // NOLINT(clang-diagnostic-reserved-macro-identifier, bugprone-reserved-identifier)
 #include <crtdbg.h>
 #endif
 
 #pragma comment(lib,"Secur32.lib")	// GetUserNameExW
 #pragma comment(lib,"mpr.lib")	    // WNetGetUniversalNameW
 #pragma comment( lib, "winmm.lib")  // timeGetTime 
+#pragma comment( lib, "Userenv.lib")  // timeGetTime 
 
 /** Common headers *********************************************************************/
 
@@ -69,6 +70,8 @@
 #include <cstdlib>
 #include <optional>
 #include <filesystem>
+#include <random>
+#include <userenv.h>
 
 #include <boost/locale.hpp>
 #include <boost/algorithm/string.hpp>

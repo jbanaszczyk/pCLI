@@ -91,7 +91,7 @@ namespace p_apps {
 	FILE* createEmptyFile(const std::filesystem::path& fileName);
 
 	/****************************************************************************
-	 * \brief  create directory if doesn't exists, check if is writeable
+	 * \brief  create directory if does not exists, check if is writeable
 	 *
 	 * \param  directory to be created
 	 ***************************************************************************/
@@ -126,7 +126,7 @@ namespace p_apps {
 
 	void execute(bool pWait, const std::wstring& cmdName, const std::vector<std::wstring>& cmdLine,
 	             const Environment& cmdEnvironment, const std::filesystem::path& cwd);
-	
+
 	/******************************************************************************
 	*
 	* imbueIO

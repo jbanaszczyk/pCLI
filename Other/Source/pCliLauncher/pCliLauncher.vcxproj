@@ -111,6 +111,7 @@
     <ClInclude Include="..\common\stdafx.h" />
     <ClInclude Include="..\common\SysInfo.h" />
     <ClInclude Include="..\common\YesNoOption.h" />
+    <ClInclude Include="CommandItems.h" />
     <ClInclude Include="LauncherVersion.h" />
     <ClInclude Include="pApps.h" />
     <ClInclude Include="stdafx.h" />

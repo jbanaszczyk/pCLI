@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common.h"
+#include "SysInfo.h"
 
 enum loggerSeverityLevel {
 	trace,
@@ -19,8 +20,9 @@ namespace logger {
 
 		extern std::wostream* logStream;
 
-		const std::wstring formatElapsedTime();
-		const std::wstring formatSeverityLevel(loggerSeverityLevel severityLevel);
+		std::wstring formatElapsedTime();
+
+		std::wstring formatSeverityLevel(loggerSeverityLevel severityLevel);
 
 		inline std::wstring logHelper(const boost::wformat& tf) {
 			return boost::str(tf);

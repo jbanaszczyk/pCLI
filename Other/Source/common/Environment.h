@@ -13,7 +13,7 @@
  *   Expand environment variable strings
  *
  * class pApps::Environment represents set of environment variables
- *   pApps::Environment is a simple, case insensitive map of tstrings
+ *   pApps::Environment is a simple, case insensitive map of wstrings
  *   pApps::Environment should be initialized from envp[] array
  *     manipulated using get/set/erase
  *     then dumped to another envp[] array and passed to launched program

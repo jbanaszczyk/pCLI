@@ -54,6 +54,9 @@
     <ClInclude Include="..\common\Logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CommandItems.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

@@ -12,7 +12,7 @@ namespace logger {
 
 		DWORD startTime = timeGetTime();
 
-		const std::wstring formatElapsedTime() {
+		std::wstring formatElapsedTime() {
 			const auto elapsedTime = timeGetTime() - startTime;
 			return str(boost::wformat(L"[%10lu]") % elapsedTime);
 		}
@@ -27,7 +27,7 @@ namespace logger {
 				L"[fail]   "
 			};
 
-		const std::wstring formatSeverityLevel(loggerSeverityLevel severityLevel) {
+		std::wstring formatSeverityLevel(loggerSeverityLevel severityLevel) {
 			return severityLevelNames[severityLevel];
 		}
 	}
