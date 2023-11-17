@@ -13,15 +13,15 @@
 namespace p_apps {
 	std::filesystem::path canonical(const std::filesystem::path& p, const std::filesystem::path& base) {
 		auto absolutePath = p.is_absolute()
-			? absolute(p)
-			: absolute(base / p);
+		                    ? absolute(p)
+		                    : absolute(base / p);
 
 		std::error_code ec;
 		auto result = canonical(absolutePath, ec);
 
 		return !ec
-			? result
-			: absolutePath;
+		       ? result
+		       : absolutePath;
 	}
 
 	std::vector<std::wstring> tokenize(const std::wstring& str) {
@@ -187,7 +187,6 @@ namespace p_apps {
 		return result;
 	}
 
-
 	FILE* createEmptyFile(const std::filesystem::path& fileName) {
 		FILE* stream;
 		_wfopen_s(&stream, fileName.c_str(), L"wx");
@@ -254,8 +253,8 @@ namespace p_apps {
 			LPCTSTR lpMsgBuf = nullptr;
 			// ReSharper disable once CppTooWideScope
 			const auto bufLen = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_ARGUMENT_ARRAY | FORMAT_MESSAGE_ALLOCATE_BUFFER, nullptr, err, 0,
-				reinterpret_cast<LPTSTR>(&lpMsgBuf),
-				0, nullptr);
+			                                  reinterpret_cast<LPTSTR>(&lpMsgBuf),
+			                                  0, nullptr);
 			if (bufLen) {
 				std::wstring result(lpMsgBuf, lpMsgBuf + bufLen);
 				// ReSharper disable once CppFunctionalStyleCast
@@ -267,7 +266,6 @@ namespace p_apps {
 	}
 
 	void execute(bool pWait, const std::wstring& cmdName, const std::vector<std::wstring>& cmdLine, const Environment& cmdEnvironment, const std::filesystem::path& cwd) {
-
 		//-------------------------------------------- lpApplicationName
 		//-------------------------------------------- lpCommandLine
 
@@ -322,30 +320,9 @@ namespace p_apps {
 			fail(L"Cannot execute %s: %s", cmdName, lastErrorMsg());
 		}
 
-		// auto_close<void*, &::DestroyEnvironmentBlock> environment(NULL);
-
-
-		HANDLE hToken = NULL;
-		HANDLE qq1 = processInfo.hProcess;
-		HANDLE qq2 = GetCurrentProcess();
-
-		BOOL ok1 = OpenProcessToken(processInfo.hProcess, TOKEN_READ, &hToken);
-		// BOOL ok1 = OpenProcessToken(GetCurrentProcess(), TOKEN_READ, &hToken);
-
-
-		assert(ok);
-		wchar_t* penv = NULL;
-		ok1 = CreateEnvironmentBlock((void**)&penv, hToken, FALSE);
-		assert(ok);
-
-
 		if (pWait && processInfo.hProcess != nullptr) {
 			WaitForSingleObject(processInfo.hProcess, INFINITE);
 		}
-
-
-
-
 
 		if (processInfo.hProcess != nullptr) {
 			CloseHandle(processInfo.hProcess);
@@ -362,9 +339,8 @@ namespace p_apps {
 		std::cerr.imbue(std::locale());
 		std::cin.imbue(std::locale());
 
-		(void)_setmode(_fileno(stdout), _O_WTEXT);
-		(void)_setmode(_fileno(stdin), _O_WTEXT);
-		(void)_setmode(_fileno(stderr), _O_WTEXT);
+		(void) _setmode(_fileno(stdout), _O_WTEXT);
+		(void) _setmode(_fileno(stdin), _O_WTEXT);
+		(void) _setmode(_fileno(stderr), _O_WTEXT);
 	}
-
 }
