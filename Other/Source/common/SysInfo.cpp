@@ -6,25 +6,27 @@
 #include "stdafx.h"
 #include "./SysInfo.h"
 
-namespace SysInfo {
-
+namespace sys_info {
 	class SmartHandle {
 		HANDLE handle;
+
 	public:
 		explicit SmartHandle(std::nullptr_t = nullptr)
 			: handle(nullptr) {
 		}
 
+		// ReSharper disable once CppNonExplicitConvertingConstructor
 		SmartHandle(const HANDLE value)
 			: handle(value == INVALID_HANDLE_VALUE
-				         ? nullptr
-				         : value) {
+			         ? nullptr
+			         : value) {
 		}
 
 		explicit operator bool() const {
 			return handle != nullptr;
 		}
 
+		// ReSharper disable once CppNonExplicitConversionOperator
 		operator HANDLE() const {
 			return handle;
 		}
@@ -38,6 +40,7 @@ namespace SysInfo {
 		}
 
 		struct Deleter {
+			// ReSharper disable once CppInconsistentNaming
 			using pointer = SmartHandle;
 
 			void operator()(const SmartHandle closingHandle) const {
@@ -54,11 +57,11 @@ namespace SysInfo {
 		return !(lha == rha);
 	}
 
-	inline bool operator ==(SmartHandle lha, HANDLE rha) {
+	inline bool operator ==(const SmartHandle lha, const HANDLE rha) {
 		return lha == SmartHandle(rha);
 	}
 
-	inline bool operator !=(SmartHandle lha, HANDLE rha) {
+	inline bool operator !=(const SmartHandle lha, const HANDLE rha) {
 		return !(lha == rha);
 	}
 
@@ -71,7 +74,7 @@ namespace SysInfo {
 		}
 	};
 
-	static auto OpenMyProcessForQuery() {
+	static auto openMyProcessForQuery() {
 		return OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, GetCurrentProcessId());
 	}
 
@@ -82,7 +85,7 @@ namespace SysInfo {
 			return std::nullopt;
 		}
 
-		const SmartHandlePtr hProcess(OpenMyProcessForQuery());
+		const SmartHandlePtr hProcess(openMyProcessForQuery());
 		if (!hProcess) {
 			return std::nullopt;
 		}
@@ -99,13 +102,13 @@ namespace SysInfo {
 	}
 
 	std::optional<std::filesystem::path> getDllName(const std::wstring& dllName) {
-		constexpr int processNameSize = MAX_PATH;
+		constexpr auto processNameSize = MAX_PATH;
 		const std::unique_ptr<wchar_t[]> processName(new(std::nothrow) wchar_t[processNameSize]);
 		if (!processName) {
 			return std::nullopt;
 		}
 
-		const SmartHandlePtr hProcess(OpenMyProcessForQuery());
+		const SmartHandlePtr hProcess(openMyProcessForQuery());
 		if (!hProcess) {
 			return std::nullopt;
 		}
@@ -121,8 +124,7 @@ namespace SysInfo {
 				// probably nEntries * sizeof( *hMod ) == cbNeeded, but ...
 				for (decltype(nEntries) idx = 0; idx < nEntries; ++idx) {
 					if (GetModuleFileNameEx(hProcess.get(), hMod[idx], processName.get(), processNameSize)) {
-						std::filesystem::path dll(processName.get());
-						if (boost::iequals(dll.filename().c_str(), dllName)) {
+						if (std::filesystem::path dll(processName.get()); boost::iequals(dll.filename().c_str(), dllName)) {
 							return dll;
 						}
 					}
@@ -136,7 +138,7 @@ namespace SysInfo {
 #ifdef _WIN64
 		return true;
 #else
-		const SmartHandlePtr hProcess(OpenMyProcessForQuery());
+		const SmartHandlePtr hProcess(openMyProcessForQuery());
 		if (!hProcess) {
 			return false;
 		}
@@ -150,14 +152,14 @@ namespace SysInfo {
 	}
 
 	DWORD getProcessPriorityClass() {
-		const SmartHandlePtr hProcess(OpenMyProcessForQuery());
+		const SmartHandlePtr hProcess(openMyProcessForQuery());
 		if (!hProcess) {
 			return NORMAL_PRIORITY_CLASS;
 		}
 		const auto result = GetPriorityClass(hProcess.get());
 		return result
-			       ? result
-			       : NORMAL_PRIORITY_CLASS;
+		       ? result
+		       : NORMAL_PRIORITY_CLASS;
 	}
 
 	bool ownsConsole() {
@@ -166,8 +168,8 @@ namespace SysInfo {
 		GetWindowThreadProcessId(consoleWindow, &dwProcessId);
 
 		return GetCurrentProcessId() == dwProcessId
-		       && _isatty(_fileno(stdout))
-		       && _isatty(_fileno(stdin))
-		       && _isatty(_fileno(stderr));
+			&& _isatty(_fileno(stdout))
+			&& _isatty(_fileno(stdin))
+			&& _isatty(_fileno(stderr));
 	}
 }

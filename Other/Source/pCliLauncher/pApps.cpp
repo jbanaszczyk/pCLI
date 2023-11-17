@@ -26,8 +26,8 @@ namespace p_apps {
 
 	std::vector<std::wstring> tokenize(const std::wstring& str) {
 		std::vector<std::wstring> result;
-		boost::escaped_list_separator<wchar_t> Separator(L'^', L' ', L'\"');
-		boost::tokenizer<boost::escaped_list_separator<wchar_t>, std::wstring::const_iterator, std::wstring> tok(str, Separator);
+		boost::escaped_list_separator<wchar_t> separator(L'^', L' ', L'\"');
+		boost::tokenizer<boost::escaped_list_separator<wchar_t>, std::wstring::const_iterator, std::wstring> tok(str, separator);
 		for (auto it = tok.begin(); it != tok.end(); ++it) {
 			result.push_back(*it);
 		}
@@ -168,7 +168,7 @@ namespace p_apps {
 		return L"";
 	}
 
-	std::wstring generateRandomAlphanumericString(std::size_t len) {
+	std::wstring generateRandomAlphanumericString(const std::size_t len) {
 		// ReSharper disable StringLiteralTypo
 		std::wstring str(L"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
 		// ReSharper restore StringLiteralTypo
@@ -178,11 +178,12 @@ namespace p_apps {
 		return str.substr(0, len);
 	}
 
+	// ReSharper disable once CppInconsistentNaming
 	std::wstring string2wstring(const std::string& str) {
 		size_t cchRequired = 0;
 		[[maybe_unused]] auto ignored1 = mbstowcs_s(&cchRequired, nullptr, 0, str.c_str(), 0); // w/ null terminator
 		std::wstring result(cchRequired, L'\0');
-		const size_t cchActual = cchRequired;
+		const auto cchActual = cchRequired;
 		[[maybe_unused]] auto ignored2 = mbstowcs_s(&cchRequired, result.data(), cchActual, str.c_str(), cchActual);
 		return result;
 	}
@@ -265,7 +266,7 @@ namespace p_apps {
 		return L"";
 	}
 
-	void execute(bool pWait, const std::wstring& cmdName, const std::vector<std::wstring>& cmdLine, const Environment& cmdEnvironment, const std::filesystem::path& cwd) {
+	void execute(const bool pWait, const std::wstring& cmdName, const std::vector<std::wstring>& cmdLine, const Environment& cmdEnvironment, const std::filesystem::path& cwd) {
 		//-------------------------------------------- lpApplicationName
 		//-------------------------------------------- lpCommandLine
 
@@ -307,14 +308,22 @@ namespace p_apps {
 		processInfo.hThread = nullptr;
 		//-------------------------------------------- go
 
-		auto qq = env.get();
-
-		const auto ok = CreateProcess(cmdName.c_str(), commandLine.get(), nullptr, nullptr, TRUE, creationFlags, qq, cwd.c_str(), &startupInfo, &processInfo);
+		// ReSharper disable once CppTooWideScopeInitStatement
+		const auto ok = CreateProcess(
+			cmdName.c_str(),
+			commandLine.get(),
+			nullptr,
+			nullptr,
+			TRUE, creationFlags,
+			env.get(),
+			cwd.c_str(),
+			&startupInfo,
+			&processInfo);
 
 		if (!ok) {
 			fail(L"Cannot execute %s: %s", cmdName, lastErrorMsg());
 		}
-		SetPriorityClass(processInfo.hProcess, SysInfo::getProcessPriorityClass());
+		SetPriorityClass(processInfo.hProcess, sys_info::getProcessPriorityClass());
 
 		if (ResumeThread(processInfo.hThread) == static_cast<DWORD>(-1)) {
 			fail(L"Cannot execute %s: %s", cmdName, lastErrorMsg());
@@ -334,6 +343,7 @@ namespace p_apps {
 		}
 	}
 
+	// ReSharper disable once CppInconsistentNaming
 	void imbueIO() {
 		std::cout.imbue(std::locale());
 		std::cerr.imbue(std::locale());

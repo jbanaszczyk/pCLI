@@ -7,8 +7,7 @@
 
 #include "./common.h"
 
-namespace SysInfo {
-
+namespace sys_info {
 	/******************************************************************************
 	 *
 	 *   getExeName()

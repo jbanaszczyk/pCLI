@@ -61,9 +61,7 @@
 namespace p_apps {
 	class IniFile {  // NOLINT(cppcoreguidelines-special-member-functions)
 
-	private:
 		class IniValue {
-		private:
 			std::wstring valueDefault; // default
 			std::wstring valueInterim; // was read from file
 			std::wstring valueCurrent; // effective
@@ -81,14 +79,15 @@ namespace p_apps {
 			[[nodiscard]] bool isModified() const;
 		};
 
-		using iniKey = std::pair<std::wstring, std::wstring>;
+		using IniKey = std::pair<std::wstring, std::wstring>;
 
-		std::map<iniKey, IniValue, CaseInsensitivePairFirst<std::wstring>::Comparator> values;
+		std::map<IniKey, IniValue, CaseInsensitivePairFirst<std::wstring>::Comparator> values;
 
+		// ReSharper disable once CppInconsistentNaming
 		std::filesystem::path iniName_;
 
 	public:
-		struct iniDefaults {
+		struct IniDefaults {
 			std::wstring aSection;
 			std::wstring aName;
 			std::wstring aValue;
@@ -98,15 +97,13 @@ namespace p_apps {
 
 		static void iniNames(const wchar_t* sectionName, const std::filesystem::path& fName, std::vector<std::wstring>& sections);
 
-
-	public:
 		IniFile();
 
 		~IniFile();
 
 		void setDefaults(const std::wstring& aSection, const std::wstring& aName, const std::wstring& aDefault);
 
-		void setDefaults(const iniDefaults* defaults, size_t nElements = 1);
+		void setDefaults(const IniDefaults* defaults, size_t nElements = 1);
 
 		void readIniFile(const std::filesystem::path& iniName);
 
@@ -122,7 +119,6 @@ namespace p_apps {
 
 		void setValue(const std::wstring& section, const std::wstring& name, const std::wstring& value, bool isDefault = false);
 
-		void setValue(const iniDefaults& defaults, bool isDefault = false);
+		void setValue(const IniDefaults& defaults, bool isDefault = false);
 	};
-
 }

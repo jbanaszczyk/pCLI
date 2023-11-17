@@ -9,7 +9,8 @@ public:
 	virtual ~CommandItems() = default;
 
 	// ReSharper disable once CppMemberFunctionMayBeStatic
-	void push_back_more() {}
+	void push_back_more() {
+	}
 };
 
 class Commands final : public CommandItems {
@@ -18,16 +19,14 @@ class Commands final : public CommandItems {
 	}
 
 public:
-
 	void push_back(const std::wstring& command) {
 		if (this->empty()) {
 			if (!isSlashC(command)) {
-				push_back(std::wstring{ L"/k" });
+				push_back(std::wstring{L"/k"});
 			}
-		}
-		else {
+		} else {
 			if (isSlashC(command)) {
-				push_back(std::wstring{ L"&" });
+				push_back(std::wstring{L"&"});
 				return;
 			}
 		}
@@ -44,9 +43,7 @@ public:
 class Directives final : public CommandItems {
 public:
 	void push_back(const std::wstring& directive) {
-		const auto equalSignPosition = directive.find(L'=');
-
-		if (equalSignPosition != std::string::npos) {
+		if (const auto equalSignPosition = directive.find(L'='); equalSignPosition != std::string::npos) {
 			auto key = directive.substr(0, equalSignPosition);
 			if (!boost::starts_with(key, L"//")) {
 				key = L"//" + key;
@@ -57,19 +54,23 @@ public:
 			std::vector<std::wstring>::push_back(key + L"=" + value);
 		}
 	}
-	[[nodiscard]] std::wstring toString(const std::wstring& key, const std::wstring& value) const {
+
+	[[nodiscard]] static std::wstring toString(const std::wstring& key, const std::wstring& value) {
 		return L"//" + key + L"=" + p_apps::quote(value);
 	}
 
-	[[nodiscard]] std::wstring toString(const std::wstring& key, const std::optional<std::wstring>& value) const {
+	[[nodiscard]] static std::wstring toString(const std::wstring& key, const std::optional<std::wstring>& value) {
 		return L"//" + key + L"=" + p_apps::quote(value);
 	}
+
 	void set(const std::wstring& key, const std::wstring& value) {
 		std::vector<std::wstring>::push_back(toString(key, value));
 	}
+
 	void setOptional(const std::wstring& key, const std::optional<std::wstring>& value) {
 		std::vector<std::wstring>::push_back(toString(key, value));
 	}
+
 	bool exists(const std::wstring& key, const std::wstring& value) {
 		return std::find(begin(), end(), toString(key, value)) != end();
 	}

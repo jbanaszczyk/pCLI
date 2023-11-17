@@ -3,7 +3,6 @@
 #include "Logger.h"
 
 namespace p_apps {
-
 	IniFile::IniValue::IniValue(const std::wstring& value, const bool setDefault, const bool setInterim) {
 		setValue(value, setDefault, setInterim);
 	}
@@ -26,8 +25,7 @@ namespace p_apps {
 	}
 
 	void IniFile::iniNames(const wchar_t* const sectionName, const std::filesystem::path& fName, std::vector<std::wstring>& sections) {
-		std::error_code errCode;
-		if (!exists(fName, errCode)) {
+		if (std::error_code errCode; !exists(fName, errCode)) {
 			return;
 		}
 
@@ -59,8 +57,8 @@ namespace p_apps {
 				break;
 			}
 			bufSize = maxBufSize / 2 >= bufSize
-				          ? 2 * bufSize
-				          : maxBufSize;
+			          ? 2 * bufSize
+			          : maxBufSize;
 		}
 		if (!bufPtr) {
 			return;
@@ -79,15 +77,14 @@ namespace p_apps {
 
 	IniFile::~IniFile() = default;
 
-	void IniFile::setDefaults(const iniDefaults* defaults, const size_t nElements) {
+	void IniFile::setDefaults(const IniDefaults* defaults, const size_t nElements) {
 		for (size_t idx = 0; nElements > idx; ++idx, ++defaults) {
 			setValue(*defaults, true);
 		}
 	}
 
 	void IniFile::readIniFile(const std::filesystem::path& iniName) {
-		std::error_code errCode;
-		if (!exists(iniName, errCode) || errCode) {
+		if (std::error_code errCode; !exists(iniName, errCode) || errCode) {
 			logger::trace(L"[%s] trying  INI file: %s", _T(__FUNCTION__), iniName.c_str());
 			return;
 		}
@@ -101,7 +98,7 @@ namespace p_apps {
 			iniNames(itSections->c_str(), iniName, nameNames);
 			for (auto itNames = begin(nameNames); end(nameNames) != itNames; ++itNames) {
 				std::wstring defaultValue;
-				iniKey thisKey(itSections->c_str(), itNames->c_str());
+				IniKey thisKey(itSections->c_str(), itNames->c_str());
 				auto ref = values.find(thisKey);
 				if (values.end() != ref) {
 					defaultValue = ref->second.getDefault();
@@ -110,7 +107,7 @@ namespace p_apps {
 				auto valueStr = iniRead(iniName, *itSections, *itNames, defaultValue);
 				if (valueStr) {
 					if (values.end() == ref) {
-						values.insert(std::pair<iniKey, IniValue>(thisKey, IniValue(valueStr.value(), false, true)));
+						values.insert(std::pair<IniKey, IniValue>(thisKey, IniValue(valueStr.value(), false, true)));
 					} else {
 						ref->second.setValue(valueStr.value(), false, true);
 					}
@@ -120,7 +117,7 @@ namespace p_apps {
 	}
 
 	std::wstring IniFile::getValueNonEmpty(const std::wstring& section, const std::wstring& name) const {
-		const iniKey thisKey(section, name);
+		const IniKey thisKey(section, name);
 		const auto ref = values.find(thisKey);
 		if (values.end() == ref) {
 			return L"";
@@ -146,7 +143,7 @@ namespace p_apps {
 		}
 	}
 
-	void IniFile::setValue(const iniDefaults& defaults, const bool isDefault) {
+	void IniFile::setValue(const IniDefaults& defaults, const bool isDefault) {
 		setValue(defaults.aSection, defaults.aName, defaults.aValue, isDefault);
 	}
 
@@ -161,8 +158,7 @@ namespace p_apps {
 	}
 
 	std::optional<std::wstring> IniFile::iniRead(const std::filesystem::path& fName, const std::wstring& section, const std::wstring& name, const std::wstring& defValue) {
-		std::error_code errCode;
-		if (!exists(fName, errCode)) {
+		if (std::error_code errCode; !exists(fName, errCode)) {
 			return std::nullopt;
 		}
 		std::unique_ptr<wchar_t[]> buf;
@@ -191,8 +187,8 @@ namespace p_apps {
 				break;
 			}
 			bufSize = maxBufSize / 2 >= bufSize
-				          ? 2 * bufSize
-				          : maxBufSize;
+			          ? 2 * bufSize
+			          : maxBufSize;
 		}
 		if (buf == nullptr) {
 			return std::nullopt;
@@ -208,7 +204,7 @@ namespace p_apps {
 	}
 
 	std::optional<std::wstring> IniFile::getValue(const std::wstring& section, const std::wstring& name) const {
-		const iniKey thisKey(section, name);
+		const IniKey thisKey(section, name);
 		const auto ref = values.find(thisKey);
 		if (values.end() == ref) {
 			return std::nullopt;
@@ -221,7 +217,7 @@ namespace p_apps {
 	}
 
 	std::optional<std::wstring> IniFile::getDefault(const std::wstring& section, const std::wstring& name) const {
-		const iniKey thisKey(section, name);
+		const IniKey thisKey(section, name);
 		const auto ref = values.find(thisKey);
 		if (values.end() == ref) {
 			return std::nullopt;
@@ -234,9 +230,8 @@ namespace p_apps {
 	}
 
 	void IniFile::setValue(const std::wstring& section, const std::wstring& name, const std::wstring& value, const bool isDefault) {
-		iniKey thisKey(section, name);
-		const auto ref = values.find(thisKey);
-		if (values.end() == ref) {
+		IniKey thisKey(section, name);
+		if (const auto ref = values.find(thisKey); values.end() == ref) {
 			values.insert(std::pair(thisKey, IniValue(value, isDefault, false)));
 		} else {
 			ref->second.setValue(value, isDefault, false);

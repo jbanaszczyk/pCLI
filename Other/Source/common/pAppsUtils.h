@@ -7,7 +7,6 @@
 #include "common.h"
 
 namespace p_apps {
-
 	template <typename T>
 	struct CaseInsensitiveMap {
 		struct Comparator {
@@ -39,6 +38,4 @@ namespace p_apps {
 			destination.insert(destination.end(), source.begin(), source.end());
 		}
 	}
-
-
 }

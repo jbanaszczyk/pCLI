@@ -9,7 +9,6 @@
 
 namespace p_apps {
 	class CtrlHandlerManager {
-
 		/**
 		 * \brief If true pressing CtrlC should beep
 		 */
@@ -44,13 +43,18 @@ namespace p_apps {
 
 	public:
 		CtrlHandlerManager(const CtrlHandlerManager&) = delete;
+
 		CtrlHandlerManager(const CtrlHandlerManager&&) = delete;
+
 		CtrlHandlerManager& operator=(const CtrlHandlerManager&) = delete;
+
 		CtrlHandlerManager&& operator=(const CtrlHandlerManager&&) = delete;
+
 		/**
 		 * \brief ctor - activate Ctrl handler
 		 */
-		CtrlHandlerManager() : isActive(FALSE) {
+		CtrlHandlerManager()
+			: isActive(FALSE) {
 			debugBeep = C_DEBUG;
 			activate(TRUE);
 		}

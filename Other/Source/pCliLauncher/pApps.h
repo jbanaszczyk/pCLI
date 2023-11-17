@@ -13,9 +13,9 @@
 #include "../common/Environment.h"
 
 namespace p_apps {
-
 	std::filesystem::path canonical(const std::filesystem::path& p, const std::filesystem::path& base);
 
+	// ReSharper disable once CppInconsistentNaming
 	std::wstring string2wstring(const std::string& str);
 
 	std::vector<std::wstring> tokenize(const std::wstring& str);
@@ -135,5 +135,4 @@ namespace p_apps {
 	*****************************************************************************/
 	// ReSharper disable once CppInconsistentNaming
 	void imbueIO();
-
 }

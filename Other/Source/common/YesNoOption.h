@@ -19,9 +19,7 @@
 #include "pAppsUtils.h"
 
 namespace p_apps {
-
 	class YesNoOption {
-
 		std::map<std::wstring, bool, CaseInsensitiveMap<std::wstring>::Comparator> keyValues;
 
 		const bool defaultValue = true;
@@ -29,8 +27,8 @@ namespace p_apps {
 		[[nodiscard]] bool getOption(const std::wstring& key) const {
 			const auto itValues = keyValues.find(key);
 			return itValues == keyValues.end()
-				? defaultValue
-				: itValues->second;
+			       ? defaultValue
+			       : itValues->second;
 		}
 
 	public:
@@ -42,8 +40,7 @@ namespace p_apps {
 				{L"no", false},
 				{L"false", false},
 				{L"0", false}
-				})
-		{
+			}) {
 		}
 
 		~YesNoOption() = default;
@@ -62,9 +59,8 @@ namespace p_apps {
 
 		bool operator()(const std::optional<std::wstring>& key) const {
 			return key
-				? getOption(key.value())
-				: defaultValue;
+			       ? getOption(key.value())
+			       : defaultValue;
 		}
-
 	};
 }
