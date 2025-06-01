@@ -1,0 +1,44 @@
+@echo off
+rem  TCCTabHere.btm
+rem  This batch file adds the "TCC tab window here" entry to Windows Explorer
+
+iff %_elevated == 0 then
+	start /elevated /c %0 %1
+	quit
+endiff
+
+echo.
+iff "%1" == "/U" then
+	echo Do you want to remove the "TCC tab window here" entry from the Windows Explorer
+	echos context (right click) menu [Y/N] ? 
+	inkey /k"yn[enter]" %%var
+	iff "%var" eq "y" then
+		echo %@regdelkey["HKCR\Directory\Shell\TCCTab"] > nul
+		echo %@regdelkey["HKCR\Drive\Shell\TCCTab"] > nul
+	endiff
+	quit
+endiff
+
+echo.
+echo Do you want to add a "TCC tab window here" entry to the Windows Explorer
+echos context (right click) menus for directories and drives [Y/N] ?
+inkey /k"yn[enter]" %%var
+
+if "%var" ne "y" quit
+
+echo %@regcreate["HKCR\Directory\Shell\TCCTab\command"] > nul
+echo %@regcreate["HKCR\Drive\Shell\TCCTab\command"] > nul
+
+iff %@regset["HKCR\Directory\Shell\TCCTab\",REG_SZ,TCC tab window here] != 0 then
+    echo Cannot update registry key!
+    quit
+endiff
+
+echo %@regset["HKCR\Drive\Shell\TCCTab\",REG_SZ,TCC tab window here] > nul
+
+echo %@regset["HKCR\Directory\Shell\TCCTab\command\",REG_SZ,"%@path[%_cmdspec]tcmd.exe" /T "%_cmdspec" /k *cdd "%%L"] > nul
+echo %@regset["HKCR\Drive\Shell\TCCTab\command\",REG_SZ,"%@path[%_cmdspec]tcmd.exe" /T "%_cmdspec" /k *cdd "%%L"] > nul
+
+echo.
+echo The Windows Explorer context menus have been updated.
+unset var

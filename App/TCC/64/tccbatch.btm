@@ -1,0 +1,45 @@
+@echo off
+rem  TCCBatch.btm
+rem  This batch file associates .BAT, .BTM, and .CMD files to TCC
+
+iff %_elevated == 0 then
+	start /elevated /c %0 %1
+	quit
+endiff
+
+echo.
+iff "%1" == "/U" then
+	echos Do you want to make CMD the default handler for .BAT and .CMD files [Y/N] ? 
+	inkey /k"yn[enter]" %%var
+	iff "%var" eq "y" then
+		ftype batfile="c:\windows\system32\cmd.exe" /c "%%1" %%*
+		ftype cmdfile="c:\windows\system32\cmd.exe" /c "%%1" %%*
+	endiff
+	quit
+endiff
+
+echos Do you want to make TCC the default handler for .BAT files [Y/N] ? 
+inkey /k"yn[enter]" %%var
+
+iff "%var" eq "y" then
+	assoc .bat=batfile
+	ftype batfile="%_cmdspec" /c "%%1" %%*
+endiff
+ 
+echo.
+echos Do you want to make TCC the default handler for .BTM files [Y/N] ? 
+inkey /k"yn[enter]" %%var
+
+iff "%var" eq "y" then
+	assoc .btm=TCC.Batch
+	ftype TCC.Batch="%_cmdspec" /c "%%1" %%*
+endiff
+ 
+echo.
+echos Do you want to make TCC the default handler for .CMD files [Y/N] ? 
+inkey /k"yn[enter]" %%var
+
+iff "%var" eq "y" then
+	assoc .cmd=cmdfile
+	ftype cmdfile="%_cmdspec" /c "%%1" %%*
+endiff

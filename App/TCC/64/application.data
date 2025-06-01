@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--signature="TSerializableObject-signature" version="4" flags=""-->
+<!--http://www.datamystic.com-->
+<object>
+  <ClassName>TRegistration</ClassName>
+  <PropCount>14</PropCount>
+  <Properties>
+    <0>
+      <PropName>UserInfo</PropName>
+      <PropIndex>0</PropIndex>
+      <ValueType>7</ValueType>
+      <IsNil>False</IsNil>
+      <PropValue som="2">
+        <ClassName>TBasicRegistrationData</ClassName>
+        <PropCount>1</PropCount>
+        <Properties>
+          <0>
+            <PropName>EmailAddress</PropName>
+            <PropIndex>0</PropIndex>
+            <ValueType>1</ValueType>
+            <PropValue/>
+          </0>
+        </Properties>
+      </PropValue>
+    </0>
+    <1>
+      <PropName>UserName</PropName>
+      <PropIndex>1</PropIndex>
+      <ValueType>1</ValueType>
+      <PropValue>Take Command</PropValue>
+    </1>
+    <2>
+      <PropName>OrganizationName</PropName>
+      <PropIndex>2</PropIndex>
+      <ValueType>1</ValueType>
+      <PropValue>JP Software</PropValue>
+    </2>
+    <3>
+      <PropName>KeyHash</PropName>
+      <PropIndex>3</PropIndex>
+      <ValueType>1</ValueType>
+      <PropValue/>
+    </3>
+    <4>
+      <PropName>KeyExpiry</PropName>
+      <PropIndex>4</PropIndex>
+      <ValueType>1</ValueType>
+      <PropValue/>
+    </4>
+    <5>
+      <PropName>ReceiptNumber</PropName>
+      <PropIndex>5</PropIndex>
+      <ValueType>1</ValueType>
+      <PropValue>AV11989260</PropValue>
+    </5>
+    <6>
+      <PropName>Installer</PropName>
+      <PropIndex>6</PropIndex>
+      <ValueType>1</ValueType>
+      <PropValue>UN</PropValue>
+    </6>
+    <7>
+      <PropName>DateForUpdateCheck</PropName>
+      <PropIndex>7</PropIndex>
+      <ValueType>5</ValueType>
+      <PropValue>43658</PropValue>
+    </7>
+    <8>
+      <PropName>IsFirstDay</PropName>
+      <PropIndex>8</PropIndex>
+      <ValueType>4</ValueType>
+      <PropValue>True</PropValue>
+    </8>
+    <9>
+      <PropName>InternetProxy</PropName>
+      <PropIndex>9</PropIndex>
+      <ValueType>1</ValueType>
+      <PropValue/>
+    </9>
+    <10>
+      <PropName>InternetProxyUser</PropName>
+      <PropIndex>10</PropIndex>
+      <ValueType>1</ValueType>
+      <PropValue/>
+    </10>
+    <11>
+      <PropName>InternetProxyPassword</PropName>
+      <PropIndex>11</PropIndex>
+      <ValueType>1</ValueType>
+      <PropValue/>
+    </11>
+    <12>
+      <PropName>RootDir</PropName>
+      <PropIndex>12</PropIndex>
+      <ValueType>1</ValueType>
+      <PropValue>d:\DataMystic\TextPipe Engine 11.0.0\</PropValue>
+    </12>
+    <13>
+      <PropName>Company</PropName>
+      <PropIndex>13</PropIndex>
+      <ValueType>1</ValueType>
+      <PropValue/>
+    </13>
+  </Properties>
+</object>

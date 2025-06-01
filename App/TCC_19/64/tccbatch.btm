@@ -1,0 +1,36 @@
+@echo off
+rem  TCCBatch.btm
+rem  This batch file associates .BAT, .BTM, and .CMD files to TCC
+
+iff %_dosver ge 6.0 then
+    echo If you are running Windows 10, 8, 7, 2008, 2012, or Vista, you must first start
+    echo a TCC session as an administrator (right click on the TCC icon and select "Run
+    echo as administrator") and then run TCCHere.btm in that session.
+endiff
+
+echo.
+echos Do you want to make TCC the default handler for .BAT files [Y/N] ? 
+inkey /k"yn[enter]" %%var
+
+iff "%var" eq "y" then
+	assoc .bat=batfile
+	ftype batfile="%_cmdspec" /c "%%1" %%*
+endiff
+ 
+echo.
+echos Do you want to make TCC the default handler for .BTM files [Y/N] ? 
+inkey /k"yn[enter]" %%var
+
+iff "%var" eq "y" then
+	assoc .btm=TCC.Batch
+	ftype TCC.Batch="%_cmdspec" /c "%%1" %%*
+endiff
+ 
+echo.
+echos Do you want to make TCC the default handler for .CMD files [Y/N] ? 
+inkey /k"yn[enter]" %%var
+
+iff "%var" eq "y" then
+	assoc .cmd=cmdfile
+	ftype cmdfile="%_cmdspec" /c "%%1" %%*
+endiff

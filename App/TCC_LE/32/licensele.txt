@@ -1,0 +1,144 @@
+SOFTWARE LICENSE AGREEMENT FOR TCC/LE
+
+Please read the following terms and conditions.
+
+You agree that all of the terms and conditions below apply to you and anyone
+else who uses this software, if either:
+
+ * You click the "Accept" button, or
+ * You copy, install, or use this copy of TCC/LE, or
+ * You permit or enable others to copy, install or use TCC/LE.
+
+If you do not agree, please terminate installation immediately, and do not
+use this software.
+
+1.  SOFTWARE COVERED BY THIS LICENSE
+
+  This license agreement ("Agreement") applies only to the version of the
+  TCC/LE ("Software") package with which this Agreement is included by JP 
+  Software, Inc. Different license terms apply to other software packages
+  from JP Software, and license terms for later versions of TCC/LE may also
+  be changed.
+
+2.  OWNERSHIP 
+
+  JP Software owns the Software under copyright, trade secret and all other
+  laws that may apply.  All JP Software product names, designs, and logos
+  are trademarks of JP Software Inc.
+
+3.  FREE USE LICENSE
+
+  (a)  Original Distribution Package Necessary.  In order to qualify for
+  the free use license described below, you must have downloaded or received
+  TCC/LE in the form distributed by JP Software, including all files contained
+  in such package ("Original Distribution Package").  Current Original 
+  Distribution Packages for TCC/LE are available from JP Software and JP
+  Software’s authorized distributors.  Copies of TCC/LE not received in the
+  form of an Original Distribution Package are not licensed for use, copying 
+  or transmission by you or others.
+
+  (b)  You may, free of charge:
+
+    * install and use TCC/LE.
+
+    * copy, store, distribute and transmit, free of charge, identical copies
+      of this Original Distribution Package of TCC/LE to  others, as long as
+      it is deemed current by JP Software.
+
+  (c) You may not:
+
+    * modify, translate, reverse engineer, decompile, disassemble, or create
+      derivative works based on, this TCC/LE program without prior permission
+      from JP Software.
+
+    * copy TCC/LE except as described above.
+
+    * sell or license copies of TCC/LE to others.
+
+    * remove any proprietary notices or labels on TCC/LE or any other JP 
+      Software software.
+
+    * use TCC/LE in or for High Risk Activities (defined below).
+
+  (d) All rights not expressly granted by JP Software in this Agreement are 
+  entirely and exclusively reserved to JP Software.
+
+4.  SUPPORT
+
+  TCC/LE contains online help files.  However, hard-copy documentation, email
+  or telephone assistance, and other support are not available under this free
+  license.
+
+5. DISCLAIMER OF WARRANTY
+
+  You are not paying for the use of the software. Accordingly the program is 
+  provided "as-is" and without warranty of any kind whatsoever, including any
+  implied warranties of merchantability or fitness for a particular purpose.
+  You assume full responsibility for the selection and use of the software to
+  achieve your intended results, and acknowledge that if you use the software
+  improperly or against our instructions you can cause damage to your files, 
+  software, data, or business.
+
+6.  LIMITATION OF LIABILITY
+
+  In no event shall JP Software be liable for any incidental, consequential, 
+  or punitive damages whatsoever arising out of use of the software or your 
+  relationship with us.
+
+7.  RESTRICTED RIGHTS LEGEND
+
+  Use, duplication, or disclosure by the U.S. Government is subject to the 
+  restrictions set forth in subparagraphs (a) through (d) of the Commercial 
+  Computer-Restricted Rights clause at FAR 52.227-19 when applicable, or in 
+  subparagraph (c)(1)(ii) of the Rights in Technical Data and Computer 
+  Software clause at DFARS 252.227-7013, or at 252.211-7015, as applicable,
+  and in similar clauses in the NASA FAR Supplement.
+
+8. TERMINATION
+
+  The license will terminate automatically if you fail to comply with any 
+  of the limitations, conditions or obligations described herein.  On 
+  termination, you must destroy all copies of the TCC/LE software and all 
+  other materials in this TCC/LE Original Distribution Package.
+
+9.  HIGH RISK ACTIVITIES
+
+  The software is not fault-tolerant and is not designed, manufactured or
+  intended for use as online control equipment in hazardous environments 
+  requiring fail-safe performance, such as in the operation of nuclear 
+  facilities, aircraft navigation or communication systems, air traffic 
+  control, direct life support machines, or weapons systems, or any other 
+  environment in which the failure of TCC/LE could lead directly to death, 
+  personal injury, or severe physical or environmental damage ("High Risk 
+  Activities").  We specifically disclaim any express or implied warranty 
+  of fitness for high risk activities for the software or any portion thereof.
+
+10.  GENERAL
+
+  This Agreement constitutes the entire Agreement between the parties with
+  respect to the subject matter herein and supersedes all previous and 
+  contemporaneous agreements, proposals and communications, written or oral
+  between you and JP Software. Waiver by JP Software of any violation of any
+  provision of this Agreement shall not be deemed to waive any further or 
+  future violation of the same or any other provision. This Agreement and 
+  any dispute relating to TCC/LE or to this Agreement shall be governed by 
+  the laws of the United States and the laws of the State of Maryland, 
+  without regard to U.S. or Maryland choice of law rules.  You agree and 
+  consent that jurisdiction and proper venue for all claims, actions and 
+  proceedings of any kind relating to JP Software or the matters in this 
+  Agreement shall be exclusively in courts located in Maryland. If any part
+  or provision of this Agreement is held to be unenforceable for any 
+  purpose, including but not limited to public policy grounds, then you 
+  agree that the remainder of the Agreement shall be fully enforceable as
+  if the unenforceable part or provision never existed. There are no third
+  party beneficiaries of any promises, obligations or representations made
+  by JP Software herein.
+
+
+JP Software Inc.
+P.O. Box 328
+Chestertown, MD 21620, USA
+
+Email support@jpsoft.com
+Web http://jpsoft.com
+[2015/07]

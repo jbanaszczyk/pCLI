@@ -1,0 +1,37 @@
+@echo off
+rem  TCMDBatch.btm
+rem  This batch file associates .BAT, .BTM, and .CMD files to Take Command
+
+iff %_transient eq 0 .and. %_dosver ge 6.0 then
+    echo If you are running Windows 10, 8, 7, 2008, 2012, or Vista, you must first
+    echo start a Take Command session as an administrator (right click on the TCMD 
+    echo icon and select "Run as administrator") and then run TCMDBatch.btm in that
+    echo session.
+endiff
+
+echo.
+echos Do you want to make Take Command the default handler for .BAT files [Y/N] ? 
+inkey /k"yn[enter]" %%var
+
+iff "%var" eq "y" then
+	assoc .bat=batfile
+	ftype batfile="%@path[%_cmdspec]tcmd.exe" /c "%%1" %%*
+endiff
+ 
+echo.
+echos Do you want to make Take Command the default handler for .BTM files [Y/N] ? 
+inkey /k"yn[enter]" %%var
+
+iff "%var" eq "y" then
+	assoc .btm=TCMD.Batch
+	ftype TCMD.Batch="%@path[%_cmdspec]tcmd.exe" /c "%%1" %%*
+endiff
+ 
+echo.
+echos Do you want to make Take Command the default handler for .CMD files [Y/N] ? 
+inkey /k"yn[enter]" %%var
+
+iff "%var" eq "y" then
+	assoc .cmd=cmdfile
+	ftype cmdfile="%@path[%_cmdspec]tcmd.exe" /c "%%1" %%*
+endiff

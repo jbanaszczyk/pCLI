@@ -1,0 +1,33 @@
+@echo off
+rem  TCCHere.btm
+rem  This batch file adds the "TCC prompt here" entry to Windows Explorer
+
+iff %_dosver ge 6.0 then
+    echo If you are running Windows 10, 8, 7, 2008, 2012, or Vista, you must first  
+    echo start a TCC session as an administrator (right click on the TCC icon and 
+    echo select "Run as administrator") and then run TCCHere.btm in that session.
+endiff
+
+echo.
+echo Do you want to add a "TCC prompt here" entry to the Windows Explorer
+echos context (right click) menus for directories and drives [Y/N] ?
+inkey /k"yn[enter]" %%var
+
+if "%var" ne "y" quit
+
+echo %@regcreate["HKCR\Directory\Shell\TCC\command"] > nul
+echo %@regcreate["HKCR\Drive\Shell\TCC\command"] > nul
+
+iff %@regset["HKCR\Directory\Shell\TCC\",REG_SZ,TCC prompt here] != 0 then
+    echo Cannot update registry key!
+    quit
+endiff
+
+echo %@regset["HKCR\Drive\Shell\TCC\",REG_SZ,TCC prompt here] > nul
+
+echo %@regset["HKCR\Directory\Shell\TCC\command\",REG_SZ,"%_cmdspec" /k *cdd "%%L"] > nul
+echo %@regset["HKCR\Drive\Shell\TCC\command\",REG_SZ,"%_cmdspec" /k *cdd "%%L"] > nul
+
+echo.
+echo The Windows Explorer context menus have been updated.
+unset var

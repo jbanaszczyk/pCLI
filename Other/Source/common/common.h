@@ -50,6 +50,7 @@
 
 // ReSharper disable CppUnusedIncludeDirective
 
+#include <iostream>
 #include <windows.h>
 #include <tchar.h>
 #include <set>

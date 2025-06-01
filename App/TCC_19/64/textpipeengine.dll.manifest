@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0"> 
+
+	<file name="textpipeengine.dll" hashalg="SHA1">
+		<comClass 
+			clsid="{B04680C2-AA8A-4927-95AA-81B0C8B63C9A}" 
+			tlbid="{056A69F8-2243-4DA5-AF80-B93BA3A7EA6F}" 
+			description="TPscriptInterface Object">
+		</comClass>
+		<comClass clsid="{AF178FD9-997D-4E8F-8855-44C81B011B78}" 
+			tlbid="{056A69F8-2243-4DA5-AF80-B93BA3A7EA6F}" 
+			description="Application Object">
+		</comClass>
+		<comClass 
+			clsid="{7ECB9BC9-F1BD-4CF8-AF45-4DDBCFF9F970}" 
+			tlbid="{056A69F8-2243-4DA5-AF80-B93BA3A7EA6F}" 
+			description="FilterWindow Object">
+		</comClass>
+
+		<typelib 
+			tlbid="{056A69F8-2243-4DA5-AF80-B93BA3A7EA6F}" 
+			version="9.9" 
+			helpdir="" 
+			flags="HASDISKIMAGE">
+		</typelib>
+	</file>
+
+	<comInterfaceExternalProxyStub 
+		name="ITPscriptInterface" 
+		iid="{90ECB7FE-2CAC-41BF-B048-7FC57441DA39}" 
+		tlbid="{056A69F8-2243-4DA5-AF80-B93BA3A7EA6F}" 
+		proxyStubClsid32="{00020424-0000-0000-C000-000000000046}">
+	</comInterfaceExternalProxyStub>
+
+	<comInterfaceExternalProxyStub 
+		name="ITPscriptInterfaceEvents" 
+		iid="{153C8C0B-B68A-483E-88EA-817BE393F9A5}"
+		tlbid="{056A69F8-2243-4DA5-AF80-B93BA3A7EA6F}" 
+		proxyStubClsid32="{00020420-0000-0000-C000-000000000046}">
+	</comInterfaceExternalProxyStub>
+
+	<comInterfaceExternalProxyStub 
+		name="IApplication" 
+		iid="{1989AF39-7267-43F5-A694-9B23007ADD50}" 
+		tlbid="{056A69F8-2243-4DA5-AF80-B93BA3A7EA6F}" 
+		proxyStubClsid32="{00020424-0000-0000-C000-000000000046}">
+	</comInterfaceExternalProxyStub>
+
+	<comInterfaceExternalProxyStub 
+		name="IFilterWindow" 
+		iid="{6FCEF6D6-211E-4E8B-828E-C428E9788DF9}" 
+		tlbid="{056A69F8-2243-4DA5-AF80-B93BA3A7EA6F}" 
+		proxyStubClsid32="{00020424-0000-0000-C000-000000000046}">
+	</comInterfaceExternalProxyStub>
+
+	<comInterfaceExternalProxyStub 
+		name="IFilterWindowEvents" 
+		iid="{D8E8F9A2-9B2F-45A5-B10C-9EE63689C096}" 
+		tlbid="{056A69F8-2243-4DA5-AF80-B93BA3A7EA6F}" 
+		proxyStubClsid32="{00020420-0000-0000-C000-000000000046}">
+	</comInterfaceExternalProxyStub>
+</assembly>

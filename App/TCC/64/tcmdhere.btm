@@ -1,0 +1,44 @@
+@echo off
+rem  TCMDHere.btm
+rem  This batch file adds the "TCMD prompt here" entry to Windows Explorer
+
+iff %_elevated == 0 then
+	start /elevated /c %0 %1
+	quit
+endiff
+
+echo.
+iff "%1" == "/U" then
+	echo Do you want to remove the "TCMD prompt here" entry from the Windows Explorer
+	echos context (right click) menu [Y/N] ? 
+	inkey /k"yn[enter]" %%var
+	iff "%var" eq "y" then
+		echo %@regdelkey["HKCR\Directory\Shell\TCMD"] > nul
+		echo %@regdelkey["HKCR\Drive\Shell\TCMD"] > nul
+	endiff
+	quit
+endiff
+
+echo.
+echo Do you want to add a "TCMD prompt here" entry to the Windows Explorer
+echos context (right click) menus for directories and drives [Y/N] ?
+inkey /k"yn[enter]" %%var
+
+if "%var" ne "y" quit
+
+echo %@regcreate["HKCR\Directory\Shell\TCMD\command"] > nul
+echo %@regcreate["HKCR\Drive\Shell\TCMD\command"] > nul
+
+iff %@regset["HKCR\Directory\Shell\TCMD\",REG_SZ,TCMD prompt here] != 0 then
+    echo Cannot update registry key!
+    quit
+endiff
+
+echo %@regset["HKCR\Drive\Shell\TCMD\",REG_SZ,TCMD prompt here] > nul
+
+echo %@regset["HKCR\Directory\Shell\TCMD\command\",REG_SZ,"%@path[%_cmdspec]tcmd.exe" /D "%%L"] > nul
+echo %@regset["HKCR\Drive\Shell\TCMD\command\",REG_SZ,"%@path[%_cmdspec]tcmd.exe" /D "%%L"] > nul
+
+echo.
+echo The Windows Explorer context menus have been updated.
+unset var
